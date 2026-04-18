@@ -25,4 +25,8 @@ export const api = {
 
   getActivity: () => get('/activity'),
   logActivity: (type) => post('/activity', { type }),
+
+  // course-meta: per-course engagement tracking
+  getAllCourseMetas: () => get('/course-metas'),
+  updateCourseMeta: (courseId, patch) => post('/course-meta', { courseId, patch }),
 };

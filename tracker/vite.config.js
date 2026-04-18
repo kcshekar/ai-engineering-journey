@@ -67,6 +67,27 @@ const routes = {
     send(res, 200, { ok: true });
   },
 
+  async 'GET /api/course-metas'(req, res) {
+    const file = path.join(REPO_ROOT, 'course-meta.json');
+    send(res, 200, readJson(file, {}));
+  },
+
+  async 'POST /api/course-meta'(req, res) {
+    const { courseId, patch } = await readBody(req);
+    const file = path.join(REPO_ROOT, 'course-meta.json');
+    const all = readJson(file, {});
+    const existing = all[courseId] || {};
+    const merged = { ...existing };
+    // Support '__inc__' as a sentinel to increment a counter
+    for (const [k, v] of Object.entries(patch)) {
+      merged[k] = v === '__inc__' ? (existing[k] || 0) + 1 : v;
+    }
+    merged.lastEngaged = new Date().toISOString().split('T')[0];
+    all[courseId] = merged;
+    fs.writeFileSync(file, JSON.stringify(all, null, 2), 'utf8');
+    send(res, 200, all[courseId]);
+  },
+
   async 'GET /api/activity'(req, res) {
     const file = path.join(REPO_ROOT, 'activity.json');
     send(res, 200, readJson(file, {}));
