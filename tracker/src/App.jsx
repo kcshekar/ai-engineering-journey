@@ -20,6 +20,8 @@ import LayerCard from './components/LayerCard';
 import ProgressBar from './components/ProgressBar';
 import WeeklyPlan from './components/WeeklyPlan';
 import QuizSection from './components/QuizSection';
+import StreakGraph from './components/StreakGraph';
+import { api } from './data/api';
 import {
   loadRoadmap,
   getCurrentLayer,
@@ -38,6 +40,16 @@ const pageVariants = {
 export default function App() {
   const [roadmap, setRoadmap] = useState(() => loadRoadmap());
   const [activePage, setActivePage] = useState('dashboard');
+  const [activityMap, setActivityMap] = useState({});
+
+  // Load activity from disk on mount
+  React.useEffect(() => {
+    api.getActivity().then(setActivityMap);
+  }, []);
+
+  const refreshActivity = useCallback(() => {
+    api.getActivity().then(setActivityMap);
+  }, []);
 
   const currentLayer = getCurrentLayer(roadmap);
   const currentWeekPlan = getCurrentWeek(currentLayer, roadmap.progress.currentWeek);
@@ -86,6 +98,7 @@ export default function App() {
         }
         return { ...prev, progress: newProgress };
       });
+      api.logActivity('complete').then(() => api.getActivity().then(setActivityMap));
     },
     []
   );
@@ -223,6 +236,15 @@ export default function App() {
                 </motion.div>
               </div>
 
+              {/* Streak Graph */}
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.45 }}
+              >
+                <StreakGraph activityMap={activityMap} />
+              </motion.div>
+
               {/* Today's Tasks */}
               {currentWeekPlan && (
                 <div className="today-section">
@@ -266,6 +288,7 @@ export default function App() {
                 layer={currentLayer}
                 progress={roadmap.progress}
                 onToggleCourse={handleToggleCourse}
+                onActivity={refreshActivity}
               />
               <WeeklyPlan
                 weeklyPlan={currentLayer.weeklyPlan}

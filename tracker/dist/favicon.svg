@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect width="32" height="32" rx="7" fill="#0B0F1A"/>
+
+  <!-- Neural network: central node + 6 spokes + outer nodes -->
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22C55E"/>
+      <stop offset="100%" stop-color="#06B6D4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Spokes -->
+  <line x1="16" y1="16" x2="16" y2="6"  stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="16" x2="16" y2="26" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="16" x2="7"  y2="11" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="16" x2="25" y2="11" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="16" x2="7"  y2="21" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+  <line x1="16" y1="16" x2="25" y2="21" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+
+  <!-- Outer nodes -->
+  <circle cx="16" cy="6"  r="2"   fill="#22C55E"/>
+  <circle cx="16" cy="26" r="2"   fill="#06B6D4"/>
+  <circle cx="7"  cy="11" r="2"   fill="#22C55E" opacity="0.85"/>
+  <circle cx="25" cy="11" r="2"   fill="#06B6D4" opacity="0.85"/>
+  <circle cx="7"  cy="21" r="2"   fill="#06B6D4" opacity="0.85"/>
+  <circle cx="25" cy="21" r="2"   fill="#22C55E" opacity="0.85"/>
+
+  <!-- Central node (on top) -->
+  <circle cx="16" cy="16" r="3.5" fill="url(#g1)"/>
+  <circle cx="16" cy="16" r="1.5" fill="#0B0F1A"/>
+</svg>
