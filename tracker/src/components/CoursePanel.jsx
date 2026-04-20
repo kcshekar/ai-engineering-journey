@@ -68,6 +68,53 @@ function buildSummaryPrompt(course, notes, code) {
   return parts.join('\n');
 }
 
+// ── Python Challenge sub-component ───────────────────────────────────────────
+function PythonChallenge({ challenge }) {
+  const [copied, setCopied] = useState(false);
+
+  if (!challenge) return (
+    <div className="panel-empty-state">
+      <span className="panel-empty-icon">🐍</span>
+      <span className="panel-empty-title">No challenge for this course yet</span>
+    </div>
+  );
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(challenge.starterCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="panel-challenge">
+      <div className="challenge-meta">
+        <span className="challenge-difficulty-badge">{challenge.difficulty}</span>
+        <span className="challenge-level-pill">Level {challenge.level}</span>
+      </div>
+
+      <h3 className="challenge-title">{challenge.title}</h3>
+
+      <div className="challenge-section-label">Task</div>
+      <div className="challenge-question">{challenge.question}</div>
+
+      <div className="challenge-section-label">Hint</div>
+      <div className="challenge-hint">{challenge.hint}</div>
+
+      <div className="challenge-code-header">
+        <span className="challenge-section-label" style={{ marginBottom: 0 }}>Starter Code</span>
+        <button className="challenge-copy-btn" onClick={handleCopy}>
+          {copied ? <><Check size={12} /> Copied!</> : <><Copy size={12} /> Copy</>}
+        </button>
+      </div>
+      <pre className="challenge-starter-code">{challenge.starterCode}</pre>
+
+      <div className="challenge-cta">
+        Switch to the <strong>Python Practice</strong> tab to write and run your solution.
+      </div>
+    </div>
+  );
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function CoursePanel({ course, layerId, onClose, onToggle, isCompleted, onActivity, onMetaChange }) {
   const [activeTab, setActiveTab] = useState('notes');
@@ -86,12 +133,11 @@ export default function CoursePanel({ course, layerId, onClose, onToggle, isComp
 
   // ── Load from disk on open ──────────────────────────────────────────────────
   useEffect(() => {
-    if (!IS_DEV) { setLoading(false); return; }
     let cancelled = false;
     setLoading(true);
     Promise.all([
-      api.getNotes(course.id, layerId),
-      api.getCode(course.id, layerId),
+      api.getNotes(course.id, layerId).catch(() => ({ content: '' })),
+      api.getCode(course.id, layerId).catch(() => ({ content: '' })),
     ]).then(([n, c]) => {
       if (cancelled) return;
       setNotes(n.content ?? '');
@@ -99,8 +145,10 @@ export default function CoursePanel({ course, layerId, onClose, onToggle, isComp
       setIsDirty(false);
       setLoading(false);
     });
-    api.logActivity('view');
-    api.updateCourseMeta(course.id, { views: '__inc__' }).then(onMetaChange);
+    if (IS_DEV) {
+      api.logActivity('view');
+      api.updateCourseMeta(course.id, { views: '__inc__' }).then(onMetaChange);
+    }
     return () => { cancelled = true; };
   }, [course.id, layerId]);
 
@@ -260,93 +308,121 @@ export default function CoursePanel({ course, layerId, onClose, onToggle, isComp
             Python Practice
             {isDirty && activeTab === 'code' && <span className="tab-dirty-dot" />}
           </button>
+          {course.pythonChallenge && (
+            <button className={`panel-tab panel-tab-challenge ${activeTab === 'challenge' ? 'active' : ''}`}
+              onClick={() => setActiveTab('challenge')}>
+              <Sparkles size={14} />
+              Challenge
+              <span className="challenge-level-badge">Lv {course.pythonChallenge.level}</span>
+            </button>
+          )}
         </div>
 
         {/* Body */}
         <div className="panel-body">
-          {!IS_DEV ? (
-            <div className="panel-prod-notice">
-              <div className="panel-prod-icon">💻</div>
-              <div className="panel-prod-title">Notes available locally only</div>
-              <div className="panel-prod-desc">
-                Run <code>npm run dev</code> on your machine to write notes and Python practice.<br />
-                After studying, run <code>npm run sync</code> to commit and push to GitHub.
-              </div>
-            </div>
-          ) : loading ? (
+          {loading ? (
             <div className="panel-loading">Loading…</div>
-          ) : activeTab === 'notes' ? (
-            <div className="panel-notes-area">
-              <textarea
-                className="panel-notes-input"
-                value={notes}
-                onChange={(e) => handleNotesChange(e.target.value)}
-                placeholder={`What did you learn in "${course.title}"?\n\nWrite in plain text or markdown:\n- Key concepts\n- Things that surprised you\n- Questions to follow up\n- How it connects to Cuva AI / NuraKnect`}
-                spellCheck={false}
-              />
-            </div>
-          ) : (
-            /* ── Python tab: editor + output panel ── */
-            <div className="code-tab-wrapper">
-              <div className="panel-editor-area">
-                <Editor
-                  height="100%"
-                  language="python"
-                  theme="vs-dark"
-                  value={code}
-                  onChange={handleCodeChange}
-                  options={{
-                    fontSize: 13,
-                    fontFamily: "'Fira Code', 'JetBrains Mono', monospace",
-                    fontLigatures: true,
-                    minimap: { enabled: false },
-                    scrollBeyondLastLine: false,
-                    lineNumbers: 'on',
-                    renderWhitespace: 'selection',
-                    tabSize: 4,
-                    wordWrap: 'on',
-                    padding: { top: 16, bottom: 16 },
-                  }}
+          ) : activeTab === 'challenge' ? (
+            <PythonChallenge challenge={course.pythonChallenge} />
+          ) : IS_DEV ? (
+            activeTab === 'notes' ? (
+              <div className="panel-notes-area">
+                <textarea
+                  className="panel-notes-input"
+                  value={notes}
+                  onChange={(e) => handleNotesChange(e.target.value)}
+                  placeholder={`What did you learn in "${course.title}"?\n\nWrite in plain text or markdown:\n- Key concepts\n- Things that surprised you\n- Questions to follow up\n- How it connects to Cuva AI / NuraKnect`}
+                  spellCheck={false}
                 />
               </div>
+            ) : (
+              /* ── Python tab: editor + output panel ── */
+              <div className="code-tab-wrapper">
+                <div className="panel-editor-area">
+                  <Editor
+                    height="100%"
+                    language="python"
+                    theme="vs-dark"
+                    value={code}
+                    onChange={handleCodeChange}
+                    options={{
+                      fontSize: 13,
+                      fontFamily: "'Fira Code', 'JetBrains Mono', monospace",
+                      fontLigatures: true,
+                      minimap: { enabled: false },
+                      scrollBeyondLastLine: false,
+                      lineNumbers: 'on',
+                      renderWhitespace: 'selection',
+                      tabSize: 4,
+                      wordWrap: 'on',
+                      padding: { top: 16, bottom: 16 },
+                    }}
+                  />
+                </div>
 
-              {/* Output panel */}
-              <div className="output-panel">
-                <div className="output-panel-header">
-                  <span className="output-panel-title">Output</span>
-                  <div className="output-panel-actions">
-                    <button
-                      className="output-action-btn"
-                      onClick={() => setOutput([])}
-                      title="Clear output"
-                      disabled={output.length === 0}
-                    >
-                      <Trash2 size={13} /> Clear
-                    </button>
-                    <button
-                      className={`output-run-btn ${isRunning ? 'running' : ''}`}
-                      onClick={handleRun}
-                      disabled={isRunning || !code.trim()}
-                      title="Run (Ctrl+Enter)"
-                    >
-                      <Play size={13} />
-                      {isRunning ? 'Running…' : 'Run'}
-                    </button>
+                {/* Output panel */}
+                <div className="output-panel">
+                  <div className="output-panel-header">
+                    <span className="output-panel-title">Output</span>
+                    <div className="output-panel-actions">
+                      <button
+                        className="output-action-btn"
+                        onClick={() => setOutput([])}
+                        title="Clear output"
+                        disabled={output.length === 0}
+                      >
+                        <Trash2 size={13} /> Clear
+                      </button>
+                      <button
+                        className={`output-run-btn ${isRunning ? 'running' : ''}`}
+                        onClick={handleRun}
+                        disabled={isRunning || !code.trim()}
+                        title="Run (Ctrl+Enter)"
+                      >
+                        <Play size={13} />
+                        {isRunning ? 'Running…' : 'Run'}
+                      </button>
+                    </div>
+                  </div>
+                  <div className="output-panel-body" ref={outputRef}>
+                    {output.length === 0 ? (
+                      <span className="output-empty">Press Run or Ctrl+Enter to execute</span>
+                    ) : (
+                      output.map((line, i) => (
+                        <div key={i} className={`output-line output-line-${line.type}`}>
+                          {line.text}
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
-                <div className="output-panel-body" ref={outputRef}>
-                  {output.length === 0 ? (
-                    <span className="output-empty">Press Run or Ctrl+Enter to execute</span>
-                  ) : (
-                    output.map((line, i) => (
-                      <div key={i} className={`output-line output-line-${line.type}`}>
-                        {line.text}
-                      </div>
-                    ))
-                  )}
-                </div>
               </div>
-            </div>
+            )
+          ) : (
+            /* ── Production: read-only view ── */
+            activeTab === 'notes' ? (
+              notes.trim() ? (
+                <div className="panel-readonly-notes">{notes}</div>
+              ) : (
+                <div className="panel-empty-state">
+                  <span className="panel-empty-icon">📝</span>
+                  <span className="panel-empty-title">No notes yet</span>
+                  <span className="panel-empty-desc">Run <code>npm run dev</code> locally to write notes.</span>
+                </div>
+              )
+            ) : (
+              code.trim() ? (
+                <div className="panel-readonly-code">
+                  <pre>{code}</pre>
+                </div>
+              ) : (
+                <div className="panel-empty-state">
+                  <span className="panel-empty-icon">🐍</span>
+                  <span className="panel-empty-title">No practice code yet</span>
+                  <span className="panel-empty-desc">Run <code>npm run dev</code> locally to write and run Python.</span>
+                </div>
+              )
+            )
           )}
         </div>
 

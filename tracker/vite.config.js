@@ -107,26 +107,29 @@ const routes = {
 };
 
 function localApiPlugin() {
+  function attachMiddleware(server) {
+    server.middlewares.use(async (req, res, next) => {
+      const url = new URL(req.url, 'http://localhost');
+      if (!url.pathname.startsWith('/api/')) return next();
+
+      const routeKey = `${req.method} ${url.pathname}`;
+      const handler = routes[routeKey];
+      if (!handler) return send(res, 404, { error: `No route: ${routeKey}` });
+
+      const query = Object.fromEntries(url.searchParams.entries());
+      try {
+        await handler(req, res, query);
+      } catch (err) {
+        console.error('[local-api]', err);
+        send(res, 500, { error: err.message });
+      }
+    });
+  }
+
   return {
     name: 'local-file-api',
-    configureServer(server) {
-      server.middlewares.use(async (req, res, next) => {
-        const url = new URL(req.url, 'http://localhost');
-        if (!url.pathname.startsWith('/api/')) return next();
-
-        const routeKey = `${req.method} ${url.pathname}`;
-        const handler = routes[routeKey];
-        if (!handler) return send(res, 404, { error: `No route: ${routeKey}` });
-
-        const query = Object.fromEntries(url.searchParams.entries());
-        try {
-          await handler(req, res, query);
-        } catch (err) {
-          console.error('[local-api]', err);
-          send(res, 500, { error: err.message });
-        }
-      });
-    },
+    configureServer: attachMiddleware,
+    configurePreviewServer: attachMiddleware,
   };
 }
 
