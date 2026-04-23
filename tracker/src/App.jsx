@@ -29,6 +29,8 @@ import {
   getCompletedCount,
   isQuizUnlocked,
   calculateOverallProgress,
+  getLayerDeadline,
+  getDeadlineStatus,
 } from './data/loader';
 
 const pageVariants = {
@@ -56,6 +58,10 @@ export default function App() {
   const overallPercent = calculateOverallProgress(roadmap.layers, roadmap.progress);
   const completedCount = getCompletedCount(currentLayer, roadmap.progress);
   const quizUnlocked = isQuizUnlocked(currentLayer, roadmap.progress);
+
+  const currentLayerProgress = roadmap.progress.layerProgress[String(currentLayer.id)];
+  const currentDeadline = getLayerDeadline(currentLayer, currentLayerProgress);
+  const deadlineStatus = getDeadlineStatus(currentDeadline);
 
   const circumference = 2 * Math.PI * 64;
   const strokeOffset = circumference - (overallPercent / 100) * circumference;
@@ -102,6 +108,46 @@ export default function App() {
     },
     []
   );
+
+  const handleSaveLayerDates = useCallback((layerId, patch) => {
+    api.saveLayerProgress(layerId, patch);
+    setRoadmap((prev) => {
+      const newProgress = JSON.parse(JSON.stringify(prev.progress));
+      const key = String(layerId);
+      if (!newProgress.layerProgress[key]) {
+        newProgress.layerProgress[key] = {
+          started: false, completed: false, coursesCompleted: [],
+          quizScore: null, quizAttempts: 0, notes: '',
+          startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
+        };
+      }
+      Object.assign(newProgress.layerProgress[key], patch);
+      return { ...prev, progress: newProgress };
+    });
+  }, []);
+
+  const handleSaveCourseTimeline = useCallback((layerId, courseId, patch) => {
+    api.saveCourseTimeline(layerId, courseId, patch);
+    setRoadmap((prev) => {
+      const newProgress = JSON.parse(JSON.stringify(prev.progress));
+      const key = String(layerId);
+      if (!newProgress.layerProgress[key]) {
+        newProgress.layerProgress[key] = {
+          started: false, completed: false, coursesCompleted: [],
+          quizScore: null, quizAttempts: 0, notes: '',
+          startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
+        };
+      }
+      if (!newProgress.layerProgress[key].courseTimelines) {
+        newProgress.layerProgress[key].courseTimelines = {};
+      }
+      newProgress.layerProgress[key].courseTimelines[courseId] = {
+        ...(newProgress.layerProgress[key].courseTimelines[courseId] || {}),
+        ...patch,
+      };
+      return { ...prev, progress: newProgress };
+    });
+  }, []);
 
   return (
     <>
@@ -168,6 +214,13 @@ export default function App() {
                     value={completedCount}
                     max={currentLayer.courses.length}
                   />
+                  {deadlineStatus.status !== 'none' && (
+                    <div className={`deadline-badge-dash deadline-${deadlineStatus.status}`}>
+                      {deadlineStatus.status === 'overdue'
+                        ? `Overdue by ${Math.abs(deadlineStatus.daysRemaining)}d`
+                        : `${deadlineStatus.daysRemaining}d to deadline`}
+                    </div>
+                  )}
                   <div className="current-layer-weeks">
                     {currentLayer.weeklyPlan.map((w) => (
                       <div
@@ -289,6 +342,8 @@ export default function App() {
                 progress={roadmap.progress}
                 onToggleCourse={handleToggleCourse}
                 onActivity={refreshActivity}
+                onSaveDates={handleSaveLayerDates}
+                onSaveCourseTimeline={handleSaveCourseTimeline}
               />
               <WeeklyPlan
                 weeklyPlan={currentLayer.weeklyPlan}

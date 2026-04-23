@@ -562,6 +562,127 @@ body::before {
   }
 }
 
+/* Deadline row */
+.deadline-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+  flex-wrap: wrap;
+}
+
+.deadline-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.deadline-field-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.deadline-value {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background 0.15s, color 0.15s;
+}
+.deadline-value:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.deadline-value svg { opacity: 0.5; }
+.deadline-value:hover svg { opacity: 1; }
+
+.deadline-value-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.deadline-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s;
+}
+.deadline-clear:hover { color: var(--danger, #ef4444); background: rgba(239,68,68,0.1); }
+
+.deadline-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  outline: none;
+  font-family: inherit;
+}
+.deadline-input:focus { border-color: var(--accent); }
+
+.deadline-sep {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.deadline-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.03em;
+  margin-left: auto;
+}
+.deadline-ok      { background: rgba(34,197,94,0.12);  color: #4ade80; }
+.deadline-warning { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.deadline-danger  { background: rgba(239,68,68,0.15);  color: #f87171; }
+.deadline-overdue { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+
+/* Warning / overdue banner */
+.deadline-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm, 6px);
+  margin-bottom: 12px;
+}
+.deadline-banner-danger  { background: rgba(239,68,68,0.1);  color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+.deadline-banner-overdue { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+
+/* Dashboard deadline badge */
+.deadline-badge-dash {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-top: 8px;
+}
+.deadline-badge-dash.deadline-ok      { background: rgba(34,197,94,0.12);  color: #4ade80; }
+.deadline-badge-dash.deadline-warning { background: rgba(251,191,36,0.15); color: #fbbf24; }
+.deadline-badge-dash.deadline-danger  { background: rgba(239,68,68,0.15);  color: #f87171; }
+.deadline-badge-dash.deadline-overdue { background: rgba(239,68,68,0.2);   color: #fca5a5; }
+
 /* Course List */
 .courses-grid {
   display: grid;
@@ -663,6 +784,79 @@ body::before {
   line-height: 1.5;
   font-style: italic;
 }
+
+/* Course timeline */
+.course-timeline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.course-timeline.editing {
+  padding: 4px 0;
+}
+
+.course-tl-dates {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.course-tl-dates.auto   { background: rgba(100,116,139,0.15); color: var(--text-muted); }
+.course-tl-dates.custom { background: rgba(6,182,212,0.12);   color: var(--cyan); }
+
+.course-tl-week {
+  font-size: 10px;
+  color: var(--text-muted);
+  background: rgba(100,116,139,0.1);
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.course-tl-edit {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.course-card:hover .course-tl-edit { opacity: 1; }
+.course-tl-edit:hover { color: var(--accent); }
+
+.course-tl-unset {
+  background: none;
+  border: 1px dashed var(--border);
+  color: var(--text-muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.course-tl-unset:hover { border-color: var(--accent); color: var(--accent); }
+
+.course-tl-save, .course-tl-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.course-tl-save  { color: var(--accent); }
+.course-tl-save:hover  { background: rgba(34,197,94,0.1); }
+.course-tl-cancel { color: var(--text-muted); }
+.course-tl-cancel:hover { background: rgba(239,68,68,0.1); color: #f87171; }
 
 .course-link {
   color: var(--cyan);

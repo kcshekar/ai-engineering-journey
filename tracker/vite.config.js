@@ -88,6 +88,40 @@ const routes = {
     send(res, 200, all[courseId]);
   },
 
+  async 'POST /api/course-timeline'(req, res) {
+    const { layerId, courseId, patch } = await readBody(req);
+    const file = path.join(import.meta.dirname, 'src/data/roadmaps/ai-engineering/progress.json');
+    const progress = readJson(file, {});
+    if (!progress.layerProgress) progress.layerProgress = {};
+    const key = String(layerId);
+    if (!progress.layerProgress[key]) progress.layerProgress[key] = {};
+    if (!progress.layerProgress[key].courseTimelines) progress.layerProgress[key].courseTimelines = {};
+    progress.layerProgress[key].courseTimelines[courseId] = {
+      ...(progress.layerProgress[key].courseTimelines[courseId] || {}),
+      ...patch,
+    };
+    fs.writeFileSync(file, JSON.stringify(progress, null, 2), 'utf8');
+    send(res, 200, { ok: true });
+  },
+
+  async 'GET /api/layer-progress'(req, res, query) {
+    const file = path.join(import.meta.dirname, 'src/data/roadmaps/ai-engineering/progress.json');
+    const progress = readJson(file, {});
+    const lp = (progress.layerProgress || {})[String(query.layerId)] || {};
+    send(res, 200, lp);
+  },
+
+  async 'POST /api/layer-progress'(req, res) {
+    const { layerId, patch } = await readBody(req);
+    const file = path.join(import.meta.dirname, 'src/data/roadmaps/ai-engineering/progress.json');
+    const progress = readJson(file, {});
+    if (!progress.layerProgress) progress.layerProgress = {};
+    const key = String(layerId);
+    progress.layerProgress[key] = { ...(progress.layerProgress[key] || {}), ...patch };
+    fs.writeFileSync(file, JSON.stringify(progress, null, 2), 'utf8');
+    send(res, 200, { ok: true });
+  },
+
   async 'GET /api/activity'(req, res) {
     const file = path.join(REPO_ROOT, 'activity.json');
     send(res, 200, readJson(file, {}));

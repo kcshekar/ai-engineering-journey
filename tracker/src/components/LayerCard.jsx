@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play } from 'lucide-react';
+import { Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play, Pencil, X, AlertTriangle, AlertCircle } from 'lucide-react';
 import ProgressBar from './ProgressBar';
 import CoursePanel from './CoursePanel';
 import { api } from '../data/api';
+import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum } from '../data/loader';
 
 const IS_DEV = import.meta.env.DEV;
 
@@ -42,11 +43,121 @@ const LEVEL_LABEL = {
   4: 'Well studied',
 };
 
-export default function LayerCard({ layer, progress, onToggleCourse, onActivity }) {
+function fmt(dateStr) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('-');
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function CourseTimeline({ layer, layerProgress, courseId, onSave }) {
+  const [editing, setEditing] = useState(false);
+  const startRef = useRef(null);
+  const { startDate, endDate, isCustom } = getCourseTimeline(layer, layerProgress, courseId);
+  const weekNum = getCourseWeekNum(layer, courseId);
+
+  function commit(newStart, newEnd) {
+    setEditing(false);
+    if (onSave) onSave(courseId, { startDate: newStart || null, endDate: newEnd || null });
+  }
+
+  function clear() {
+    if (onSave) onSave(courseId, { startDate: null, endDate: null });
+  }
+
+  if (editing) {
+    return (
+      <div className="course-timeline editing" onClick={(e) => e.stopPropagation()}>
+        <input
+          ref={startRef}
+          type="date"
+          className="deadline-input"
+          defaultValue={startDate || ''}
+          autoFocus
+          placeholder="Start"
+        />
+        <span className="deadline-sep">→</span>
+        <input
+          type="date"
+          className="deadline-input"
+          defaultValue={endDate || ''}
+          placeholder="End"
+        />
+        <button className="course-tl-save" onClick={(e) => {
+          e.stopPropagation();
+          const inputs = e.currentTarget.closest('.course-timeline').querySelectorAll('input');
+          commit(inputs[0].value, inputs[1].value);
+        }}>✓</button>
+        <button className="course-tl-cancel" onClick={(e) => { e.stopPropagation(); setEditing(false); }}>✕</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="course-timeline" onClick={(e) => e.stopPropagation()}>
+      {startDate ? (
+        <>
+          <span className={`course-tl-dates${isCustom ? ' custom' : ' auto'}`}>
+            {fmt(startDate)} → {fmt(endDate)}
+          </span>
+          {!isCustom && weekNum && (
+            <span className="course-tl-week">Wk {weekNum}</span>
+          )}
+          <button className="course-tl-edit" onClick={() => setEditing(true)} title="Edit dates">
+            <Pencil size={10} />
+          </button>
+          {isCustom && (
+            <button className="deadline-clear" onClick={clear} title="Reset to auto">
+              <X size={10} />
+            </button>
+          )}
+        </>
+      ) : (
+        <button className="course-tl-unset" onClick={() => setEditing(true)}>
+          {layerProgress?.startedDate ? `Wk ${weekNum ?? '?'} — set dates` : 'Set layer start first'}
+          <Pencil size={10} />
+        </button>
+      )}
+    </div>
+  );
+}
+
+export default function LayerCard({ layer, progress, onToggleCourse, onActivity, onSaveDates, onSaveCourseTimeline }) {
   const [openCourse, setOpenCourse] = useState(null);
   const [courseMetas, setCourseMetas] = useState({});
 
+  // Deadline editing state
+  const [editingStart, setEditingStart] = useState(false);
+  const [editingDeadline, setEditingDeadline] = useState(false);
+  const startInputRef = useRef(null);
+  const deadlineInputRef = useRef(null);
+
   const layerProgress = progress.layerProgress[String(layer.id)] || { coursesCompleted: [] };
+
+  const deadline = getLayerDeadline(layer, layerProgress);
+  const isCustomDeadline = !!layerProgress?.deadline;
+  const { daysRemaining, status: deadlineStatus } = getDeadlineStatus(deadline);
+
+  useEffect(() => {
+    if (editingStart && startInputRef.current) startInputRef.current.focus();
+  }, [editingStart]);
+
+  useEffect(() => {
+    if (editingDeadline && deadlineInputRef.current) deadlineInputRef.current.focus();
+  }, [editingDeadline]);
+
+  function commitStart(val) {
+    setEditingStart(false);
+    if (val && onSaveDates) onSaveDates(layer.id, { startedDate: val });
+  }
+
+  function commitDeadline(val) {
+    setEditingDeadline(false);
+    if (val && onSaveDates) onSaveDates(layer.id, { deadline: val });
+  }
+
+  function clearDeadline() {
+    if (onSaveDates) onSaveDates(layer.id, { deadline: null });
+  }
 
   // Load per-course engagement data
   const refreshMetas = useCallback(() => {
@@ -71,6 +182,76 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity 
           />
         </div>
       </div>
+
+      {/* Deadline row */}
+      <div className="deadline-row">
+        {/* Start date */}
+        <div className="deadline-field">
+          <span className="deadline-field-label">Started</span>
+          {editingStart ? (
+            <input
+              ref={startInputRef}
+              type="date"
+              className="deadline-input"
+              defaultValue={layerProgress.startedDate || ''}
+              onBlur={(e) => commitStart(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') commitStart(e.target.value); if (e.key === 'Escape') setEditingStart(false); }}
+            />
+          ) : (
+            <button className="deadline-value" onClick={() => setEditingStart(true)}>
+              {layerProgress.startedDate ? fmt(layerProgress.startedDate) : 'Not set'}
+              <Pencil size={11} />
+            </button>
+          )}
+        </div>
+
+        <span className="deadline-sep">→</span>
+
+        {/* Deadline */}
+        <div className="deadline-field">
+          <span className="deadline-field-label">Deadline{!isCustomDeadline && deadline ? ' (Auto)' : ''}</span>
+          {editingDeadline ? (
+            <input
+              ref={deadlineInputRef}
+              type="date"
+              className="deadline-input"
+              defaultValue={deadline || ''}
+              onBlur={(e) => commitDeadline(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') commitDeadline(e.target.value); if (e.key === 'Escape') setEditingDeadline(false); }}
+            />
+          ) : (
+            <span className="deadline-value-group">
+              <button className="deadline-value" onClick={() => setEditingDeadline(true)}>
+                {deadline ? fmt(deadline) : 'Not set'}
+                <Pencil size={11} />
+              </button>
+              {isCustomDeadline && (
+                <button className="deadline-clear" onClick={clearDeadline} title="Reset to auto">
+                  <X size={11} />
+                </button>
+              )}
+            </span>
+          )}
+        </div>
+
+        {/* Status badge */}
+        {deadlineStatus !== 'none' && (
+          <div className={`deadline-badge deadline-${deadlineStatus}`}>
+            {deadlineStatus === 'overdue'
+              ? `${Math.abs(daysRemaining)}d overdue`
+              : `${daysRemaining}d left`}
+          </div>
+        )}
+      </div>
+
+      {/* Warning / overdue banner */}
+      {(deadlineStatus === 'danger' || deadlineStatus === 'overdue') && (
+        <div className={`deadline-banner deadline-banner-${deadlineStatus}`}>
+          {deadlineStatus === 'danger'
+            ? <><AlertTriangle size={14} /> Deadline in {daysRemaining} day{daysRemaining !== 1 ? 's' : ''} — keep pushing!</>
+            : <><AlertCircle size={14} /> Deadline passed {Math.abs(daysRemaining)} day{Math.abs(daysRemaining) !== 1 ? 's' : ''} ago — time to catch up!</>}
+        </div>
+      )}
 
       <motion.div className="courses-grid" variants={stagger} initial="hidden" animate="show">
         <AnimatePresence>
@@ -133,6 +314,12 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity 
                     )}
                   </div>
                   <div className="course-why">{course.why}</div>
+                  <CourseTimeline
+                    layer={layer}
+                    layerProgress={layerProgress}
+                    courseId={course.id}
+                    onSave={(courseId, patch) => onSaveCourseTimeline && onSaveCourseTimeline(layer.id, courseId, patch)}
+                  />
                 </div>
 
                 {/* Actions */}

@@ -12,8 +12,10 @@
       "quizScore": null,
       "quizAttempts": 0,
       "notes": "",
-      "startedDate": null,
-      "completedDate": null
+      "startedDate": "2026-04-20",
+      "completedDate": null,
+      "deadline": null,
+      "courseTimelines": {}
     }
   },
   "weeklyCheckins": [],

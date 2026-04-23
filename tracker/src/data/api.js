@@ -29,4 +29,10 @@ export const api = {
   // course-meta: per-course engagement tracking
   getAllCourseMetas: () => get('/course-metas'),
   updateCourseMeta: (courseId, patch) => post('/course-meta', { courseId, patch }),
+
+  // layer progress: persist startedDate and deadline to disk
+  saveLayerProgress: (layerId, patch) => post('/layer-progress', { layerId, patch }),
+
+  // course timeline: persist per-course start/end dates
+  saveCourseTimeline: (layerId, courseId, patch) => post('/course-timeline', { layerId, courseId, patch }),
 };
