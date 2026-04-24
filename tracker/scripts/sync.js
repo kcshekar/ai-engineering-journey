@@ -3,10 +3,19 @@ import { execSync } from 'child_process';
 import path from 'path';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const TARGETS = ['notes/', 'exercises/', 'activity.json'];
+const TRACKER = path.join(ROOT, 'tracker');
 
-function run(cmd) {
-  return execSync(cmd, { cwd: ROOT, encoding: 'utf8' }).trim();
+// All files/dirs that capture study activity + progress state
+const TARGETS = [
+  'notes/',
+  'exercises/',
+  'activity.json',
+  'course-meta.json',
+  'tracker/src/data/roadmaps/ai-engineering/progress.json',
+];
+
+function run(cmd, cwd = ROOT) {
+  return execSync(cmd, { cwd, encoding: 'utf8' }).trim();
 }
 
 function hasChanges() {
@@ -15,7 +24,7 @@ function hasChanges() {
 }
 
 if (!hasChanges()) {
-  console.log('Nothing to sync — no changes in notes/, exercises/, or activity.json');
+  console.log('Nothing to sync — no changes in study files or progress.json');
   process.exit(0);
 }
 
@@ -29,6 +38,17 @@ const date = new Date().toLocaleString('en-US', {
 
 run(`git add ${TARGETS.join(' ')}`);
 run(`git commit -m "study: ${fileCount} file${fileCount !== 1 ? 's' : ''} updated — ${date}"`);
+
+// Rebuild static site so the live deployment reflects latest notes, exercises, and progress
+console.log('\nRebuilding dist for live deployment...');
+run('npm run build', TRACKER);
+
+const distStatus = run('git status --porcelain tracker/dist/');
+if (distStatus) {
+  run('git add tracker/dist/');
+  run(`git commit -m "build: update dist — ${date}"`);
+}
+
 run('git push');
 
 console.log(`\n✓ Synced ${fileCount} file${fileCount !== 1 ? 's' : ''} to GitHub`);

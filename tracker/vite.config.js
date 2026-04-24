@@ -140,6 +140,32 @@ const routes = {
   },
 };
 
+function copyDirSync(src, dest) {
+  if (!fs.existsSync(src)) return;
+  fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyDirSync(srcPath, destPath);
+    } else {
+      fs.copyFileSync(srcPath, destPath);
+    }
+  }
+}
+
+// Copies notes/ and exercises/ into dist/ so they're served as static files on GitHub Pages
+function copyStudyFilesPlugin() {
+  return {
+    name: 'copy-study-files',
+    closeBundle() {
+      const outDir = path.resolve(import.meta.dirname, 'dist');
+      copyDirSync(path.join(REPO_ROOT, 'notes'), path.join(outDir, 'notes'));
+      copyDirSync(path.join(REPO_ROOT, 'exercises'), path.join(outDir, 'exercises'));
+    },
+  };
+}
+
 function localApiPlugin() {
   function attachMiddleware(server) {
     server.middlewares.use(async (req, res, next) => {
@@ -168,7 +194,7 @@ function localApiPlugin() {
 }
 
 export default defineConfig({
-  plugins: [react(), localApiPlugin()],
+  plugins: [react(), localApiPlugin(), copyStudyFilesPlugin()],
   server: {
     port: 3000,
     open: true,
