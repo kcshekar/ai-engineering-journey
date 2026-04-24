@@ -102,6 +102,7 @@ export default function App() {
           lp.completed = false;
           lp.completedDate = null;
         }
+        api.saveLayerProgress(layerId, lp);
         return { ...prev, progress: newProgress };
       });
       api.logActivity('complete').then(() => api.getActivity().then(setActivityMap));
