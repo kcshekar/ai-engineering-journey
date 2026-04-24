@@ -6,13 +6,15 @@
   "currentWeek": 1,
   "layerProgress": {
     "1": {
-      "started": false,
+      "started": true,
       "completed": false,
-      "coursesCompleted": [],
+      "coursesCompleted": [
+        "c1"
+      ],
       "quizScore": null,
       "quizAttempts": 0,
       "notes": "",
-      "startedDate": "2026-04-20",
+      "startedDate": "2026-04-24",
       "completedDate": null,
       "deadline": null,
       "courseTimelines": {}
