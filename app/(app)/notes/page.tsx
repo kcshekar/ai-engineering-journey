@@ -1,24 +1,29 @@
-import { BookOpen, ExternalLink } from "lucide-react"
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
+import { FileText, ExternalLink } from "lucide-react"
 import layersData from "@/data/roadmaps/ai-engineering/layers.json"
 
-export default function NotesPage() {
+export default async function NotesPage() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/login")
+  }
+
   return (
     <div>
-      <div className="section-title"><BookOpen /> Notes</div>
+      <div className="section-title"><FileText /> Notes</div>
       <div className="notes-grid">
-        {layersData.layers.map((layer) => (
+        {(layersData.layers as any[]).map((layer) => (
           <a
             key={layer.id}
-            className="note-card"
             href={`https://github.com/kcshekar/ai-engineering-journey/tree/main/notes/layer-${layer.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ textDecoration: "none", color: "inherit" }}
+            className="note-card"
           >
-            <div className="card-icon green"><BookOpen /></div>
-            <div className="card-name">Layer {layer.id}: {layer.title}</div>
-            <div className="card-desc">{layer.description}</div>
-            <div className="card-link">View notes on GitHub <ExternalLink /></div>
+            <div className="note-header">Layer {layer.id}: {layer.title}</div>
+            <div className="note-desc">{layer.description}</div>
+            <div className="note-link">View on GitHub <ExternalLink size={14} /></div>
           </a>
         ))}
       </div>

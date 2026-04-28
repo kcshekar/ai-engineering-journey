@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { progress, activity } from "@/lib/db/schema"
@@ -10,7 +11,7 @@ import type { LayerProgressEntry, ActivityDay, RoadmapData, RoadmapMeta } from "
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.id) {
-    return <div>Unauthorized access. Please log in.</div>
+    redirect("/login")
   }
   const userId  = session.user.id
 

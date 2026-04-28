@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { progress } from "@/lib/db/schema"
@@ -12,7 +13,7 @@ import type { LayerProgressEntry } from "@/types"
 export default async function LayersPage() {
   const session = await auth()
   if (!session?.user?.id) {
-    return <div>Unauthorized access. Please log in.</div>
+    redirect("/login")
   }
   const userId  = session.user.id
 

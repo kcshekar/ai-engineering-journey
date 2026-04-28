@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { progress } from "@/lib/db/schema"
@@ -18,7 +18,7 @@ export default async function LayerDetailPage({ params }: Props) {
 
   const session = await auth()
   if (!session?.user?.id) {
-    notFound()
+    redirect("/login")
   }
   const userId  = session.user.id
 

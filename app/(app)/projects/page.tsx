@@ -1,6 +1,13 @@
+import { redirect } from "next/navigation"
+import { auth } from "@/lib/auth"
 import { FolderGit2, ExternalLink, Cpu, MessageSquare } from "lucide-react"
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    redirect("/login")
+  }
+
   return (
     <div>
       <div className="section-title"><FolderGit2 /> Projects</div>
