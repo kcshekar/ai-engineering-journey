@@ -1,0 +1,123 @@
+{
+  "layers": [
+    {
+      "id": 1,
+      "title": "AI Foundation",
+      "status": "in-progress",
+      "weeks": "1-3",
+      "description": "Neural networks, transformers, LLMs, and prompt engineering",
+      "appliesTo": ["cuva-ai", "nuraknect"],
+      "courses": [
+        {
+          "id": "c1",
+          "title": "Neural Networks by 3Blue1Brown",
+          "platform": "YouTube",
+          "url": "https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi",
+          "cost": "Free",
+          "duration": "3.5 hours",
+          "videos": 4,
+          "status": "not-started",
+          "order": 1,
+          "why": "Visual, intuitive understanding of how AI learns. Opens the black box permanently."
+        },
+        {
+          "id": "c2",
+          "title": "How Transformer LLMs Work",
+          "platform": "DeepLearning.AI",
+          "url": "https://www.deeplearning.ai/short-courses/how-transformer-llms-work/",
+          "cost": "Free",
+          "duration": "90 minutes",
+          "status": "not-started",
+          "order": 2,
+          "why": "Best visual explanation of transformers. Directly explains what AutoGen agents do under the hood."
+        },
+        {
+          "id": "c3",
+          "title": "Neural Networks Zero to Hero (First 3 videos)",
+          "platform": "YouTube - Andrej Karpathy",
+          "url": "https://karpathy.ai/zero-to-hero.html",
+          "cost": "Free",
+          "duration": "5 hours",
+          "videos": 3,
+          "status": "not-started",
+          "order": 3,
+          "why": "Builds from scratch in Python. Turns abstract concepts into code you have written yourself."
+        },
+        {
+          "id": "c4",
+          "title": "ChatGPT Prompt Engineering for Developers",
+          "platform": "DeepLearning.AI",
+          "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/",
+          "cost": "Free",
+          "duration": "90 minutes",
+          "status": "not-started",
+          "order": 4,
+          "why": "Directly applicable to NuraKnect DM reply generation this same week."
+        }
+      ],
+      "weeklyPlan": [
+        {
+          "week": 1,
+          "focus": "Neural Networks",
+          "courses": ["c1"],
+          "dailyMinutes": 90,
+          "buildTask": "Write a one paragraph explanation of backpropagation in your own words",
+          "pythonTask": "20 minutes daily — rewrite one JS function you know in Python"
+        },
+        {
+          "week": 2,
+          "focus": "Transformers & LLMs",
+          "courses": ["c2", "c3"],
+          "dailyMinutes": 90,
+          "buildTask": "Make your first raw OpenAI API call in Python. No framework. Just the API.",
+          "pythonTask": "20 minutes daily — async/await patterns in Python vs Node.js"
+        },
+        {
+          "week": 3,
+          "focus": "Prompt Engineering",
+          "courses": ["c4"],
+          "dailyMinutes": 90,
+          "buildTask": "Build NuraKnect's first DM intent classifier using raw LLM API. Classify: complaint, question, purchase intent, greeting.",
+          "pythonTask": "20 minutes daily — Pydantic v2 models for structured LLM output"
+        }
+      ],
+      "quiz": {
+        "status": "locked",
+        "unlockCondition": "Complete all 4 courses in this layer",
+        "passingScore": 70,
+        "questions": [
+          {
+            "id": "q1",
+            "type": "explain",
+            "question": "In your own words, explain what a Transformer is and why it matters for what you are building on Cuva AI.",
+            "hint": "Think about attention, context, and how your AutoGen agents process instructions"
+          },
+          {
+            "id": "q2",
+            "type": "conceptual",
+            "question": "What is the difference between a token and a word? Why does this matter when you are designing prompts for NuraKnect?",
+            "hint": "Think about cost, context windows, and how LLMs actually read text"
+          },
+          {
+            "id": "q3",
+            "type": "practical",
+            "question": "You are building a prompt for NuraKnect to classify Instagram DMs. Write a system prompt that handles at least 4 intent categories and returns structured JSON output.",
+            "hint": "Use what you learned from the prompt engineering course"
+          },
+          {
+            "id": "q4",
+            "type": "conceptual",
+            "question": "Explain backpropagation to a junior developer in 3 sentences. No math.",
+            "hint": "Use an analogy. Think about feedback loops."
+          },
+          {
+            "id": "q5",
+            "type": "architectural",
+            "question": "Your AutoGen agent on Cuva AI keeps giving inconsistent outputs for the same input. Based on what you learned about LLMs, what are 3 possible reasons and how would you fix each?",
+            "hint": "Think about temperature, prompt design, and model determinism"
+          }
+        ]
+      }
+    }
+  ]
+}

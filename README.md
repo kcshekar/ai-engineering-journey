@@ -19,15 +19,15 @@ Most learning paths are static checklists. This one is different:
 git clone https://github.com/kcshekar/ai-engineering-journey.git
 cd ai-engineering-journey
 
-# Install tracker dependencies
-cd tracker
+# Install dependencies
+cd webapp
 npm install
 
-# Start the tracker
+# Start the app
 npm run dev
 ```
 
-The app opens at `http://localhost:3000`.
+The app opens at `http://localhost:3000` (login: `korpolechandrashekar@gmail.com` / `learning2024`).
 
 ## How it works
 
@@ -57,8 +57,6 @@ Click a course to mark it complete. When all courses in a layer are done, the qu
    - `layers.json`: Array of layers, each with `courses`, `weeklyPlan`, `quiz`
    - `progress.json`: Initialize with empty `layerProgress` for each layer
 
-3. Update the data loader in `tracker/src/data/loader.js` to import your new roadmap.
-
 The app is designed so any roadmap folder works - no hardcoded course names or layer counts.
 
 ## Project Structure
@@ -66,27 +64,29 @@ The app is designed so any roadmap folder works - no hardcoded course names or l
 ```
 ai-engineering-journey/
 ├── README.md
-├── roadmaps/              # Roadmap definitions (JSON)
+├── MIGRATION_COMPLETE.md  # Architecture documentation
+├── webapp/                # Next.js 15 app with database
+│   ├── app/              # Next.js App Router
+│   ├── components/       # React components
+│   ├── lib/              # Auth, DB, utilities
+│   └── public/           # Static assets
+├── roadmaps/             # Roadmap definitions (JSON)
 │   └── ai-engineering/
 │       ├── meta.json
 │       ├── layers.json
-│       └── progress.json
-├── notes/                 # Your learning notes per layer
+│       └── (progress stored in Turso DB)
+├── notes/                # Your learning notes per layer
 │   └── layer-1/
-├── exercises/             # Weekly practice exercises
-│   └── week-1/
-├── projects/              # Project architecture notes
-│   ├── cuva-ai/
-│   └── nuraknect/
-└── tracker/               # React app
-    ├── package.json
-    ├── public/
-    └── src/
-        ├── App.js
-        ├── App.css
-        ├── components/
-        └── data/
+└── exercises/            # Weekly practice exercises
+    └── layer-1/
 ```
+
+## Architecture
+
+**Frontend:** Next.js 15 with Turbopack  
+**Backend:** API routes with NextAuth v5  
+**Database:** Turso (LibSQL) - cloud SQLite with local sync  
+**Authentication:** Credentials-based (email/password)
 
 ## Learning Philosophy
 
@@ -108,6 +108,18 @@ ai-engineering-journey/
 | 4 | Fine-tuning & Training | 10-12 |
 | 5 | Evaluation & Testing | 13-15 |
 | 6 | Production AI Systems | 16-18 |
+
+## Features
+
+- **Database persistence** - All progress, notes, and code saved to Turso
+- **Activity tracking** - Streak graph and daily activity heatmap
+- **Python practice** - Write and execute Python code in browser (via Pyodide)
+- **Responsive UI** - Mobile-friendly with smooth animations
+- **Type-safe** - Full TypeScript with Drizzle ORM
+
+## Getting Started
+
+See [MIGRATION_COMPLETE.md](./MIGRATION_COMPLETE.md) for detailed architecture, API documentation, and testing instructions.
 
 ## Author
 

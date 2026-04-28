@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>E2E Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .test { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+    .pass { background: #90EE90; }
+    .fail { background: #FFB6C6; }
+    .info { background: #87CEEB; }
+  </style>
+</head>
+<body>
+  <h1>End-to-End Database Flow Test</h1>
+  <p>Open browser DevTools Console (F12) to see results</p>
+
+  <div id="results"></div>
+
+  <script>
+    const log = (msg, type = 'info') => {
+      const div = document.createElement('div');
+      div.className = `test ${type}`;
+      div.textContent = msg;
+      document.getElementById('results').appendChild(div);
+      console.log(`[${type.toUpperCase()}] ${msg}`);
+    };
+
+    (async () => {
+      try {
+        log('Step 1: Checking if authenticated...', 'info');
+        const res = await fetch('/', { credentials: 'include' });
+        if (res.ok) {
+          log('✓ Dashboard accessible (authenticated)', 'pass');
+        } else if (res.status === 307) {
+          log('✗ Not authenticated (redirected to login)', 'fail');
+          return;
+        }
+
+        log('Step 2: Testing activity API...', 'info');
+        const actRes = await fetch('/api/activity', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'view' })
+        });
+
+        const actData = await actRes.json();
+        if (actRes.ok && actData.ok) {
+          log('✓ Activity logged to database', 'pass');
+          log('Complete E2E flow verified: Login → Session → API → Database', 'pass');
+        } else {
+          log(`✗ API returned: ${actRes.status} ${JSON.stringify(actData)}`, 'fail');
+        }
+      } catch (e) {
+        log(`Error: ${e.message}`, 'fail');
+      }
+    })();
+  </script>
+</body>
+</html>
