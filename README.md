@@ -7,7 +7,7 @@ A structured, layer-by-layer learning tracker for engineers transitioning into A
 Most learning paths are static checklists. This one is different:
 
 - **Layer-based progression** - Each layer builds on the last. No skipping. No tutorial-hopping.
-- **Project-driven** - Every course ties back to something you're actually building (Cuva AI, NuraKnect AI).
+- **Project-driven** - Every course ties back to something you're actually building (NuraKnect AI).
 - **Weekly cadence** - Each week has a focus, a build task, and daily Python practice.
 - **Quiz gates** - You can't move forward without proving you understood the layer. Quizzes are taken in conversation with a mentor (Claude), not as multiple-choice busywork.
 - **Generic structure** - Want to track a different roadmap? Add a folder. The app reads whatever is there.
@@ -27,7 +27,8 @@ npm install
 npm run dev
 ```
 
-The app opens at `http://localhost:3000` (login: `korpolechandrashekar@gmail.com` / `learning2024`).
+The app opens at `http://localhost:3000`.
+Note: Currently single-user. Fork the repo and add your own credentials via .env.local
 
 ## How it works
 
@@ -123,4 +124,4 @@ See [MIGRATION_COMPLETE.md](./MIGRATION_COMPLETE.md) for detailed architecture, 
 
 ## Author
 
-**kcshekar** - Senior Full-Stack Engineer building Cuva AI and NuraKnect AI while transitioning into Applied AI Engineering.
+**kcshekar** - Senior Full-Stack Engineer transitioning into Applied AI Engineering. Currently building NuraKnectAI.
