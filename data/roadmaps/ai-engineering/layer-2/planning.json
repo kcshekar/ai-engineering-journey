@@ -1,0 +1,35 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 4,
+      "focus": "LLM Chains and Multi-step Systems",
+      "courses": [
+        "c5"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Replace NuraKnect PromptTemplate mock with a real OpenAI or Anthropic API call. Classify a real DM and return actual JSON. No mock data. Handle errors with try/except.",
+      "pythonTask": "20 min daily — Python dict manipulation and JSON parsing. Used constantly with LLM outputs."
+    },
+    {
+      "week": 5,
+      "focus": "RAG Architecture and Embeddings",
+      "courses": [
+        "c6",
+        "c7"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Add conversation memory to NuraKnect. Store past DMs as embeddings. Retrieve relevant context when new DM arrives. RAG applied to conversation history.",
+      "pythonTask": "20 min daily — list comprehensions and generator expressions. Core Python for data processing in AI pipelines."
+    },
+    {
+      "week": 6,
+      "focus": "Vector Databases in Production",
+      "courses": [
+        "c8"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Set up Qdrant locally via Docker. Index 20 real NuraKnect DM examples. Query by semantic similarity. Measure retrieval accuracy on 5 test queries. Document results.",
+      "pythonTask": "20 min daily — async/await in Python properly. All vector DB and LLM API calls must be async in production."
+    }
+  ]
+}

@@ -1,0 +1,126 @@
+{
+  "id": 2,
+  "title": "Applied LLMs",
+  "status": "not-started",
+  "weeks": "4-6",
+  "description": "RAG systems, embeddings, vector databases, and LangChain — turning LLM knowledge into real products",
+  "appliesTo": [
+    "cuva-ai",
+    "nuraknect"
+  ],
+  "courses": [
+    {
+      "id": "c5",
+      "title": "Building Systems with the ChatGPT API",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt-api/",
+      "cost": "Free",
+      "duration": "90 minutes",
+      "status": "not-started",
+      "order": 1,
+      "why": "Teaches multi-step LLM chains — exactly what Cuva AI workflow orchestration does. AutoGen patterns become clear.",
+      "pythonChallenge": {
+        "level": 5,
+        "difficulty": "Advanced",
+        "title": "Chain Two LLM Steps Together",
+        "question": "Building Systems with the ChatGPT API is about composing several small LLM calls into one pipeline instead of doing everything in a single giant prompt.\n\nYour task:\nBuild a class  Chain  that:\n  1. Takes a list of step functions in  __init__(self, steps)\n  2. Has a  run(self, input_value)  method that passes input_value through each step function in order, feeding each step's output into the next step's input\n  3. Stops early and returns an error dict  {\"error\": str(e)}  if any step raises an exception (this is your moderation / safety gate)\n\nThen build two real step functions for NuraKnect:\n  classify_intent(dm)  → returns {\"category\": ..., \"text\": dm} (mock classification — no real API call needed here)\n  generate_reply(classified)  → returns a reply string based on classified[\"category\"]\n\nWire them into a Chain and run it on: \"How much does your service cost?\"\n\nBonus (teaches real production moderation): add a third step  moderate(dm)  that runs FIRST and raises  ValueError  if the message contains a banned word list. Confirm the Chain stops and returns the error dict instead of continuing to classify_intent.",
+        "hint": "Use a simple for-loop in run() that reassigns a `value` variable after each step: value = step(value). Wrap the loop body in try/except Exception and return the error dict immediately on failure — that early-stop behavior is exactly what production moderation gates do before spending tokens on a real LLM call.",
+        "starterCode": "class Chain:\n    def __init__(self, steps):\n        self.steps = steps\n\n    def run(self, input_value):\n        value = input_value\n        for step in self.steps:\n            try:\n                value = step(value)\n            except Exception as e:\n                return {\"error\": str(e)}\n        return value\n\n\ndef classify_intent(dm):\n    # Mock classifier — in production this calls the OpenAI/Anthropic API\n    categories = {\n        \"cost\": \"purchase_intent\",\n        \"price\": \"purchase_intent\",\n        \"hello\": \"greeting\",\n    }\n    text_lower = dm.lower()\n    category = next((v for k, v in categories.items() if k in text_lower), \"question\")\n    return {\"category\": category, \"text\": dm}\n\n\ndef generate_reply(classified):\n    replies = {\n        \"purchase_intent\": \"Thanks for asking! Here is our pricing page: ...\",\n        \"greeting\": \"Hey! Thanks for reaching out \\U0001F44B\",\n        \"question\": \"Great question — let me get you an answer.\",\n    }\n    return replies.get(classified[\"category\"], \"Thanks for your message!\")\n\n\nnuraknect_chain = Chain([classify_intent, generate_reply])\nresult = nuraknect_chain.run(\"How much does your service cost?\")\nprint(result)\n\n# Bonus: add a moderate(dm) step that runs before classify_intent\n# and raises ValueError for banned words. Confirm Chain returns\n# {\"error\": \"...\"} instead of a reply when moderation trips.\n"
+      }
+    },
+    {
+      "id": "c6",
+      "title": "Building RAG Agents with LLMs",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/building-your-own-database-agent/",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 2,
+      "why": "Core RAG architecture end to end. Applies directly to NuraKnect conversation memory and Cuva AI knowledge retrieval.",
+      "pythonChallenge": {
+        "level": 6,
+        "difficulty": "Advanced",
+        "title": "Retrieval With Cosine Similarity",
+        "question": "RAG retrieval works by comparing the embedding of a new query against the embeddings of stored documents and returning the most similar ones.\n\nYour task:\nWrite two functions:\n  cosine_similarity(vec_a, vec_b) → float\n    computes  dot(vec_a, vec_b) / (magnitude(vec_a) * magnitude(vec_b))\n\n  retrieve_top_k(query_vector, documents, k=2)\n    documents is a list of dicts: {\"id\": ..., \"text\": ..., \"embedding\": [...]}\n    returns the top k documents sorted by cosine similarity to query_vector, highest first, each tagged with its similarity score\n\nTest with this toy NuraKnect DM history (3D embeddings for simplicity — real embeddings are 1536+ dimensions, but the math is identical):\n\ndocuments = [\n  {\"id\": \"dm1\", \"text\": \"How much is the monthly plan?\", \"embedding\": [0.9, 0.1, 0.0]},\n  {\"id\": \"dm2\", \"text\": \"Is this available in India?\",   \"embedding\": [0.1, 0.9, 0.0]},\n  {\"id\": \"dm3\", \"text\": \"What does the pricing look like?\", \"embedding\": [0.85, 0.15, 0.0]},\n]\nquery = [0.88, 0.12, 0.0]  # embedding for: \"what's the cost?\"\n\nExpected: dm1 and dm3 rank above dm2 — they are about pricing, dm2 is about availability.\n\nBonus: what should retrieve_top_k return when documents is an empty list? Handle it without crashing — this is the 'no relevant context found' case.",
+        "hint": "magnitude(v) = sqrt(sum(x*x for x in v)). Guard against division by zero if a vector is all zeros. Python's sorted(..., key=..., reverse=True) is the cleanest way to rank documents by score.",
+        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\ndef retrieve_top_k(query_vector, documents, k=2):\n    if not documents:\n        return []\n    scored = [\n        {**doc, \"score\": cosine_similarity(query_vector, doc[\"embedding\"])}\n        for doc in documents\n    ]\n    scored.sort(key=lambda d: d[\"score\"], reverse=True)\n    return scored[:k]\n\n\ndocuments = [\n    {\"id\": \"dm1\", \"text\": \"How much is the monthly plan?\", \"embedding\": [0.9, 0.1, 0.0]},\n    {\"id\": \"dm2\", \"text\": \"Is this available in India?\", \"embedding\": [0.1, 0.9, 0.0]},\n    {\"id\": \"dm3\", \"text\": \"What does the pricing look like?\", \"embedding\": [0.85, 0.15, 0.0]},\n]\nquery = [0.88, 0.12, 0.0]\n\nresults = retrieve_top_k(query, documents, k=2)\nfor r in results:\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['text']}\")\n\n# Bonus: try retrieve_top_k(query, [], k=2) — should return [] not crash\n"
+      }
+    },
+    {
+      "id": "c7",
+      "title": "LangChain for LLM Application Development",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/langchain-for-llm-application-development/",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 3,
+      "why": "Bridge between AutoGen patterns already known and LangGraph coming in Layer 3. Learn LCEL and chain composition.",
+      "pythonChallenge": {
+        "level": 7,
+        "difficulty": "Advanced+",
+        "title": "Build a Minimal LCEL-Style Pipe Chain",
+        "question": "LangChain's LCEL lets you compose steps with the  |  operator: chain = prompt | model | parser. This challenge builds that pipe syntax yourself using Python's operator overloading, so you understand what LCEL is actually doing under the hood instead of treating it as magic.\n\nYour task:\nBuild a class  Runnable  that:\n  1. Wraps a single function in  __init__(self, func)\n  2. Has an  invoke(self, input_value)  method that calls self.func(input_value)\n  3. Overrides  __or__(self, other)  so that  runnable_a | runnable_b  returns a NEW Runnable whose invoke() calls runnable_a's function, then feeds that result into runnable_b's invoke()\n\nThen build 3 small functions for NuraKnect and chain all three with  |  :\n  parse_dm(raw)      → strips whitespace, lowercases\n  classify(text)     → returns {\"category\": \"purchase_intent\" if \"price\" in text or \"cost\" in text else \"question\", \"text\": text}\n  format_response(classified) → returns a formatted string: f\"[{classified['category'].upper()}] {classified['text']}\"\n\n  pipeline = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\n  print(pipeline.invoke(\"  What's the COST?  \"))\n\nExpected output: [PURCHASE_INTENT] what's the cost?",
+        "hint": "__or__(self, other) should return Runnable(lambda x: other.invoke(self.invoke(x))). This is the entire trick behind LCEL — each pipe just nests one more function call. Chaining 3+ runnables works automatically because Python evaluates | left to right.",
+        "starterCode": "class Runnable:\n    def __init__(self, func):\n        self.func = func\n\n    def invoke(self, input_value):\n        return self.func(input_value)\n\n    def __or__(self, other):\n        return Runnable(lambda x: other.invoke(self.invoke(x)))\n\n\ndef parse_dm(raw):\n    return raw.strip().lower()\n\n\ndef classify(text):\n    category = \"purchase_intent\" if (\"price\" in text or \"cost\" in text) else \"question\"\n    return {\"category\": category, \"text\": text}\n\n\ndef format_response(classified):\n    return f\"[{classified['category'].upper()}] {classified['text']}\"\n\n\npipeline = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\nprint(pipeline.invoke(\"  What's the COST?  \"))\n# Expected: [PURCHASE_INTENT] what's the cost?\n"
+      }
+    },
+    {
+      "id": "c8",
+      "title": "Vector Databases from Embeddings to Applications",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/vector-databases-embeddings-applications/",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 4,
+      "why": "Pinecone and Qdrant hands-on. Semantic search, metadata filtering, hybrid search. Foundation for RAG in both products.",
+      "pythonChallenge": {
+        "level": 8,
+        "difficulty": "Expert",
+        "title": "Build an In-Memory Vector Store (Mini Qdrant)",
+        "question": "Before setting up real Qdrant in Docker, prove you understand what it does internally by building a minimal version yourself: a collection that stores vectors + payload metadata, and supports similarity search with metadata filtering (hybrid search).\n\nYour task:\nBuild a class  VectorStore  that:\n  1.  add(self, id, vector, payload)  — stores one point: {id, vector, payload}\n  2.  search(self, query_vector, top_k=3, filter_fn=None)  —\n        computes cosine similarity between query_vector and every stored vector\n        if filter_fn is given, first drops any point where filter_fn(point['payload']) is False (this is Qdrant's payload filtering)\n        returns the top_k remaining points sorted by similarity score, highest first\n\nTest it with 5 real-style NuraKnect DM examples (toy embeddings), then:\n  a. Run search() with no filter — get the top 3 overall\n  b. Run search() with  filter_fn=lambda p: p['category'] == 'purchase_intent' — get the top matches restricted to that category only\n\nThis is exactly the hybrid search pattern (semantic similarity + metadata filter) you will use in real Qdrant for NuraKnect.",
+        "hint": "Reuse cosine_similarity from the RAG challenge (Course 6) — the math does not change just because you're calling it a 'vector database' now. Filter BEFORE ranking, not after, so top_k is computed only over the allowed subset.",
+        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\nclass VectorStore:\n    def __init__(self):\n        self.points = []\n\n    def add(self, id, vector, payload):\n        self.points.append({\"id\": id, \"vector\": vector, \"payload\": payload})\n\n    def search(self, query_vector, top_k=3, filter_fn=None):\n        candidates = self.points\n        if filter_fn is not None:\n            candidates = [p for p in candidates if filter_fn(p[\"payload\"])]\n        scored = [\n            {**p, \"score\": cosine_similarity(query_vector, p[\"vector\"])}\n            for p in candidates\n        ]\n        scored.sort(key=lambda p: p[\"score\"], reverse=True)\n        return scored[:top_k]\n\n\nstore = VectorStore()\nstore.add(\"dm1\", [0.9, 0.1, 0.0], {\"category\": \"purchase_intent\", \"text\": \"How much is it?\"})\nstore.add(\"dm2\", [0.1, 0.9, 0.0], {\"category\": \"question\", \"text\": \"Do you ship to India?\"})\nstore.add(\"dm3\", [0.85, 0.15, 0.0], {\"category\": \"purchase_intent\", \"text\": \"What's the pricing?\"})\nstore.add(\"dm4\", [0.0, 0.1, 0.9], {\"category\": \"complaint\", \"text\": \"My order never arrived\"})\nstore.add(\"dm5\", [0.88, 0.1, 0.05], {\"category\": \"purchase_intent\", \"text\": \"Cost for annual plan?\"})\n\nquery = [0.88, 0.12, 0.0]  # embedding for: \"what's the cost?\"\n\nprint(\"-- no filter --\")\nfor r in store.search(query, top_k=3):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n\nprint(\"-- filtered to purchase_intent --\")\nfor r in store.search(query, top_k=3, filter_fn=lambda p: p[\"category\"] == \"purchase_intent\"):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n"
+      }
+    }
+  ],
+  "quiz": {
+    "status": "locked",
+    "unlockCondition": "Complete all 4 courses in this layer",
+    "passingScore": 70,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "conceptual",
+        "question": "Explain the difference between semantic search and keyword search. Give a real example from NuraKnect where semantic search gives a better result than keyword search.",
+        "hint": "Think about what embeddings capture that keywords miss"
+      },
+      {
+        "id": "q2",
+        "type": "architectural",
+        "question": "Design the complete RAG pipeline for NuraKnect conversation memory. What gets embedded, how is it stored, what triggers retrieval, and what gets passed to the LLM?",
+        "hint": "Think about chunking strategy and retrieval trigger"
+      },
+      {
+        "id": "q3",
+        "type": "practical",
+        "question": "Write the Python code to make a real API call to OpenAI or Anthropic that classifies one Instagram DM and returns structured JSON. Use your PromptTemplate class from Layer 1. Show error handling.",
+        "hint": "Use the openai or anthropic Python SDK directly"
+      },
+      {
+        "id": "q4",
+        "type": "conceptual",
+        "question": "When would you use RAG versus fine-tuning for Cuva AI? Give one specific use case where RAG is better and one where fine-tuning is better. Explain why each time.",
+        "hint": "Think about data freshness, cost, and accuracy"
+      },
+      {
+        "id": "q5",
+        "type": "architectural",
+        "question": "Your Qdrant vector database is returning irrelevant results for some NuraKnect DMs. Walk through 3 things you would investigate and exactly how you would fix each one.",
+        "hint": "Think about chunking, embedding model, metadata filter"
+      }
+    ]
+  }
+}

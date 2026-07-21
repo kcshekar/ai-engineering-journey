@@ -6,7 +6,7 @@ import { progress } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { Layers } from "lucide-react"
 import ProgressBar from "@/components/ProgressBar"
-import layersData from "@/data/roadmaps/ai-engineering/layers.json"
+import { getRoadmapLayers } from "@/lib/roadmap-data"
 import metaData from "@/data/roadmaps/ai-engineering/meta.json"
 import type { LayerProgressEntry } from "@/types"
 
@@ -36,7 +36,7 @@ export default async function LayersPage() {
     }
   }
 
-  const layers = layersData.layers
+  const layers = getRoadmapLayers("ai-engineering")
   const currentLayerId = metaData.currentLayer
 
   return (

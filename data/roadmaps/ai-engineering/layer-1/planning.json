@@ -1,0 +1,35 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 1,
+      "focus": "Neural Networks",
+      "courses": [
+        "c1"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Write a one paragraph explanation of backpropagation in your own words",
+      "pythonTask": "20 minutes daily — rewrite one JS function you know in Python"
+    },
+    {
+      "week": 2,
+      "focus": "Transformers & LLMs",
+      "courses": [
+        "c2",
+        "c3"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Make your first raw OpenAI API call in Python. No framework. Just the API.",
+      "pythonTask": "20 minutes daily — async/await patterns in Python vs Node.js"
+    },
+    {
+      "week": 3,
+      "focus": "Prompt Engineering",
+      "courses": [
+        "c4"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Build NuraKnect's first DM intent classifier using raw LLM API. Classify: complaint, question, purchase intent, greeting.",
+      "pythonTask": "20 minutes daily — Pydantic v2 models for structured LLM output"
+    }
+  ]
+}

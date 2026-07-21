@@ -4,8 +4,8 @@ import { db } from "@/lib/db"
 import { progress } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import LayerDetailClient from "@/components/LayerDetailClient"
-import layersData from "@/data/roadmaps/ai-engineering/layers.json"
-import type { LayerProgressEntry, RoadmapProgress, Layer } from "@/types"
+import { getRoadmapLayers } from "@/lib/roadmap-data"
+import type { LayerProgressEntry, RoadmapProgress } from "@/types"
 
 interface Props { params: Promise<{ id: string }> }
 
@@ -13,7 +13,7 @@ export default async function LayerDetailPage({ params }: Props) {
   const { id } = await params
   const layerId = parseInt(id)
 
-  const layer = (layersData.layers as Layer[]).find((l) => l.id === layerId)
+  const layer = getRoadmapLayers("ai-engineering").find((l) => l.id === layerId)
   if (!layer) notFound()
 
   const session = await auth()

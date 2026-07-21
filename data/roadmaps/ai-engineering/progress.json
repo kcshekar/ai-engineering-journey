@@ -6,6 +6,15 @@
   "currentWeek": 1,
   "layerProgress": {
     "1": {
+      "started": true,
+      "completed": true,
+      "coursesCompleted": [],
+      "quizScore": 66,
+      "notes": "",
+      "startedDate": "28/04/2026",
+      "completedDate": "22/07/2026"
+    },
+    "2": {
       "started": false,
       "completed": false,
       "coursesCompleted": [],

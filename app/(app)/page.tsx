@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import { progress, activity } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import DashboardClient from "@/components/DashboardClient"
-import layersData from "@/data/roadmaps/ai-engineering/layers.json"
+import { getRoadmapLayers } from "@/lib/roadmap-data"
 import metaData from "@/data/roadmaps/ai-engineering/meta.json"
 import type { LayerProgressEntry, ActivityDay, RoadmapData, RoadmapMeta } from "@/types"
 
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
 
   const roadmap: RoadmapData = {
     meta: metaData as RoadmapMeta,
-    layers: layersData.layers as RoadmapData["layers"],
+    layers: getRoadmapLayers("ai-engineering"),
     progress: {
       userId,
       roadmapId: "ai-engineering",
