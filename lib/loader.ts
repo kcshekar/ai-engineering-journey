@@ -18,6 +18,21 @@ export function isQuizUnlocked(layer: Layer, progress: RoadmapProgress): boolean
   return lp.coursesCompleted.length === layer.courses.length
 }
 
+export type LayerStatus = "completed" | "in-progress" | "not-started"
+
+export function getLayerStatus(
+  layer: Layer,
+  layerProgress: Record<string, LayerProgressEntry> | undefined
+): LayerStatus {
+  const lp = layerProgress?.[String(layer.id)]
+  const completedCount = lp?.coursesCompleted.length ?? 0
+  if (lp?.completed || (layer.courses.length > 0 && completedCount === layer.courses.length)) {
+    return "completed"
+  }
+  if (lp?.started || completedCount > 0) return "in-progress"
+  return "not-started"
+}
+
 export function getLayerDuration(layer: Layer): number {
   const [start, end] = layer.weeks.split("-").map(Number)
   return (end - start + 1) * 7
@@ -87,6 +102,26 @@ export function getCourseTimeline(
   return suggested
     ? { ...suggested, isCustom: false }
     : { startDate: null, endDate: null, isCustom: false }
+}
+
+export function getEffectiveCurrentLayer(
+  layers: Layer[],
+  layerProgress: Record<string, LayerProgressEntry> | undefined
+): Layer {
+  const sorted = [...layers].sort((a, b) => a.id - b.id)
+  const firstIncomplete = sorted.find((l) => getLayerStatus(l, layerProgress) !== "completed")
+  return firstIncomplete ?? sorted[sorted.length - 1]
+}
+
+export function getCurrentWeekNum(layer: Layer, lp: LayerProgressEntry | undefined): number {
+  const weeks = layer.weeklyPlan.map((w) => w.week)
+  const minWeek = Math.min(...weeks)
+  const maxWeek = Math.max(...weeks)
+  if (!lp?.startedDate) return minWeek
+  const start = new Date(lp.startedDate)
+  const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000)
+  const weekOffset = Math.floor(diffDays / 7)
+  return Math.min(maxWeek, Math.max(minWeek, minWeek + weekOffset))
 }
 
 export function calculateOverallProgress(layers: Layer[], progress: RoadmapProgress): number {

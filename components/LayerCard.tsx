@@ -125,6 +125,16 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
   }, [])
   useEffect(() => { refreshMetas() }, [refreshMetas])
 
+  const openCoursePanel = useCallback((course: typeof layer.courses[0]) => {
+    setOpenCourse(course)
+    if (!layerProgress?.started) {
+      onSaveDates(layer.id, {
+        started: true,
+        startedDate: layerProgress?.startedDate ?? new Date().toISOString().split("T")[0],
+      })
+    }
+  }, [layer.id, layerProgress?.started, layerProgress?.startedDate, onSaveDates])
+
   return (
     <div className="layer-view">
       <div className="layer-header">
@@ -232,8 +242,8 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
                   className="course-info course-info-clickable"
                   role="button"
                   tabIndex={0}
-                  onClick={() => setOpenCourse(course)}
-                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpenCourse(course) } }}
+                  onClick={() => openCoursePanel(course)}
+                  onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openCoursePanel(course) } }}
                 >
                   <div className="course-title">{course.title}</div>
                   <div className="course-meta">
@@ -255,7 +265,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
                 </div>
 
                 <div className="course-actions">
-                  <button className="course-notes-btn" onClick={() => setOpenCourse(course)} title="Notes & Practice">
+                  <button className="course-notes-btn" onClick={() => openCoursePanel(course)} title="Notes & Practice">
                     <FileText size={14} />
                   </button>
                   <a href={course.url} className="course-link" target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>

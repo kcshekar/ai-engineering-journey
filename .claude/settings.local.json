@@ -46,7 +46,9 @@
       "Bash(curl -s http://localhost:3000/ -w \"\\\\nHTTP %{http_code}\\\\n\")",
       "Bash(git ls-tree *)",
       "Bash(git add *)",
-      "Bash(git commit -m 'restore: add pythonChallenge data for all 4 courses in layer-1 *)"
+      "Bash(git commit -m 'restore: add pythonChallenge data for all 4 courses in layer-1 *)",
+      "WebSearch",
+      "Artifact"
     ]
   }
 }

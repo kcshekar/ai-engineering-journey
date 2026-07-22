@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm"
 import { Layers } from "lucide-react"
 import ProgressBar from "@/components/ProgressBar"
 import { getRoadmapLayers } from "@/lib/roadmap-data"
-import metaData from "@/data/roadmaps/ai-engineering/meta.json"
+import { getLayerStatus, getEffectiveCurrentLayer } from "@/lib/loader"
 import type { LayerProgressEntry } from "@/types"
 
 export default async function LayersPage() {
@@ -37,7 +37,7 @@ export default async function LayersPage() {
   }
 
   const layers = getRoadmapLayers("ai-engineering")
-  const currentLayerId = metaData.currentLayer
+  const currentLayerId = getEffectiveCurrentLayer(layers, layerProgressMap).id
 
   return (
     <div className="layers-overview">
@@ -47,6 +47,7 @@ export default async function LayersPage() {
           const lp = layerProgressMap[String(layer.id)]
           const completed = lp?.coursesCompleted.length ?? 0
           const isCurrent = layer.id === currentLayerId
+          const status = getLayerStatus(layer, layerProgressMap)
           return (
             <Link
               key={layer.id}
@@ -62,11 +63,11 @@ export default async function LayersPage() {
                 </div>
               </div>
               <div className="layer-row-meta">
-                <span className={`layer-row-badge ${layer.status.replace("-", "-")}`}>
-                  {layer.status.replace("-", " ")}
+                <span className={`layer-row-badge ${status}`}>
+                  {status.replace("-", " ")}
                 </span>
                 {isCurrent && (
-                  <span className="layer-row-badge in-progress" style={{ background: "var(--accent-dim)", color: "var(--accent)" }}>
+                  <span className="layer-row-badge current-badge">
                     Current
                   </span>
                 )}

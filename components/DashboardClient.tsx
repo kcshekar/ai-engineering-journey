@@ -9,7 +9,7 @@ import StreakGraph from "./StreakGraph"
 import { api } from "@/lib/api-client"
 import {
   getCurrentLayer, getCurrentWeek, getCompletedCount,
-  calculateOverallProgress, getLayerDeadline, getDeadlineStatus,
+  calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
 } from "@/lib/loader"
 import type { RoadmapData, ActivityDay, CourseMetaEntry, LayerProgressEntry } from "@/types"
 
@@ -35,6 +35,7 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
   const currentWeekPlan = getCurrentWeek(currentLayer, roadmap.progress.currentWeek)
   const overallPercent = calculateOverallProgress(roadmap.layers, roadmap.progress)
   const completedCount = getCompletedCount(currentLayer, roadmap.progress)
+  const currentLayerStatus = getLayerStatus(currentLayer, roadmap.progress.layerProgress)
 
   const currentLayerProgress = roadmap.progress.layerProgress[String(currentLayer.id)] as LayerProgressEntry | undefined
   const currentDeadline  = getLayerDeadline(currentLayer, currentLayerProgress)
@@ -119,8 +120,8 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
             <svg className="progress-ring-svg" viewBox="0 0 144 144">
               <defs>
                 <linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#22C55E" />
-                  <stop offset="100%" stopColor="#06B6D4" />
+                  <stop offset="0%" style={{ stopColor: "var(--accent)" }} />
+                  <stop offset="100%" style={{ stopColor: "var(--cyan)" }} />
                 </linearGradient>
               </defs>
               <circle className="progress-ring-bg" cx="72" cy="72" r="64" />
@@ -147,7 +148,9 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
               <div className="current-layer-name">Layer {currentLayer.id}: {currentLayer.title}</div>
               <div className="current-layer-desc">{currentLayer.description}</div>
             </div>
-            <div className="current-layer-badge">{currentLayer.status}</div>
+            <div className={`current-layer-badge status-${currentLayerStatus}`}>
+              {currentLayerStatus.replace("-", " ")}
+            </div>
           </div>
           <ProgressBar label="Course progress" value={completedCount} max={currentLayer.courses.length} />
           {deadlineStatus.status !== "none" && (

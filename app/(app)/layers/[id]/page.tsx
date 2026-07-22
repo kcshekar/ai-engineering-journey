@@ -5,6 +5,7 @@ import { progress } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import LayerDetailClient from "@/components/LayerDetailClient"
 import { getRoadmapLayers } from "@/lib/roadmap-data"
+import { getCurrentWeekNum } from "@/lib/loader"
 import type { LayerProgressEntry, RoadmapProgress } from "@/types"
 
 interface Props { params: Promise<{ id: string }> }
@@ -46,7 +47,7 @@ export default async function LayerDetailPage({ params }: Props) {
     roadmapId: "ai-engineering",
     overallProgress: 0,
     currentLayer: layerId,
-    currentWeek: 1,
+    currentWeek: getCurrentWeekNum(layer, layerProgressMap[String(layerId)]),
     layerProgress: layerProgressMap,
     weeklyCheckins: [],
     totalHoursSpent: 0,

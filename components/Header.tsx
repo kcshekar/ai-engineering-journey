@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { motion } from "framer-motion"
 import { LayoutDashboard, Layers, FileText, FolderGit2, LogOut } from "lucide-react"
+import ThemeToggle from "./ThemeToggle"
 
 const navItems = [
   { href: "/",         label: "Dashboard", icon: LayoutDashboard },
@@ -54,6 +55,7 @@ export default function Header() {
             <LogOut />
             <span className="nav-btn-label">Sign out</span>
           </button>
+          <ThemeToggle />
         </nav>
       </div>
     </motion.header>

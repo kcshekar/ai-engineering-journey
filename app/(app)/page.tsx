@@ -5,6 +5,7 @@ import { progress, activity } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import DashboardClient from "@/components/DashboardClient"
 import { getRoadmapLayers } from "@/lib/roadmap-data"
+import { getEffectiveCurrentLayer, getCurrentWeekNum } from "@/lib/loader"
 import metaData from "@/data/roadmaps/ai-engineering/meta.json"
 import type { LayerProgressEntry, ActivityDay, RoadmapData, RoadmapMeta } from "@/types"
 
@@ -48,15 +49,19 @@ export default async function DashboardPage() {
     }
   }
 
+  const layers = getRoadmapLayers("ai-engineering")
+  const effectiveCurrentLayer = getEffectiveCurrentLayer(layers, layerProgressMap)
+  const currentWeek = getCurrentWeekNum(effectiveCurrentLayer, layerProgressMap[String(effectiveCurrentLayer.id)])
+
   const roadmap: RoadmapData = {
     meta: metaData as RoadmapMeta,
-    layers: getRoadmapLayers("ai-engineering"),
+    layers,
     progress: {
       userId,
       roadmapId: "ai-engineering",
       overallProgress: 0,
-      currentLayer: metaData.currentLayer,
-      currentWeek: 1,
+      currentLayer: effectiveCurrentLayer.id,
+      currentWeek,
       layerProgress: layerProgressMap,
       weeklyCheckins: [],
       totalHoursSpent: 0,
