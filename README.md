@@ -125,3 +125,7 @@ See [MIGRATION_COMPLETE.md](./MIGRATION_COMPLETE.md) for detailed architecture, 
 ## Author
 
 **kcshekar** - Senior Full-Stack Engineer transitioning into Applied AI Engineering. Currently building NuraKnectAI.
+
+
+Resume this session with:
+claude --resume 0d48df86-8508-493e-9f9e-8e3bb19f5f81

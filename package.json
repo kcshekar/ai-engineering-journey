@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck",
+    "migrate": "drizzle-kit push"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

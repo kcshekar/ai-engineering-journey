@@ -13,4 +13,4 @@ next-env.d.ts
 /drizzle
 node_modules
 .agents
-.claude
+.claude/settings.local.json

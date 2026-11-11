@@ -24,7 +24,6 @@ type: project
 - `exercises` — Python exercise code per user/layer/course
 
 ## Auth
-- Default login: korpolechandrashekar@gmail.com / learning2024
 - Architecture ready for multi-user (swap hardcoded USERS array with DB lookup)
 - **Why:** Multi-user planned but not yet needed
 
