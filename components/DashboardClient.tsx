@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar"
 import StreakGraph from "./StreakGraph"
 import { api } from "@/lib/api-client"
 import {
-  getCurrentLayer, getCurrentWeek, getCompletedCount,
+  getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, isLayerWorkDone,
   calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
 } from "@/lib/loader"
 import type { RoadmapData, ActivityDay, CourseMetaEntry, LayerProgressEntry } from "@/types"
@@ -64,8 +64,9 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
         if (!lp.started) { lp.started = true; lp.startedDate = new Date().toISOString().split("T")[0] }
       }
       const layer = prev.layers.find((l) => l.id === layerId)
-      if (layer && lp.coursesCompleted.length === layer.courses.length) {
-        lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0]
+      if (layer && isLayerWorkDone(layer, lp.coursesCompleted)) {
+        // Keep the first completion date when an optional or extra pick-group item is toggled.
+        if (!lp.completed) { lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0] }
       } else {
         lp.completed = false; lp.completedDate = null
       }
@@ -152,7 +153,7 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
               {currentLayerStatus.replace("-", " ")}
             </div>
           </div>
-          <ProgressBar label="Course progress" value={completedCount} max={currentLayer.courses.length} />
+          <ProgressBar label="Course progress" value={completedCount} max={getRequiredCount(currentLayer)} />
           {deadlineStatus.status !== "none" && (
             <div className={`deadline-badge-dash deadline-${deadlineStatus.status}`}>
               {deadlineStatus.status === "overdue"

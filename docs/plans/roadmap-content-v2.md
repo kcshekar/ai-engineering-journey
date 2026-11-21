@@ -110,8 +110,9 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
   - every `planning.json` week references real ids
   - multiple-choice questions: `correct` is in range, the correct answer isn't always in the same position, and it isn't usually the longest option (the same idea as AI Engineering from Scratch's `check_quiz_bias.py`)
   Then make `verify` run `tsc --noEmit && node scripts/check-content.mjs`.
-- [ ] T3 Update `lib/loader.ts` so that layer completion, the quiz unlock and overall progress count only core items. Pick groups count as 1. Missing `track` defaults to core, so layers 1–2 behave exactly as they do now. Add `getLayerHours()`.
+- [x] T3 Update `lib/loader.ts` so that layer completion, the quiz unlock and overall progress count only core items. Pick groups count as 1. Missing `track` defaults to core, so layers 1–2 behave exactly as they do now. Add `getLayerHours()`.
 - [ ] T4 Run a read-only check query against dev before and after: `SELECT layer_id, courses_completed FROM progress;` The output must be unchanged.
+  - Status 2026-11-22: blocked. There is no `.env.local` on this machine, so dev Turso is unreachable and the "before" snapshot could not be taken ahead of T3. T3 writes nothing to the DB, and an old-vs-new loader comparison over every completed-id subset of layers 1–2 gave 0 differences in 6144 comparisons. When `.env.local` exists, run the query once to confirm the rows look sane (every id is in its layer).
 - Exit:
   - `npm run verify` is green, with the content check passing on layers 1–2.
   - The check query output is the same before and after.
@@ -150,6 +151,7 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
 
 ### Phase 3: Retrofit layers 1–2 (R4)
 - Entry: Phase 2 exit met.
+- Note from the T3 review: `getLayerStatus` trusts the stored `completed` flag, but the quiz unlock and the bars recompute from items. A new core item added to an already-completed layer leaves it "completed" with the quiz locked. Decide in T1/T2: either clear `completed` when the required count grows, or accept it.
 - [ ] T1 Layer 1: add the new fields to the existing items, keeping their ids. Add:
   - Must-know terms: token, context window, sampling, embedding, prompt vs context.
   - Context engineering items (core).

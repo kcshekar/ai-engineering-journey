@@ -6,7 +6,7 @@ import { Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play, Pencil, 
 import ProgressBar from "./ProgressBar"
 import CoursePanel from "./CoursePanel"
 import { api } from "@/lib/api-client"
-import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum } from "@/lib/loader"
+import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum, countDoneUnits, getRequiredCount } from "@/lib/loader"
 import type { Layer, RoadmapProgress, LayerProgressEntry, CourseMetaEntry } from "@/types"
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -145,8 +145,8 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
         <div className="layer-progress-bar">
           <ProgressBar
             label="Courses completed"
-            value={layerProgress?.coursesCompleted.length ?? 0}
-            max={layer.courses.length}
+            value={countDoneUnits(layer, layerProgress?.coursesCompleted ?? [])}
+            max={getRequiredCount(layer)}
           />
         </div>
       </div>

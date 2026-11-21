@@ -7,7 +7,7 @@ import { eq, and } from "drizzle-orm"
 import { Layers } from "lucide-react"
 import ProgressBar from "@/components/ProgressBar"
 import { getRoadmapLayers } from "@/lib/roadmap-data"
-import { getLayerStatus, getEffectiveCurrentLayer } from "@/lib/loader"
+import { getLayerStatus, getEffectiveCurrentLayer, countDoneUnits, getRequiredCount } from "@/lib/loader"
 import type { LayerProgressEntry } from "@/types"
 
 export default async function LayersPage() {
@@ -45,7 +45,7 @@ export default async function LayersPage() {
       <div className="layers-grid">
         {layers.map((layer) => {
           const lp = layerProgressMap[String(layer.id)]
-          const completed = lp?.coursesCompleted.length ?? 0
+          const completed = countDoneUnits(layer, lp?.coursesCompleted ?? [])
           const isCurrent = layer.id === currentLayerId
           const status = getLayerStatus(layer, layerProgressMap)
           return (
@@ -59,7 +59,7 @@ export default async function LayersPage() {
                 <div className="layer-row-title">{layer.title}</div>
                 <div className="layer-row-desc">{layer.description}</div>
                 <div style={{ marginTop: 10, maxWidth: 240 }}>
-                  <ProgressBar label="Courses" value={completed} max={layer.courses.length} />
+                  <ProgressBar label="Courses" value={completed} max={getRequiredCount(layer)} />
                 </div>
               </div>
               <div className="layer-row-meta">

@@ -193,6 +193,10 @@ for (const roadmap of fs.readdirSync(root, { withFileTypes: true }).filter((e) =
     for (const g of pickGroupIds) {
       if (!courses.some((c) => isObj(c) && c.pickGroup === g)) errors.push(`${where}: pickGroup "${g}" has no items`)
     }
+    // lib/loader.ts never completes a layer with no core item, so its quiz would never unlock.
+    if (!courses.some((c) => isObj(c) && (c.track ?? "core") === "core")) {
+      errors.push(`${where}: layer needs at least one core item, or it can never be completed`)
+    }
 
     const weeks = isObj(planning) ? list(planning.weeklyPlan, `${where} planning`, "weeklyPlan") : []
     for (const week of weeks) {

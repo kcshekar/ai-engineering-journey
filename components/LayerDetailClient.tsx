@@ -5,7 +5,7 @@ import LayerCard from "./LayerCard"
 import WeeklyPlan from "./WeeklyPlan"
 import QuizSection from "./QuizSection"
 import { api } from "@/lib/api-client"
-import { getCompletedCount, isQuizUnlocked } from "@/lib/loader"
+import { getCompletedCount, getRequiredCount, isLayerWorkDone, isQuizUnlocked } from "@/lib/loader"
 import type { Layer, RoadmapProgress, LayerProgressEntry } from "@/types"
 
 interface Props {
@@ -37,8 +37,9 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
         lp.coursesCompleted.push(courseId)
         if (!lp.started) { lp.started = true; lp.startedDate = new Date().toISOString().split("T")[0] }
       }
-      if (lp.coursesCompleted.length === layer.courses.length) {
-        lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0]
+      if (isLayerWorkDone(layer, lp.coursesCompleted)) {
+        // Keep the first completion date when an optional or extra pick-group item is toggled.
+        if (!lp.completed) { lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0] }
       } else {
         lp.completed = false; lp.completedDate = null
       }
@@ -46,7 +47,7 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
       return np
     })
     api.logActivity("complete")
-  }, [layer.courses.length])
+  }, [layer])
 
   const handleSaveDates = useCallback((layerId: number, patch: Record<string, unknown>) => {
     api.saveLayerProgress(layerId, patch)
@@ -94,7 +95,7 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
         quiz={layer.quiz}
         isUnlocked={quizUnlocked}
         completedCount={completedCount}
-        totalCourses={layer.courses.length}
+        totalCourses={getRequiredCount(layer)}
       />
     </div>
   )

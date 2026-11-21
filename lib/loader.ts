@@ -8,14 +8,74 @@ export function getCurrentWeek(layer: Layer, weekNum: number): WeekPlan | undefi
   return layer.weeklyPlan.find((w) => w.week === weekNum) ?? layer.weeklyPlan[0]
 }
 
+// Required units for completion (decision 0001): each core item is one unit, and a
+// pick group with at least one core item is one unit, done when any of its items is done.
+// Optional items never count. A missing track means core, so older layers behave as before.
+function getRequiredUnits(layer: Layer): string[][] {
+  const units: string[][] = []
+  const groups = new Map<string, string[]>()
+  const coreGroups = new Set<string>()
+  for (const item of layer.courses) {
+    const isCore = (item.track ?? "core") === "core"
+    if (item.pickGroup) {
+      if (!groups.has(item.pickGroup)) {
+        const ids: string[] = []
+        groups.set(item.pickGroup, ids)
+        units.push(ids)
+      }
+      groups.get(item.pickGroup)!.push(item.id)
+      if (isCore) coreGroups.add(item.pickGroup)
+    } else if (isCore) {
+      units.push([item.id])
+    }
+  }
+  return units.filter((ids) => {
+    const group = layer.courses.find((c) => c.id === ids[0])?.pickGroup
+    return group ? coreGroups.has(group) : true
+  })
+}
+
+export function countDoneUnits(layer: Layer, completedIds: string[]): number {
+  const done = new Set(completedIds)
+  return getRequiredUnits(layer).filter((ids) => ids.some((id) => done.has(id))).length
+}
+
+export function getRequiredCount(layer: Layer): number {
+  return getRequiredUnits(layer).length
+}
+
 export function getCompletedCount(layer: Layer, progress: RoadmapProgress): number {
-  return progress.layerProgress[String(layer.id)]?.coursesCompleted.length ?? 0
+  return countDoneUnits(layer, progress.layerProgress[String(layer.id)]?.coursesCompleted ?? [])
+}
+
+export function isLayerWorkDone(layer: Layer, completedIds: string[]): boolean {
+  const required = getRequiredCount(layer)
+  return required > 0 && countDoneUnits(layer, completedIds) === required
 }
 
 export function isQuizUnlocked(layer: Layer, progress: RoadmapProgress): boolean {
   const lp = progress.layerProgress[String(layer.id)]
   if (!lp) return false
-  return lp.coursesCompleted.length === layer.courses.length
+  return isLayerWorkDone(layer, lp.coursesCompleted)
+}
+
+export function getLayerHours(layer: Layer): { required: number; optional: number } {
+  let required = 0
+  let optional = 0
+  const seenGroups = new Set<string>()
+  for (const item of layer.courses) {
+    if (!item.hours) continue
+    if ((item.track ?? "core") === "optional") {
+      optional += item.hours
+    } else if (item.pickGroup) {
+      // Count a pick group once, at its first core member's hours, since only one is needed.
+      if (!seenGroups.has(item.pickGroup)) required += item.hours
+      seenGroups.add(item.pickGroup)
+    } else {
+      required += item.hours
+    }
+  }
+  return { required, optional }
 }
 
 export type LayerStatus = "completed" | "in-progress" | "not-started"
@@ -25,11 +85,11 @@ export function getLayerStatus(
   layerProgress: Record<string, LayerProgressEntry> | undefined
 ): LayerStatus {
   const lp = layerProgress?.[String(layer.id)]
-  const completedCount = lp?.coursesCompleted.length ?? 0
-  if (lp?.completed || (layer.courses.length > 0 && completedCount === layer.courses.length)) {
+  const completedIds = lp?.coursesCompleted ?? []
+  if (lp?.completed || isLayerWorkDone(layer, completedIds)) {
     return "completed"
   }
-  if (lp?.started || completedCount > 0) return "in-progress"
+  if (lp?.started || completedIds.length > 0) return "in-progress"
   return "not-started"
 }
 
@@ -128,8 +188,8 @@ export function calculateOverallProgress(layers: Layer[], progress: RoadmapProgr
   let total = 0
   let completed = 0
   layers.forEach((layer) => {
-    total += layer.courses.length
-    completed += progress.layerProgress[String(layer.id)]?.coursesCompleted.length ?? 0
+    total += getRequiredCount(layer)
+    completed += getCompletedCount(layer, progress)
   })
   return total > 0 ? Math.round((completed / total) * 100) : 0
 }
