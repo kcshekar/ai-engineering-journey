@@ -9,7 +9,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck",
+    "verify": "npm run typecheck && node scripts/check-content.mjs",
     "migrate": "drizzle-kit push"
   },
   "dependencies": {

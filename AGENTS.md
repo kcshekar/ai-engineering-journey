@@ -4,7 +4,7 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 
 ## Commands
 - Dev: `npm run dev` (Next.js with Turbopack) → http://localhost:3000
-- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, about 4 s). There are no tests or lint yet.
+- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, quiz answers). About 5 s. There are no unit tests or lint yet.
 - Build: `npm run build`
 - Migrate: `npm run migrate` (`drizzle-kit push`). It pushes `lib/db/schema.ts` straight to Turso and writes no migration files (`/drizzle` is gitignored).
 - DB browser: `npm run db:studio`

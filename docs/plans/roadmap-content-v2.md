@@ -103,7 +103,7 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
   - pythonChallenge: tests, hints
   - quiz question: options, correct, explanation, stage
   Add a comment saying "course = any learning item".
-- [ ] T2 Add `scripts/check-content.mjs`, a Node script with no new dependencies. It checks:
+- [x] T2 Add `scripts/check-content.mjs`, a Node script with no new dependencies. It checks:
   - every item id is unique across the roadmap
   - `prereqs` and `pickGroup` point to ids that exist
   - enum values are valid
@@ -216,6 +216,7 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
 ## Parking lot
 
 - Rotate the login password that is in git history (still the "Now" item, and yours to do).
+- The Stop hook `.claude/hooks/verify.sh` (playbook-managed) runs only `npx tsc --noEmit`, and only when `.ts` or `.tsx` files change. It does not run the content check when `layer.json` changes. Consider making it run `npm run verify`.
 - `npm audit` (2026-11-22, after `npm ci` on Node 18.19.1) reports 16 vulnerabilities: 4 critical, 6 high, 6 moderate. One of them is sharp/libvips (GHSA-f88m-g3jw-g9cj). Triage them in a separate task.
 - Remove the `*.bak` files.
 - The roadmap.sh research agent left raw files in `/tmp/r.json` and `/tmp/all.md`. Delete them when convenient.
