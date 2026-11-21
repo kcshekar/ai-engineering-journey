@@ -1,7 +1,7 @@
 ---
 type: plan
 title: Roadmap content v2 (structure, then new topics)
-status: draft
+status: approved
 size: M
 updated: 2026-11-22
 covers:
@@ -97,7 +97,7 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
 
 ### Phase 1: Content model and checks (no UI change)
 - Entry: plan and decision 0001 approved. Working tree clean.
-- [ ] T1 Extend `types/index.ts` with the optional fields above:
+- [x] T1 Extend `types/index.ts` with the optional fields above:
   - item: kind, price, recommended, hours, track, stage, pickGroup, prereqs, skills, keep
   - layer: mustKnow (with misconception), stageGoals, pickGroups, outcomes, startHere, portfolioProof
   - pythonChallenge: tests, hints
@@ -216,6 +216,7 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
 ## Parking lot
 
 - Rotate the login password that is in git history (still the "Now" item, and yours to do).
+- `npm audit` (2026-11-22, after `npm ci` on Node 18.19.1) reports 16 vulnerabilities: 4 critical, 6 high, 6 moderate. One of them is sharp/libvips (GHSA-f88m-g3jw-g9cj). Triage them in a separate task.
 - Remove the `*.bak` files.
 - The roadmap.sh research agent left raw files in `/tmp/r.json` and `/tmp/all.md`. Delete them when convenient.
 - Ideas not chosen this time:

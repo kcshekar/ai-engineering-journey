@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Now
-- Repo is on the playbook standard (AGENTS.md, verify hook, git hooks).
-- Next: rotate the login password that is in git history (`lib/auth.ts` and an old memory file).
+- Active plan: [Roadmap content v2](plans/roadmap-content-v2.md). Phase 1, T1 is done (optional content-model types).
+- Next task: Phase 1, T2: add `scripts/check-content.mjs` and run it in `verify`.
+- Still open (yours): rotate the login password that is in git history (`lib/auth.ts` and an old memory file).
 
 ## Next
 - README is out of date: it refers to `webapp/` and `roadmaps/` paths and has a leftover "Resume this session" line.
