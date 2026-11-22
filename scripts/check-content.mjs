@@ -191,7 +191,12 @@ for (const roadmap of fs.readdirSync(root, { withFileTypes: true }).filter((e) =
     }
 
     for (const g of pickGroupIds) {
-      if (!courses.some((c) => isObj(c) && c.pickGroup === g)) errors.push(`${where}: pickGroup "${g}" has no items`)
+      const members = courses.filter((c) => isObj(c) && c.pickGroup === g)
+      if (!members.length) errors.push(`${where}: pickGroup "${g}" has no items`)
+      // The layer page shows a pick group as one card inside one stage section.
+      if (new Set(members.map((c) => c.stage)).size > 1) errors.push(`${where}: pickGroup "${g}" members must share one stage`)
+      if (members.some((c) => (c.track ?? "core") !== "core")) errors.push(`${where}: pickGroup "${g}" members must all be core (optional items are not grouped on the page)`)
+      if (new Set(members.map((c) => c.kind === "project")).size > 1) errors.push(`${where}: pickGroup "${g}" cannot mix projects with other items`)
     }
     // lib/loader.ts never completes a layer with no core item, so its quiz would never unlock.
     if (!courses.some((c) => isObj(c) && (c.track ?? "core") === "core")) {

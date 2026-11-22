@@ -24,10 +24,27 @@
         "level": 1,
         "difficulty": "Beginner",
         "title": "Implement a Single Neuron",
-        "question": "A neuron takes several inputs, multiplies each by a weight, sums them all up, adds a bias, and squashes the result through an activation function to produce an output between 0 and 1.\n\nYour task:\nWrite a function  neuron_forward(inputs, weights, bias)  that:\n  1. Computes:  total = (input[0]*weight[0]) + (input[1]*weight[1]) + ... + bias\n  2. Applies sigmoid activation:  output = 1 / (1 + e^(-total))\n  3. Returns the final output value\n\nTest it with:\n  inputs  = [1.0, 0.5, -1.0]\n  weights = [0.4, 0.8,  0.2]\n  bias    = 0.3\n\nExpected output: 0.5744\n\nStarter code is provided below. Fill in the blanks.",
+        "question": "A neuron takes several inputs, multiplies each by a weight, sums them all up, adds a bias, and squashes the result through an activation function to produce an output between 0 and 1.\n\nYour task:\nWrite a function  neuron_forward(inputs, weights, bias)  that:\n  1. Computes:  total = (input[0]*weight[0]) + (input[1]*weight[1]) + ... + bias\n  2. Applies sigmoid activation:  output = 1 / (1 + e^(-total))\n  3. Returns the final output value\n\nTest it with:\n  inputs  = [1.0, 0.5, -1.0]\n  weights = [0.4, 0.8,  0.2]\n  bias    = 0.3\n\nExpected output: 0.7109  (weighted sum 0.9 → sigmoid(0.9))\n\nStarter code is provided below. Fill in the blanks.",
         "hint": "Use math.exp() from Python's standard library. The sigmoid function maps any real number to a value between 0 and 1 — that is exactly what makes neurons output a bounded signal.",
-        "starterCode": "import math\n\ndef sigmoid(x):\n    return 1 / (1 + math.exp(-x))\n\ndef neuron_forward(inputs, weights, bias):\n    # Step 1: compute the weighted sum + bias\n    # Hint: use zip(inputs, weights) to pair them up\n    total = 0\n    # ... your code here\n\n    # Step 2: apply sigmoid and return\n    pass\n\n# Test your function\nresult = neuron_forward([1.0, 0.5, -1.0], [0.4, 0.8, 0.2], 0.3)\nprint(f'Neuron output: {result:.4f}')  # Expected: 0.5744"
-      }
+        "starterCode": "import math\n\ndef sigmoid(x):\n    return 1 / (1 + math.exp(-x))\n\ndef neuron_forward(inputs, weights, bias):\n    # Step 1: compute the weighted sum + bias\n    # Hint: use zip(inputs, weights) to pair them up\n    total = 0\n    # ... your code here\n\n    # Step 2: apply sigmoid and return\n    pass\n\n# Test your function\nresult = neuron_forward([1.0, 0.5, -1.0], [0.4, 0.8, 0.2], 0.3)\nprint(f'Neuron output: {result:.4f}')  # Expected: 0.7109",
+        "tests": "_r = neuron_forward([1.0, 0.5, -1.0], [0.4, 0.8, 0.2], 0.3)\nassert abs(_r - 0.7109) < 1e-3, f\"inputs [1.0, 0.5, -1.0], weights [0.4, 0.8, 0.2], bias 0.3 give total 0.9, so sigmoid(0.9) = 0.7109; got {_r}\"\nassert abs(neuron_forward([0.0, 0.0], [5.0, -3.0], 0.0) - 0.5) < 1e-9, \"zero input and zero bias gives total 0, sigmoid(0) = 0.5\"\nassert neuron_forward([10.0], [10.0], 0.0) > 0.999, \"a large positive total should be squashed close to 1\"\nassert neuron_forward([10.0], [-10.0], 0.0) < 0.001, \"a large negative total should be squashed close to 0\"\nassert abs(neuron_forward([], [], 0.3) - sigmoid(0.3)) < 1e-9, \"with no inputs the total is just the bias\"",
+        "hints": [
+          "Start total at the bias (or add it at the end), then loop: for x, w in zip(inputs, weights): total += x * w.",
+          "Finish with return sigmoid(total). Do not print inside the function; return the number.",
+          "Heads-up: for the example inputs the weighted sum is 0.9 so the output is 0.7109. The 0.5744 in the task text is sigmoid of the bias alone (0.3), which is what you get if you forget the inputs."
+        ]
+      },
+      "kind": "video",
+      "price": "free",
+      "hours": 3.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "neural networks",
+        "gradient descent",
+        "backpropagation"
+      ],
+      "recommended": true
     },
     {
       "id": "c2",
@@ -45,8 +62,25 @@
         "title": "Implement Softmax from Scratch",
         "question": "In a Transformer, the attention head scores every token against every other token. Raw scores (called logits) can be any number. Softmax converts them into probabilities that sum to exactly 1.0, so the model can decide how much attention to pay to each token.\n\nYour task:\nWrite a function  softmax(scores)  that:\n  1. Computes  exp_scores = [e^x for x in scores]\n  2. Computes  total = sum of all exp_scores\n  3. Returns   [e_x / total for e_x in exp_scores]\n\nTest it with:\n  scores = [2.0, 1.0, 0.1]\n\nExpected output: [0.659, 0.242, 0.099]  (they must sum to 1.0)\n\nBonus (teaches you something every real LLM uses):\n  Try softmax([1000.0, 1001.0, 1002.0])\n  Does it crash? Why?\n  Fix it by subtracting max(scores) from every score before computing exp.\n  This is called the numerically stable softmax — every production\n  implementation uses this trick.",
         "hint": "Use math.exp() for the exponent. The key insight: dividing by the sum ensures all outputs add up to 1.0, making them valid probabilities.",
-        "starterCode": "import math\n\ndef softmax(scores):\n    # Step 1: compute e^x for each score\n    exp_scores = []  # fill this in\n\n    # Step 2: sum all the exp values\n    total = 0  # fill this in\n\n    # Step 3: divide each exp value by the total\n    return []  # fill this in\n\n# Test\nresult = softmax([2.0, 1.0, 0.1])\nprint([f'{p:.3f}' for p in result])  # Expected: ['0.659', '0.242', '0.099']\nprint(f'Sum: {sum(result):.4f}')     # Must be 1.0000\n\n# Bonus: try large numbers — does it crash?\n# print(softmax([1000.0, 1001.0, 1002.0]))"
-      }
+        "starterCode": "import math\n\ndef softmax(scores):\n    # Step 1: compute e^x for each score\n    exp_scores = []  # fill this in\n\n    # Step 2: sum all the exp values\n    total = 0  # fill this in\n\n    # Step 3: divide each exp value by the total\n    return []  # fill this in\n\n# Test\nresult = softmax([2.0, 1.0, 0.1])\nprint([f'{p:.3f}' for p in result])  # Expected: ['0.659', '0.242', '0.099']\nprint(f'Sum: {sum(result):.4f}')     # Must be 1.0000\n\n# Bonus: try large numbers — does it crash?\n# print(softmax([1000.0, 1001.0, 1002.0]))",
+        "tests": "_p = softmax([2.0, 1.0, 0.1])\nassert len(_p) == 3 and abs(sum(_p) - 1.0) < 1e-9, \"softmax outputs must sum to 1.0\"\nassert all(abs(a - b) < 1e-3 for a, b in zip(_p, [0.659, 0.242, 0.099])), f\"expected about [0.659, 0.242, 0.099], got {_p}\"\nassert _p[0] > _p[1] > _p[2], \"a bigger score must get a bigger probability\"\nassert abs(softmax([1.0, 1.0])[0] - 0.5) < 1e-9, \"equal scores must give equal probabilities\"\nassert abs(sum(softmax([1000.0, 1001.0, 1002.0])) - 1.0) < 1e-9, \"bonus: subtract max(scores) first so large scores do not overflow\"",
+        "hints": [
+          "Build exp_scores with a list comprehension: [math.exp(s) for s in scores].",
+          "total = sum(exp_scores); return [e / total for e in exp_scores].",
+          "For the bonus, compute m = max(scores) and use math.exp(s - m). The result is identical but never overflows."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "transformers",
+        "attention",
+        "tokens"
+      ],
+      "recommended": true
     },
     {
       "id": "c3",
@@ -65,8 +99,24 @@
         "title": "Make a Model Learn by Hand",
         "question": "Gradient descent is how neural networks learn. Given a loss (how wrong the model is), you compute the gradient (which direction makes it worse) and take a small step in the opposite direction.\n\nYour task:\nMinimize  f(x) = (x - 3)^2  using gradient descent:\n  1. Start with  x = 0.0\n  2. Each step:\n       gradient = 2 * (x - 3)     ← this is the derivative of f(x)\n       x = x - learning_rate * gradient\n  3. Run 20 steps with  learning_rate = 0.1\n  4. Print x and the loss  (x - 3)^2  at every step\n\nYou should see x converge toward 3.0 (the minimum of the function).\n\nBonus experiments — each one teaches you something real:\n  a. Change learning_rate to 1.0  → what happens in exactly one step?\n  b. Change learning_rate to 1.5  → does it converge or explode?\n  c. Change learning_rate to 0.01 → how many steps to reach x ≈ 2.99?\n  These three runs explain why learning rate tuning matters in training.",
         "hint": "For f(x) = (x-3)^2, the derivative is df/dx = 2*(x-3). At the minimum (x=3) the gradient is exactly 0, so updates stop. This is the same logic used in every neural network optimizer.",
-        "starterCode": "def gradient_descent(start_x, learning_rate, steps):\n    x = start_x\n    for step in range(steps):\n        # Compute gradient of f(x) = (x - 3)^2\n        gradient = 2 * (x - 3)\n\n        # Update x in the opposite direction of the gradient\n        x = x - learning_rate * gradient\n\n        loss = (x - 3) ** 2\n        print(f'Step {step + 1:2d}: x = {x:.6f},  loss = {loss:.8f}')\n\n    return x\n\n# Run with default settings\nfinal = gradient_descent(start_x=0.0, learning_rate=0.1, steps=20)\nprint(f'\\nFinal x: {final:.6f}  (should be very close to 3.0)')\n\n# Uncomment to try the bonus experiments:\n# gradient_descent(start_x=0.0, learning_rate=1.0,  steps=5)\n# gradient_descent(start_x=0.0, learning_rate=1.5,  steps=10)\n# gradient_descent(start_x=0.0, learning_rate=0.01, steps=50)"
-      }
+        "starterCode": "def gradient_descent(start_x, learning_rate, steps):\n    x = start_x\n    for step in range(steps):\n        # Compute gradient of f(x) = (x - 3)^2\n        gradient = 2 * (x - 3)\n\n        # Update x in the opposite direction of the gradient\n        x = x - learning_rate * gradient\n\n        loss = (x - 3) ** 2\n        print(f'Step {step + 1:2d}: x = {x:.6f},  loss = {loss:.8f}')\n\n    return x\n\n# Run with default settings\nfinal = gradient_descent(start_x=0.0, learning_rate=0.1, steps=20)\nprint(f'\\nFinal x: {final:.6f}  (should be very close to 3.0)')\n\n# Uncomment to try the bonus experiments:\n# gradient_descent(start_x=0.0, learning_rate=1.0,  steps=5)\n# gradient_descent(start_x=0.0, learning_rate=1.5,  steps=10)\n# gradient_descent(start_x=0.0, learning_rate=0.01, steps=50)",
+        "tests": "_x = gradient_descent(0.0, 0.1, 20)\nassert abs(_x - 3 * (1 - 0.8 ** 20)) < 1e-6, f\"after 20 steps at lr 0.1, x should be about 2.9654, got {_x}\"\nassert abs(gradient_descent(0.0, 1.0, 1) - 6.0) < 1e-9, \"lr 1.0, one step from 0 overshoots to x = 6.0\"\nassert abs(gradient_descent(3.0, 0.1, 5) - 3.0) < 1e-9, \"at the minimum the gradient is 0 so x must not move\"\nassert abs(gradient_descent(0.0, 1.5, 10) - 3) > 100, \"lr 1.5 diverges: after 10 steps x should be far from 3\"\nassert abs(gradient_descent(0.0, 0.01, 50) - 3) > abs(gradient_descent(0.0, 0.1, 50) - 3), \"a tiny learning rate converges more slowly\"",
+        "hints": [
+          "gradient = 2 * (x - 3), then x = x - learning_rate * gradient, repeated `steps` times.",
+          "Return x at the end so a caller (and the tests) can read the final value.",
+          "If x ends up at 3.0 after one step with lr 0.5, your update direction is right: 0 - 0.5 * (-6) = 3."
+        ]
+      },
+      "kind": "video",
+      "price": "free",
+      "hours": 5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "autograd",
+        "training loop",
+        "python from scratch"
+      ]
     },
     {
       "id": "c4",
@@ -84,13 +134,319 @@
         "title": "Build a Reusable Prompt Template",
         "question": "Hardcoding prompts as strings breaks the moment you want to reuse them with different inputs. Real prompt engineering uses templates — fill-in-the-blank structures that stay consistent and are easy to test.\n\nYour task:\nBuild a class  PromptTemplate  with three methods:\n\n  __init__(self, system, user_template)\n    — stores the system prompt and a user message template\n    — the user_template contains {placeholders} for variable parts\n\n  render(self, **variables)  →  str\n    — fills in {placeholders} in user_template using the given values\n    — raises ValueError with a clear message if a placeholder is missing\n\n  to_messages(self, **variables)  →  list\n    — returns the standard OpenAI / Claude API format:\n      [\n        {\"role\": \"system\",  \"content\": <system prompt>},\n        {\"role\": \"user\",    \"content\": <rendered user message>}\n      ]\n\nTest it with this real NuraKnect use case (starter code below).\n\nExpected: a list of two dicts with role and content, ready to pass\nstraight into an OpenAI or Anthropic API call.",
         "hint": "Use Python's built-in str.format_map() or str.format(**variables) for placeholder substitution. For the ValueError, wrap the format call in a try/except KeyError block and re-raise with a helpful message.",
-        "starterCode": "class PromptTemplate:\n    def __init__(self, system, user_template):\n        self.system = system\n        self.user_template = user_template\n\n    def render(self, **variables):\n        # Fill {placeholders} in user_template with the given variables\n        # Raise ValueError if a required placeholder is missing\n        pass\n\n    def to_messages(self, **variables):\n        # Return [{\"role\": \"system\", ...}, {\"role\": \"user\", ...}]\n        pass\n\n\n# Test with a real NuraKnect use case\nclassifier = PromptTemplate(\n    system='You are a DM intent classifier for NuraKnect. Return only JSON.',\n    user_template='Classify this Instagram DM: \"{message}\"\\nCategories: {categories}'\n)\n\nmessages = classifier.to_messages(\n    message='How much does this cost?',\n    categories='complaint, question, purchase_intent, greeting'\n)\n\nfor msg in messages:\n    print(f\"[{msg['role'].upper()}]\")\n    print(msg['content'])\n    print()\n\n# Bonus: test that ValueError is raised for missing variables\ntry:\n    classifier.render(message='Hello')  # missing 'categories'\nexcept ValueError as e:\n    print(f'Caught expected error: {e}')"
-      }
+        "starterCode": "class PromptTemplate:\n    def __init__(self, system, user_template):\n        self.system = system\n        self.user_template = user_template\n\n    def render(self, **variables):\n        # Fill {placeholders} in user_template with the given variables\n        # Raise ValueError if a required placeholder is missing\n        pass\n\n    def to_messages(self, **variables):\n        # Return [{\"role\": \"system\", ...}, {\"role\": \"user\", ...}]\n        pass\n\n\n# Test with a real NuraKnect use case\nclassifier = PromptTemplate(\n    system='You are a DM intent classifier for NuraKnect. Return only JSON.',\n    user_template='Classify this Instagram DM: \"{message}\"\\nCategories: {categories}'\n)\n\nmessages = classifier.to_messages(\n    message='How much does this cost?',\n    categories='complaint, question, purchase_intent, greeting'\n)\n\nfor msg in messages:\n    print(f\"[{msg['role'].upper()}]\")\n    print(msg['content'])\n    print()\n\n# Bonus: test that ValueError is raised for missing variables\ntry:\n    classifier.render(message='Hello')  # missing 'categories'\nexcept ValueError as e:\n    print(f'Caught expected error: {e}')",
+        "tests": "_t = PromptTemplate(\"SYS\", \"Hi {name}, you asked: {q}\")\nassert _t.render(name=\"Asha\", q=\"price?\") == \"Hi Asha, you asked: price?\", \"render must fill every placeholder\"\n_m = _t.to_messages(name=\"Asha\", q=\"price?\")\nassert _m == [{\"role\": \"system\", \"content\": \"SYS\"}, {\"role\": \"user\", \"content\": \"Hi Asha, you asked: price?\"}], f\"to_messages must return a system and a user dict, got {_m}\"\ntry:\n    _t.render(name=\"Asha\")\n    _raised = None\nexcept ValueError as _e:\n    _raised = str(_e)\nexcept Exception as _e:\n    _raised = \"WRONG:\" + type(_e).__name__\nassert _raised and not _raised.startswith(\"WRONG\") and \"q\" in _raised, f\"a missing placeholder must raise ValueError naming it, got {_raised}\"\nassert _t.render(name=\"A\", q=\"B\", extra=\"ignored\") == \"Hi A, you asked: B\", \"extra variables should be ignored, not crash\"",
+        "hints": [
+          "self.user_template.format(**variables) fills the placeholders.",
+          "Wrap it in try/except KeyError as e and raise ValueError(f\"Missing variable: {e.args[0]}\") so the message names the missing key.",
+          "to_messages returns [{\"role\": \"system\", \"content\": self.system}, {\"role\": \"user\", \"content\": self.render(**variables)}]."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "prompt design",
+        "few-shot",
+        "structured output"
+      ],
+      "recommended": true
+    },
+    {
+      "id": "c101",
+      "title": "Tokenizers: how text becomes tokens",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/01-tokenizers",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 5,
+      "why": "Tokens are what you are billed for and what the context window counts. Seeing BPE once makes NuraKnect prompt cost and truncation bugs easy to reason about.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "prereqs": [
+        "c2"
+      ],
+      "skills": [
+        "tokens",
+        "BPE",
+        "context window",
+        "cost"
+      ]
+    },
+    {
+      "id": "c102",
+      "title": "Sampling: temperature, top-k and top-p",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/practice/top-k-top-p-sampling",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 6,
+      "why": "Explains why the same DM can get different labels or replies, and which knob to turn (temperature 0 for classification, higher for varied replies).",
+      "kind": "repo",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "beginner",
+      "prereqs": [
+        "c101"
+      ],
+      "skills": [
+        "temperature",
+        "top-p",
+        "top-k",
+        "determinism"
+      ]
+    },
+    {
+      "id": "c103",
+      "title": "Embeddings (ML Crash Course)",
+      "platform": "Google for Developers",
+      "url": "https://developers.google.com/machine-learning/crash-course/embeddings",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 7,
+      "why": "First look at embeddings as vectors where meaning is distance. Layer 2 builds NuraKnect memory search on this idea.",
+      "kind": "course",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "prereqs": [
+        "c2"
+      ],
+      "skills": [
+        "embeddings",
+        "vector similarity",
+        "dimensionality"
+      ]
+    },
+    {
+      "id": "c104",
+      "title": "Effective context engineering for AI agents",
+      "platform": "Anthropic",
+      "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 8,
+      "why": "Prompt engineering is only one part: you also choose what history, tools and retrieved text reach the model. This is the skill behind a good NuraKnect reply with long DM threads.",
+      "kind": "article",
+      "price": "free",
+      "recommended": true,
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c101",
+        "c4"
+      ],
+      "skills": [
+        "context engineering",
+        "context budget",
+        "compaction",
+        "retrieval"
+      ]
+    },
+    {
+      "id": "c105",
+      "title": "Context engineering lesson (hands-on)",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/05-context-engineering",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 9,
+      "why": "Code-along for the article above: build a context assembler with a token budget, then trim and summarise. Optional second pass if you want runnable practice.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "intermediate",
+      "prereqs": [
+        "c104"
+      ],
+      "skills": [
+        "context assembly",
+        "token budget",
+        "summarisation"
+      ]
+    },
+    {
+      "id": "c107",
+      "title": "Choosing a model (capability, cost, latency)",
+      "platform": "Anthropic",
+      "url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 10,
+      "why": "A repeatable way to pick the cheapest model that passes your own test set, instead of defaulting to the biggest. Directly applies to NuraKnect classify vs reply steps.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c101"
+      ],
+      "skills": [
+        "model selection",
+        "cost vs latency",
+        "evals"
+      ]
+    },
+    {
+      "id": "c108",
+      "title": "OpenAI API docs: text generation (closed model)",
+      "platform": "OpenAI",
+      "url": "https://platform.openai.com/docs/guides/text",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 11,
+      "why": "The closed-model path: a hosted API, no GPU, best raw capability, pay per token. Read it if you want to ship NuraKnect fastest.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "beginner",
+      "pickGroup": "open-vs-closed",
+      "prereqs": [
+        "c4"
+      ],
+      "skills": [
+        "hosted API",
+        "messages",
+        "pricing"
+      ]
+    },
+    {
+      "id": "c109",
+      "title": "Hugging Face LLM Course: Transformers models and open weights",
+      "platform": "Hugging Face",
+      "url": "https://huggingface.co/learn/llm-course/chapter1/1",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 12,
+      "why": "The open-model path: download weights, run them yourself, control cost and data. Read it if privacy or per-token cost for NuraKnect worries you.",
+      "kind": "course",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "beginner",
+      "pickGroup": "open-vs-closed",
+      "prereqs": [
+        "c2"
+      ],
+      "skills": [
+        "open weights",
+        "transformers library",
+        "local inference"
+      ]
+    },
+    {
+      "id": "c111",
+      "title": "Project: Token and cost meter for NuraKnect DMs",
+      "platform": "Build",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/projects/token-counter-and-cost-meter",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 13,
+      "why": "Count tokens for 30 sample DMs and estimate the monthly cost at 1,000 DMs a day. Makes tokens and pricing concrete.",
+      "kind": "project",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "beginner",
+      "prereqs": [
+        "c101"
+      ],
+      "skills": [
+        "tokens",
+        "cost estimation",
+        "python"
+      ],
+      "keep": [
+        "Script that prints tokens and cost per DM",
+        "A short table of 30 DMs with token counts",
+        "One paragraph: which prompt part costs the most"
+      ]
+    },
+    {
+      "id": "c112",
+      "title": "Project: DM intent classifier with structured JSON",
+      "platform": "Build",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 14,
+      "why": "Classify 20 real-style DMs into 4 intents with a JSON schema, run it at temperature 0 and at 0.8, and count how often labels flip.",
+      "kind": "project",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c4",
+        "c102"
+      ],
+      "skills": [
+        "prompting",
+        "structured output",
+        "temperature",
+        "evaluation"
+      ],
+      "keep": [
+        "Prompt file and JSON schema",
+        "Results table for 20 DMs at two temperatures",
+        "Notes on every label that changed"
+      ]
+    },
+    {
+      "id": "c113",
+      "title": "Project: Model bake-off, hosted vs local",
+      "platform": "Build",
+      "url": "https://docs.ollama.com/quickstart",
+      "cost": "Free",
+      "duration": "4 hours",
+      "status": "not-started",
+      "order": 15,
+      "why": "Run the same 30 DMs through one hosted model and one local Ollama model, and compare accuracy, latency and cost per 1,000 DMs.",
+      "kind": "project",
+      "price": "free",
+      "hours": 4,
+      "track": "optional",
+      "stage": "advanced",
+      "prereqs": [
+        "c107",
+        "c112"
+      ],
+      "skills": [
+        "model selection",
+        "local inference",
+        "benchmarking"
+      ],
+      "keep": [
+        "Comparison table: accuracy, p50 latency, cost per 1,000 DMs",
+        "The 30-DM test set",
+        "A one-page recommendation for NuraKnect"
+      ]
     }
   ],
   "quiz": {
     "status": "locked",
-    "unlockCondition": "Complete all 4 courses in this layer",
+    "unlockCondition": "Complete all core items in this layer",
     "passingScore": 70,
     "questions": [
       {
@@ -122,7 +478,156 @@
         "type": "architectural",
         "question": "Your AutoGen agent on Cuva AI keeps giving inconsistent outputs for the same input. Based on what you learned about LLMs, what are 3 possible reasons and how would you fix each?",
         "hint": "Think about temperature, prompt design, and model determinism"
+      },
+      {
+        "id": "q6",
+        "type": "conceptual",
+        "question": "What happens to a deployed LLM's weights while it answers your requests?",
+        "hint": "Think about training versus inference.",
+        "options": [
+          "They are updated after every request",
+          "They stay frozen during inference",
+          "They are retrained each night automatically",
+          "They are blended with your input text"
+        ],
+        "correct": 1,
+        "explanation": "Inference uses fixed weights. Weights change only during training or fine-tuning.",
+        "stage": "pre"
+      },
+      {
+        "id": "q7",
+        "type": "conceptual",
+        "question": "What does one step of gradient descent do?",
+        "hint": "Remember the Layer 1 challenge on minimising a loss.",
+        "options": [
+          "Shuffles the data without changing any weights",
+          "Doubles the learning rate until the loss is zero",
+          "Removes the largest weight from the network",
+          "Moves parameters a small step that lowers loss"
+        ],
+        "correct": 3,
+        "explanation": "Gradient descent nudges parameters opposite the gradient so the loss goes down a little each step.",
+        "stage": "pre"
+      },
+      {
+        "id": "q8",
+        "type": "conceptual",
+        "question": "Which statement about tokens is true?",
+        "hint": "Think about how a long word or a rare name is split.",
+        "options": [
+          "A token is a chunk of text, often part of a word",
+          "Every token is exactly one whole English word",
+          "Tokens are counted only in the model's reply",
+          "Token counts are equal in every language"
+        ],
+        "correct": 0,
+        "explanation": "Tokenizers split text into subword chunks, so counts differ from word counts and vary by language. Both input and output tokens count.",
+        "stage": "check"
+      },
+      {
+        "id": "q9",
+        "type": "practical",
+        "question": "You need the same DM to get the same intent label every time. Which setting helps most?",
+        "hint": "Look back at the sampling lesson.",
+        "options": [
+          "Raise temperature to 1.5 for more variety",
+          "Add more examples of the wrong labels",
+          "Set temperature to 0 or very close to it",
+          "Increase the context window size"
+        ],
+        "correct": 2,
+        "explanation": "Low temperature makes the model pick the most likely tokens, which makes labels steadier. It is still not a hard guarantee.",
+        "stage": "check"
+      },
+      {
+        "id": "q10",
+        "type": "architectural",
+        "question": "A long DM thread makes replies worse as old turns pile up. Which fix is context engineering?",
+        "hint": "Think about what the model actually needs to see.",
+        "options": [
+          "Raise top-p to 1.0 so it forgets less",
+          "Repeat the system prompt ten times",
+          "Send every past message in full, always",
+          "Summarise old turns and keep key facts"
+        ],
+        "correct": 3,
+        "explanation": "Context engineering chooses what enters the window: summarise or trim old turns, keep the facts that matter, and leave out noise.",
+        "stage": "post"
+      },
+      {
+        "id": "q11",
+        "type": "architectural",
+        "question": "How should you choose a model for NuraKnect intent labelling?",
+        "hint": "Think about evidence, not reputation.",
+        "options": [
+          "Pick the newest model and skip testing",
+          "Pick the cheapest model that passes your own DM test set",
+          "Pick the largest model available every time",
+          "Pick an open model only because it costs nothing"
+        ],
+        "correct": 1,
+        "explanation": "Test candidates on your own labelled DMs and take the cheapest and fastest one that meets your accuracy bar.",
+        "stage": "post"
       }
+    ]
+  },
+  "pickGroups": [
+    {
+      "id": "open-vs-closed",
+      "label": "Open vs closed models: pick one"
+    }
+  ],
+  "mustKnow": [
+    {
+      "term": "Token",
+      "oneLiner": "The chunk of text a model reads and writes; usage, limits and price are all counted in tokens.",
+      "misconception": "A token is not a word; a word can be several tokens and punctuation or spaces count too."
+    },
+    {
+      "term": "Context window",
+      "oneLiner": "The maximum tokens (input plus output) the model can consider in one request.",
+      "misconception": "A bigger window does not mean the model uses all of it equally well."
+    },
+    {
+      "term": "Sampling (temperature, top-p)",
+      "oneLiner": "How the next token is picked from the model's probabilities; low temperature is steadier, high is more varied.",
+      "misconception": "Temperature 0 makes outputs mostly repeatable, not guaranteed identical."
+    },
+    {
+      "term": "Embedding",
+      "oneLiner": "A list of numbers for a piece of text where similar meaning sits close together.",
+      "misconception": "Embeddings are not generated text; they only measure meaning, they do not answer questions."
+    },
+    {
+      "term": "Prompt vs context",
+      "oneLiner": "The prompt is your instruction; context is everything the model sees, including history, tools and retrieved text.",
+      "misconception": "Better wording alone rarely fixes a reply that is missing the right information."
+    },
+    {
+      "term": "Training vs inference",
+      "oneLiner": "Training changes the weights; inference uses frozen weights to produce output.",
+      "misconception": "The model does not learn from your API calls."
+    }
+  ],
+  "stageGoals": {
+    "beginner": "Explain tokens, sampling and embeddings in plain words, and call a hosted or local model from Python.",
+    "intermediate": "Design the context for a request, choose a model with a small test set, and measure how settings change outputs.",
+    "advanced": "Compare hosted and local models on your own data and defend a model choice with accuracy, latency and cost numbers."
+  },
+  "startHere": "Already comfortable with neural nets and prompting? Skip c1 to c3, check the pre questions, then start at c101 (tokens) and c104 (context engineering).",
+  "outcomes": [
+    "Explain tokens, context windows, sampling and embeddings without jargon",
+    "Estimate the token cost of a NuraKnect prompt before sending it",
+    "Pick a temperature for classification versus reply generation and justify it",
+    "Assemble a request's context deliberately instead of pasting the whole chat",
+    "Choose between a hosted and an open model using your own test set"
+  ],
+  "portfolioProof": {
+    "title": "NuraKnect DM classifier with cost and model notes",
+    "evidence": [
+      "Repo with the prompt, JSON schema and a 20-DM results table",
+      "Token and cost meter output for 30 DMs",
+      "A short write-up comparing temperature 0 and 0.8, and your model choice"
     ]
   }
 }

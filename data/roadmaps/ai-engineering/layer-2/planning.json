@@ -2,9 +2,12 @@
   "weeklyPlan": [
     {
       "week": 4,
-      "focus": "LLM Chains and Multi-step Systems",
+      "focus": "LLM Chains and Multi-step Systems plus Retrieval Techniques",
       "courses": [
-        "c5"
+        "c5",
+        "c202",
+        "c204",
+        "c211"
       ],
       "dailyMinutes": 90,
       "buildTask": "Replace NuraKnect PromptTemplate mock with a real OpenAI or Anthropic API call. Classify a real DM and return actual JSON. No mock data. Handle errors with try/except.",
@@ -15,7 +18,8 @@
       "focus": "RAG Architecture and Embeddings",
       "courses": [
         "c6",
-        "c7"
+        "c7",
+        "c212"
       ],
       "dailyMinutes": 90,
       "buildTask": "Add conversation memory to NuraKnect. Store past DMs as embeddings. Retrieve relevant context when new DM arrives. RAG applied to conversation history.",
@@ -23,9 +27,18 @@
     },
     {
       "week": 6,
-      "focus": "Vector Databases in Production",
+      "focus": "Vector Databases in Production plus Hybrid Search",
       "courses": [
-        "c8"
+        "c8",
+        "c207",
+        "c208",
+        "c209",
+        "c201",
+        "c203",
+        "c213",
+        "c214",
+        "c205",
+        "c206"
       ],
       "dailyMinutes": 90,
       "buildTask": "Set up Qdrant locally via Docker. Index 20 real NuraKnect DM examples. Query by semantic similarity. Measure retrieval accuracy on 5 test queries. Document results.",

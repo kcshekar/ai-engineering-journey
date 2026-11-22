@@ -6,7 +6,7 @@ import Editor from "@monaco-editor/react"
 import {
   X, FileText, Terminal, Copy, Check,
   ExternalLink, Clock, Monitor, BookOpen, Sparkles,
-  Play, Trash2, Save,
+  Play, Trash2, Save, ListChecks, Lightbulb,
 } from "lucide-react"
 import { api } from "@/lib/api-client"
 import type { Course } from "@/types"
@@ -49,6 +49,47 @@ finally:
     sys.stdout, sys.stderr = __po, __pe
 `
 
+// Runs the learner's code, then each top-level statement of the challenge tests in the same
+// namespace. Every assert is reported as one check; other statements are setup.
+const CHECKER = `
+import ast, io, json, sys, traceback as _tb
+__ns = {'__name__': '__main__'}
+__results = []
+__setup = []
+__out = io.StringIO(); __err = io.StringIO()
+__po, __pe = sys.stdout, sys.stderr
+sys.stdout, sys.stderr = __out, __err
+__user_ok = True
+try:
+    try:
+        exec(compile(__user_code__, '<practice>', 'exec'), __ns)
+    except BaseException:
+        __user_ok = False
+        _tb.print_exc(limit=-1, file=sys.stderr)
+    # Checks still run after a crash: functions defined before it can be checked.
+    for __node in ast.parse(__tests__).body:
+        __src = ast.get_source_segment(__tests__, __node) or ''
+        __is_check = isinstance(__node, ast.Assert)
+        __label = __src
+        if __is_check and isinstance(__node.msg, ast.Constant) and isinstance(__node.msg.value, str):
+            __label = __node.msg.value
+        try:
+            exec(compile(ast.Module(body=[__node], type_ignores=[]), '<check>', 'exec'), __ns)
+            if __is_check:
+                __results.append({'label': __label, 'ok': True, 'error': ''})
+        except BaseException as __e:
+            __msg = type(__e).__name__ + ': ' + str(__e)
+            if not __is_check:
+                __setup.append(__src.splitlines()[0][:80] + ' -> ' + __msg)
+            elif isinstance(__e, AssertionError):
+                __results.append({'label': __label, 'ok': False, 'error': '' if str(__e) in ('', __label) else str(__e)})
+            else:
+                __results.append({'label': __label, 'ok': False, 'error': __msg})
+finally:
+    sys.stdout, sys.stderr = __po, __pe
+__results_json = json.dumps({'userOk': __user_ok, 'results': __results, 'setup': __setup, 'stdout': __out.getvalue(), 'stderr': __err.getvalue()})
+`
+
 function buildSummaryPrompt(course: Course, notes: string, code: string) {
   const parts = [
     `I just finished studying: "${course.title}"`,
@@ -62,6 +103,7 @@ function buildSummaryPrompt(course: Course, notes: string, code: string) {
 
 function PythonChallenge({ challenge }: { challenge: Course["pythonChallenge"] }) {
   const [copied, setCopied] = useState(false)
+  const [hintsShown, setHintsShown] = useState(0)
   if (!challenge) return (
     <div className="panel-empty-state">
       <span className="panel-empty-icon">🐍</span>
@@ -83,6 +125,18 @@ function PythonChallenge({ challenge }: { challenge: Course["pythonChallenge"] }
       <div className="challenge-question">{challenge.question}</div>
       <div className="challenge-section-label">Hint</div>
       <div className="challenge-hint">{challenge.hint}</div>
+      {challenge.hints && challenge.hints.length > 0 && (
+        <div className="challenge-hints">
+          {challenge.hints.slice(0, hintsShown).map((h, i) => (
+            <div key={i} className="challenge-hint challenge-hint-step"><span className="hint-step-num">{i + 1}</span>{h}</div>
+          ))}
+          {hintsShown < challenge.hints.length && (
+            <button className="challenge-hint-btn" onClick={() => setHintsShown((n) => n + 1)}>
+              <Lightbulb size={13} /> {hintsShown === 0 ? "Stuck? Show a hint" : "Show next hint"} ({hintsShown}/{challenge.hints.length})
+            </button>
+          )}
+        </div>
+      )}
       <div className="challenge-code-header">
         <span className="challenge-section-label" style={{ marginBottom: 0 }}>Starter Code</span>
         <button className="challenge-copy-btn" onClick={handleCopy}>
@@ -90,9 +144,16 @@ function PythonChallenge({ challenge }: { challenge: Course["pythonChallenge"] }
         </button>
       </div>
       <pre className="challenge-starter-code">{challenge.starterCode}</pre>
-      <div className="challenge-cta">Switch to the <strong>Python Practice</strong> tab to write and run your solution.</div>
+      <div className="challenge-cta">
+        Switch to the <strong>Python Practice</strong> tab to write and run your solution.
+        {challenge.tests && <> Press <strong>Check</strong> there to run {countChecks(challenge.tests)} automatic checks.</>}
+      </div>
     </div>
   )
+}
+
+function countChecks(tests: string) {
+  return tests.split("\n").filter((l) => /^assert\b/.test(l)).length
 }
 
 interface Props {
@@ -206,6 +267,48 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
     }
   }, [code, isRunning, course.id, onMetaChange])
 
+  const tests = course.pythonChallenge?.tests
+  const handleCheck = useCallback(async () => {
+    if (isRunning || !code.trim() || !tests) return
+    setIsRunning(true)
+    setOutput([{ type: "info", text: _pyodide ? "▶ Checking…" : "⏳ Loading Python runtime…" }])
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const py = await getPyodide() as any
+      py.globals.set("__user_code__", code)
+      py.globals.set("__tests__", tests)
+      await py.runPythonAsync(CHECKER)
+      const res = JSON.parse(py.globals.get("__results_json")) as {
+        userOk: boolean; stdout: string; stderr: string; setup: string[]
+        results: { label: string; ok: boolean; error: string }[]
+      }
+      const lines: { type: string; text: string }[] = []
+      if (res.stdout) res.stdout.trimEnd().split("\n").forEach((t) => lines.push({ type: "stdout", text: t }))
+      if (!res.userOk) {
+        res.stderr.trimEnd().split("\n").forEach((t) => lines.push({ type: "stderr", text: t }))
+        lines.push({ type: "info", text: "Your code raised an error. Checks ran on what was defined before it:" })
+      }
+      res.setup.forEach((t) => lines.push({ type: "stderr", text: `⚠ setup: ${t}` }))
+      for (const r of res.results) {
+        lines.push(r.ok ? { type: "pass", text: `✓ ${r.label}` } : { type: "fail", text: `✗ ${r.label}${r.error ? ` (${r.error})` : ""}` })
+      }
+      const passed = res.results.filter((r) => r.ok).length
+      const total = res.results.length
+      if (total === 0) lines.push({ type: "info", text: "This challenge has no checks yet." })
+      else lines.push({
+        type: passed === total ? "summary-pass" : "summary-fail",
+        text: passed === total ? `All ${total} checks passed 🎉` : `${passed} of ${total} checks passed`,
+      })
+      setOutput(lines)
+      api.logActivity("code")
+      api.updateCourseMeta(course.id, { codeRuns: "__inc__", hasCode: true, codeChars: code.trim().length }).then(onMetaChange)
+    } catch (e) {
+      setOutput([{ type: "stderr", text: String(e) }])
+    } finally {
+      setIsRunning(false)
+    }
+  }, [code, isRunning, tests, course.id, onMetaChange])
+
   const handleCopySummary = useCallback(async () => {
     await navigator.clipboard.writeText(buildSummaryPrompt(course, notes, code))
     setCopied(true); setTimeout(() => setCopied(false), 2000)
@@ -300,6 +403,11 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
                     <button className="output-action-btn" onClick={() => setOutput([])} disabled={output.length === 0}>
                       <Trash2 size={13} /> Clear
                     </button>
+                    {tests && (
+                      <button className="output-check-btn" onClick={handleCheck} disabled={isRunning || !code.trim()} title="Run your code, then the challenge checks">
+                        <ListChecks size={13} /> Check
+                      </button>
+                    )}
                     <button className={`output-run-btn ${isRunning ? "running" : ""}`} onClick={handleRun} disabled={isRunning || !code.trim()} title="Run (Ctrl+Enter)">
                       <Play size={13} /> {isRunning ? "Running…" : "Run"}
                     </button>

@@ -216,3 +216,36 @@ and query strategy you would use for NuraKnect DM memory)
 | Q4 | RAG vs fine-tuning | /10 |
 | Q5 | Vector DB debugging | /10 |
 | **Total** | | |
+
+## All items (v2)
+| id | Title | Kind | Hours | Track |
+|---|---|---|---|---|
+| c5 | Building Systems with the ChatGPT API | course | 1.5 | core |
+| c6 | Building RAG Agents with LLMs | course | 2 | core |
+| c7 | LangChain for LLM Application Development | course | 2 | core |
+| c8 | Vector Databases from Embeddings to Applications | course | 2 | core |
+| c201 | Hybrid search explained (BM25 plus vectors) | article | 1 | core |
+| c202 | Rerankers and two-stage retrieval | article | 1 | core |
+| c203 | Contextual retrieval | article | 1 | core |
+| c204 | HyDE: hypothetical document embeddings | article | 1 | core |
+| c211 | RAGAS: evaluating a RAG pipeline | docs | 1.5 | core |
+| c207 | Qdrant quickstart | docs | 1.5 | core (pick one: vector-db) |
+| c208 | pgvector | repo | 1.5 | core (pick one: vector-db) |
+| c209 | Chroma getting started | docs | 1.5 | core (pick one: vector-db) |
+| c212 | Project: PDF Q&A with sources | project | 3 | core |
+| c213 | Project: Hybrid search over NuraKnect DMs | project | 3 | core |
+| c214 | Project: Add a reranker and measure before and after | project | 4 | optional |
+| c205 | GraphRAG (Microsoft) | docs | 2 | optional |
+| c206 | Building Agentic RAG with LlamaIndex | course | 1 | optional |
+
+## Projects
+- c212 (beginner): PDF Q&A with sources
+- c213 (intermediate): Hybrid search over NuraKnect DMs
+- c214 (advanced): Add a reranker and measure before and after
+
+## Outcomes
+- Build a RAG pipeline that answers from your documents and cites sources
+- Choose a vector database for a project and explain the trade-off
+- Combine keyword and vector search and say when each wins
+- Measure retrieval and answer quality with a test set and RAGAS
+- Add a reranker and report its quality gain against its latency cost

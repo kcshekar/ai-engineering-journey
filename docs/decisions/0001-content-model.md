@@ -1,7 +1,7 @@
 ---
 type: decision
 title: Richer roadmap content model
-status: proposed
+status: accepted
 updated: 2026-11-22
 ---
 
@@ -49,3 +49,6 @@ Chosen: **Extend the course item (2)**. It delivers all four ideas you picked (r
 - `npm run verify` runs a content check: ids are unique, `prereqs` and `pickGroup` resolve, and enum values are valid.
 - A read-only check query against dev shows the same `courses_completed` rows before and after.
 - Layers 1–2 show the same completion state as before.
+
+## Update, 2026-11-22: finished layers stay finished
+Layers 1–2 were completed when they had 4 core items each. They now have 12 core units each. We accept the stored `completed` flag: a layer marked complete keeps its "completed" status, its unlocked final quiz and its "You can now…" panel, while the bar shows the new items (for example 4/12). The flag is cleared only when the learner unticks an item and the required work goes from done to not done (`applyItemToggle` in `lib/loader.ts`). Pick groups must have members that are all core, in one stage, and not mixed between projects and other items; `scripts/check-content.mjs` enforces this.

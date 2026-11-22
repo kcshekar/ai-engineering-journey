@@ -1,0 +1,56 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 7,
+      "focus": "Tool calling and the agent loop",
+      "courses": [
+        "c301",
+        "c302",
+        "c303",
+        "c313"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Build the DM triage agent with mocked tools (c313): tool schemas, the loop, a step limit and a run log.",
+      "pythonTask": "20 min daily: finish the tool-dispatch and ReAct challenges (c301, c302)."
+    },
+    {
+      "week": 8,
+      "focus": "Memory and MCP foundations",
+      "courses": [
+        "c304",
+        "c305",
+        "c306",
+        "c314"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Start the NuraKnect MCP server (c314): one read tool and one resource, tested with an MCP client or inspector.",
+      "pythonTask": "20 min daily: the sliding-window memory and JSON-RPC handler challenges (c304, c306)."
+    },
+    {
+      "week": 9,
+      "focus": "Agent SDKs and the MCP server",
+      "courses": [
+        "c307",
+        "c308",
+        "c309",
+        "c310",
+        "c312",
+        "c314"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Finish the MCP server (c314) with a draft-reply tool, then read ONE Agent SDK from the pick group (c307-c310; the rest are alternatives) and connect an agent to your server.",
+      "pythonTask": "20 min daily: write a mock-LLM test for the agent so it runs without an API key."
+    },
+    {
+      "week": 10,
+      "focus": "Multi-agent workflow and approval",
+      "courses": [
+        "c311",
+        "c315"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Build the drafter plus checker workflow with a human approval pause (c315), then run a 10-DM task-success eval.",
+      "pythonTask": "20 min daily: write the eval scorer as plain Python and track the success rate."
+    }
+  ]
+}

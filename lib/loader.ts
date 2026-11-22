@@ -53,10 +53,34 @@ export function isLayerWorkDone(layer: Layer, completedIds: string[]): boolean {
   return required > 0 && countDoneUnits(layer, completedIds) === required
 }
 
+// A layer finished earlier stays finished when new core items are added later (plan Phase 3 note):
+// the stored flag also unlocks the quiz, while the bars still show the new items.
 export function isQuizUnlocked(layer: Layer, progress: RoadmapProgress): boolean {
   const lp = progress.layerProgress[String(layer.id)]
   if (!lp) return false
-  return isLayerWorkDone(layer, lp.coursesCompleted)
+  return lp.completed || isLayerWorkDone(layer, lp.coursesCompleted)
+}
+
+// Toggles one item in place and updates started/completed. Completion is cleared only when the
+// required work was done before this toggle and is not done after it (the learner unticked a
+// required item), so a layer flagged complete before new items were added keeps its flag.
+export function applyItemToggle(layer: Layer | undefined, lp: LayerProgressEntry, courseId: string): void {
+  const today = new Date().toISOString().split("T")[0]
+  const wasDone = layer ? isLayerWorkDone(layer, lp.coursesCompleted) : false
+  const idx = lp.coursesCompleted.indexOf(courseId)
+  if (idx > -1) {
+    lp.coursesCompleted.splice(idx, 1)
+  } else {
+    lp.coursesCompleted.push(courseId)
+    if (!lp.started) { lp.started = true; lp.startedDate = today }
+  }
+  if (!layer) return
+  if (isLayerWorkDone(layer, lp.coursesCompleted)) {
+    // Keep the first completion date when an optional or extra pick-group item is toggled.
+    if (!lp.completed) { lp.completed = true; lp.completedDate = today }
+  } else if (wasDone) {
+    lp.completed = false; lp.completedDate = null
+  }
 }
 
 export function getLayerHours(layer: Layer): { required: number; optional: number } {

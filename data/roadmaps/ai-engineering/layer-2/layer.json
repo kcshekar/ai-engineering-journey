@@ -13,7 +13,7 @@
       "id": "c5",
       "title": "Building Systems with the ChatGPT API",
       "platform": "DeepLearning.AI",
-      "url": "https://anthropic.skilljar.com/claude-with-the-anthropic-api",
+      "url": "https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/",
       "cost": "Free",
       "duration": "90 minutes",
       "status": "not-started",
@@ -25,8 +25,25 @@
         "title": "Chain Two LLM Steps Together",
         "question": "Building Systems with the ChatGPT API is about composing several small LLM calls into one pipeline instead of doing everything in a single giant prompt.\n\nYour task:\nBuild a class  Chain  that:\n  1. Takes a list of step functions in  __init__(self, steps)\n  2. Has a  run(self, input_value)  method that passes input_value through each step function in order, feeding each step's output into the next step's input\n  3. Stops early and returns an error dict  {\"error\": str(e)}  if any step raises an exception (this is your moderation / safety gate)\n\nThen build two real step functions for NuraKnect:\n  classify_intent(dm)  → returns {\"category\": ..., \"text\": dm} (mock classification — no real API call needed here)\n  generate_reply(classified)  → returns a reply string based on classified[\"category\"]\n\nWire them into a Chain and run it on: \"How much does your service cost?\"\n\nBonus (teaches real production moderation): add a third step  moderate(dm)  that runs FIRST and raises  ValueError  if the message contains a banned word list. Confirm the Chain stops and returns the error dict instead of continuing to classify_intent.",
         "hint": "Use a simple for-loop in run() that reassigns a `value` variable after each step: value = step(value). Wrap the loop body in try/except Exception and return the error dict immediately on failure — that early-stop behavior is exactly what production moderation gates do before spending tokens on a real LLM call.",
-        "starterCode": "class Chain:\n    def __init__(self, steps):\n        self.steps = steps\n\n    def run(self, input_value):\n        value = input_value\n        for step in self.steps:\n            try:\n                value = step(value)\n            except Exception as e:\n                return {\"error\": str(e)}\n        return value\n\n\ndef classify_intent(dm):\n    # Mock classifier — in production this calls the OpenAI/Anthropic API\n    categories = {\n        \"cost\": \"purchase_intent\",\n        \"price\": \"purchase_intent\",\n        \"hello\": \"greeting\",\n    }\n    text_lower = dm.lower()\n    category = next((v for k, v in categories.items() if k in text_lower), \"question\")\n    return {\"category\": category, \"text\": dm}\n\n\ndef generate_reply(classified):\n    replies = {\n        \"purchase_intent\": \"Thanks for asking! Here is our pricing page: ...\",\n        \"greeting\": \"Hey! Thanks for reaching out \\U0001F44B\",\n        \"question\": \"Great question — let me get you an answer.\",\n    }\n    return replies.get(classified[\"category\"], \"Thanks for your message!\")\n\n\nnuraknect_chain = Chain([classify_intent, generate_reply])\nresult = nuraknect_chain.run(\"How much does your service cost?\")\nprint(result)\n\n# Bonus: add a moderate(dm) step that runs before classify_intent\n# and raises ValueError for banned words. Confirm Chain returns\n# {\"error\": \"...\"} instead of a reply when moderation trips.\n"
-      }
+        "starterCode": "class Chain:\n    def __init__(self, steps):\n        self.steps = steps\n\n    def run(self, input_value):\n        value = input_value\n        for step in self.steps:\n            try:\n                value = step(value)\n            except Exception as e:\n                return {\"error\": str(e)}\n        return value\n\n\ndef classify_intent(dm):\n    # Mock classifier — in production this calls the OpenAI/Anthropic API\n    categories = {\n        \"cost\": \"purchase_intent\",\n        \"price\": \"purchase_intent\",\n        \"hello\": \"greeting\",\n    }\n    text_lower = dm.lower()\n    category = next((v for k, v in categories.items() if k in text_lower), \"question\")\n    return {\"category\": category, \"text\": dm}\n\n\ndef generate_reply(classified):\n    replies = {\n        \"purchase_intent\": \"Thanks for asking! Here is our pricing page: ...\",\n        \"greeting\": \"Hey! Thanks for reaching out \\U0001F44B\",\n        \"question\": \"Great question — let me get you an answer.\",\n    }\n    return replies.get(classified[\"category\"], \"Thanks for your message!\")\n\n\nnuraknect_chain = Chain([classify_intent, generate_reply])\nresult = nuraknect_chain.run(\"How much does your service cost?\")\nprint(result)\n\n# Bonus: add a moderate(dm) step that runs before classify_intent\n# and raises ValueError for banned words. Confirm Chain returns\n# {\"error\": \"...\"} instead of a reply when moderation trips.\n",
+        "tests": "_log = []\n_c = Chain([lambda v: v + 1, lambda v: v * 10])\nassert _c.run(1) == 20, \"steps must run in order, feeding each output into the next (1 + 1, then * 10)\"\ndef _boom(v):\n    raise ValueError(\"blocked\")\ndef _after(v):\n    _log.append(\"ran\")\n    return v\n_r = Chain([_boom, _after]).run(\"x\")\nassert _r == {\"error\": \"blocked\"}, f\"a failing step must return {{'error': str(e)}}, got {_r}\"\nassert _log == [], \"steps after a failing step must not run\"\nassert classify_intent(\"What is the price?\")[\"category\"] == \"purchase_intent\", \"price/cost messages are purchase_intent\"\nassert nuraknect_chain.run(\"How much does your service cost?\").startswith(\"Thanks for asking\"), \"the NuraKnect chain should reply to a cost question with the pricing reply\"",
+        "hints": [
+          "In run(), keep a `value` variable and do value = step(value) inside a for loop.",
+          "Wrap the step call in try/except Exception as e and return {\"error\": str(e)} immediately.",
+          "Remember the Chain must stop at the first failure, so return inside the except block, not after the loop."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "prompt chaining",
+        "moderation",
+        "classification"
+      ],
+      "recommended": true
     },
     {
       "id": "c6",
@@ -44,14 +61,31 @@
         "title": "Retrieval With Cosine Similarity",
         "question": "RAG retrieval works by comparing the embedding of a new query against the embeddings of stored documents and returning the most similar ones.\n\nYour task:\nWrite two functions:\n  cosine_similarity(vec_a, vec_b) → float\n    computes  dot(vec_a, vec_b) / (magnitude(vec_a) * magnitude(vec_b))\n\n  retrieve_top_k(query_vector, documents, k=2)\n    documents is a list of dicts: {\"id\": ..., \"text\": ..., \"embedding\": [...]}\n    returns the top k documents sorted by cosine similarity to query_vector, highest first, each tagged with its similarity score\n\nTest with this toy NuraKnect DM history (3D embeddings for simplicity — real embeddings are 1536+ dimensions, but the math is identical):\n\ndocuments = [\n  {\"id\": \"dm1\", \"text\": \"How much is the monthly plan?\", \"embedding\": [0.9, 0.1, 0.0]},\n  {\"id\": \"dm2\", \"text\": \"Is this available in India?\",   \"embedding\": [0.1, 0.9, 0.0]},\n  {\"id\": \"dm3\", \"text\": \"What does the pricing look like?\", \"embedding\": [0.85, 0.15, 0.0]},\n]\nquery = [0.88, 0.12, 0.0]  # embedding for: \"what's the cost?\"\n\nExpected: dm1 and dm3 rank above dm2 — they are about pricing, dm2 is about availability.\n\nBonus: what should retrieve_top_k return when documents is an empty list? Handle it without crashing — this is the 'no relevant context found' case.",
         "hint": "magnitude(v) = sqrt(sum(x*x for x in v)). Guard against division by zero if a vector is all zeros. Python's sorted(..., key=..., reverse=True) is the cleanest way to rank documents by score.",
-        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\ndef retrieve_top_k(query_vector, documents, k=2):\n    if not documents:\n        return []\n    scored = [\n        {**doc, \"score\": cosine_similarity(query_vector, doc[\"embedding\"])}\n        for doc in documents\n    ]\n    scored.sort(key=lambda d: d[\"score\"], reverse=True)\n    return scored[:k]\n\n\ndocuments = [\n    {\"id\": \"dm1\", \"text\": \"How much is the monthly plan?\", \"embedding\": [0.9, 0.1, 0.0]},\n    {\"id\": \"dm2\", \"text\": \"Is this available in India?\", \"embedding\": [0.1, 0.9, 0.0]},\n    {\"id\": \"dm3\", \"text\": \"What does the pricing look like?\", \"embedding\": [0.85, 0.15, 0.0]},\n]\nquery = [0.88, 0.12, 0.0]\n\nresults = retrieve_top_k(query, documents, k=2)\nfor r in results:\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['text']}\")\n\n# Bonus: try retrieve_top_k(query, [], k=2) — should return [] not crash\n"
-      }
+        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\ndef retrieve_top_k(query_vector, documents, k=2):\n    if not documents:\n        return []\n    scored = [\n        {**doc, \"score\": cosine_similarity(query_vector, doc[\"embedding\"])}\n        for doc in documents\n    ]\n    scored.sort(key=lambda d: d[\"score\"], reverse=True)\n    return scored[:k]\n\n\ndocuments = [\n    {\"id\": \"dm1\", \"text\": \"How much is the monthly plan?\", \"embedding\": [0.9, 0.1, 0.0]},\n    {\"id\": \"dm2\", \"text\": \"Is this available in India?\", \"embedding\": [0.1, 0.9, 0.0]},\n    {\"id\": \"dm3\", \"text\": \"What does the pricing look like?\", \"embedding\": [0.85, 0.15, 0.0]},\n]\nquery = [0.88, 0.12, 0.0]\n\nresults = retrieve_top_k(query, documents, k=2)\nfor r in results:\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['text']}\")\n\n# Bonus: try retrieve_top_k(query, [], k=2) — should return [] not crash\n",
+        "tests": "assert abs(cosine_similarity([1.0, 0.0], [1.0, 0.0]) - 1.0) < 1e-9, \"identical vectors have similarity 1\"\nassert abs(cosine_similarity([1.0, 0.0], [0.0, 1.0])) < 1e-9, \"orthogonal vectors have similarity 0\"\nassert cosine_similarity([0.0, 0.0], [1.0, 1.0]) == 0.0, \"a zero vector must not crash; return 0.0\"\n_docs = [{\"id\": \"dm1\", \"text\": \"a\", \"embedding\": [0.9, 0.1, 0.0]}, {\"id\": \"dm2\", \"text\": \"b\", \"embedding\": [0.1, 0.9, 0.0]}, {\"id\": \"dm3\", \"text\": \"c\", \"embedding\": [0.85, 0.15, 0.0]}]\n_top = retrieve_top_k([0.88, 0.12, 0.0], _docs, k=2)\nassert sorted(d[\"id\"] for d in _top) == [\"dm1\", \"dm3\"], f\"the two pricing DMs should rank above dm2, got {[d['id'] for d in _top]}\"\nassert all(\"score\" in d for d in _top) and _top[0][\"score\"] >= _top[1][\"score\"], \"results need a score and must be sorted highest first\"\nassert retrieve_top_k([1.0, 0.0, 0.0], [], k=2) == [], \"no documents must return an empty list\"",
+        "hints": [
+          "magnitude = math.sqrt(sum(x * x for x in v)); return 0.0 if either magnitude is 0.",
+          "Build scored = [{**doc, \"score\": cosine_similarity(query_vector, doc[\"embedding\"])} for doc in documents].",
+          "scored.sort(key=lambda d: d[\"score\"], reverse=True); return scored[:k], and return [] first when documents is empty."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "RAG",
+        "retrieval",
+        "evaluation"
+      ],
+      "recommended": true
     },
     {
       "id": "c7",
       "title": "LangChain for LLM Application Development",
       "platform": "DeepLearning.AI",
-      "url": "https://udemy.com/course/production-ai-agents",
+      "url": "https://www.deeplearning.ai/short-courses/langchain-for-llm-application-development/",
       "cost": "Free",
       "duration": "2 hours",
       "status": "not-started",
@@ -63,8 +97,24 @@
         "title": "Build a Minimal LCEL-Style Pipe Chain",
         "question": "LangChain's LCEL lets you compose steps with the  |  operator: chain = prompt | model | parser. This challenge builds that pipe syntax yourself using Python's operator overloading, so you understand what LCEL is actually doing under the hood instead of treating it as magic.\n\nYour task:\nBuild a class  Runnable  that:\n  1. Wraps a single function in  __init__(self, func)\n  2. Has an  invoke(self, input_value)  method that calls self.func(input_value)\n  3. Overrides  __or__(self, other)  so that  runnable_a | runnable_b  returns a NEW Runnable whose invoke() calls runnable_a's function, then feeds that result into runnable_b's invoke()\n\nThen build 3 small functions for NuraKnect and chain all three with  |  :\n  parse_dm(raw)      → strips whitespace, lowercases\n  classify(text)     → returns {\"category\": \"purchase_intent\" if \"price\" in text or \"cost\" in text else \"question\", \"text\": text}\n  format_response(classified) → returns a formatted string: f\"[{classified['category'].upper()}] {classified['text']}\"\n\n  pipeline = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\n  print(pipeline.invoke(\"  What's the COST?  \"))\n\nExpected output: [PURCHASE_INTENT] what's the cost?",
         "hint": "__or__(self, other) should return Runnable(lambda x: other.invoke(self.invoke(x))). This is the entire trick behind LCEL — each pipe just nests one more function call. Chaining 3+ runnables works automatically because Python evaluates | left to right.",
-        "starterCode": "class Runnable:\n    def __init__(self, func):\n        self.func = func\n\n    def invoke(self, input_value):\n        return self.func(input_value)\n\n    def __or__(self, other):\n        return Runnable(lambda x: other.invoke(self.invoke(x)))\n\n\ndef parse_dm(raw):\n    return raw.strip().lower()\n\n\ndef classify(text):\n    category = \"purchase_intent\" if (\"price\" in text or \"cost\" in text) else \"question\"\n    return {\"category\": category, \"text\": text}\n\n\ndef format_response(classified):\n    return f\"[{classified['category'].upper()}] {classified['text']}\"\n\n\npipeline = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\nprint(pipeline.invoke(\"  What's the COST?  \"))\n# Expected: [PURCHASE_INTENT] what's the cost?\n"
-      }
+        "starterCode": "class Runnable:\n    def __init__(self, func):\n        self.func = func\n\n    def invoke(self, input_value):\n        return self.func(input_value)\n\n    def __or__(self, other):\n        return Runnable(lambda x: other.invoke(self.invoke(x)))\n\n\ndef parse_dm(raw):\n    return raw.strip().lower()\n\n\ndef classify(text):\n    category = \"purchase_intent\" if (\"price\" in text or \"cost\" in text) else \"question\"\n    return {\"category\": category, \"text\": text}\n\n\ndef format_response(classified):\n    return f\"[{classified['category'].upper()}] {classified['text']}\"\n\n\npipeline = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\nprint(pipeline.invoke(\"  What's the COST?  \"))\n# Expected: [PURCHASE_INTENT] what's the cost?\n",
+        "tests": "_p = Runnable(parse_dm) | Runnable(classify) | Runnable(format_response)\nassert _p.invoke(\"  What's the COST?  \") == \"[PURCHASE_INTENT] what's the cost?\", f\"got {_p.invoke('  What' + chr(39) + 's the COST?  ')}\"\nassert isinstance(Runnable(lambda x: x) | Runnable(lambda x: x), Runnable), \"a | b must return a new Runnable\"\nassert (Runnable(lambda x: x + 1) | Runnable(lambda x: x * 2)).invoke(3) == 8, \"left side runs first: (3 + 1) * 2\"\nassert (Runnable(lambda x: x * 2) | Runnable(lambda x: x + 1)).invoke(3) == 7, \"order matters: (3 * 2) + 1\"\nassert Runnable(lambda x: x.upper()).invoke(\"dm\") == \"DM\", \"invoke should call the wrapped function\"",
+        "hints": [
+          "invoke is just return self.func(input_value).",
+          "__or__ must return a Runnable, not call anything yet: return Runnable(...).",
+          "Runnable(lambda x: other.invoke(self.invoke(x))) is the whole trick."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "LangChain",
+        "LCEL",
+        "chains"
+      ]
     },
     {
       "id": "c8",
@@ -82,13 +132,366 @@
         "title": "Build an In-Memory Vector Store (Mini Qdrant)",
         "question": "Before setting up real Qdrant in Docker, prove you understand what it does internally by building a minimal version yourself: a collection that stores vectors + payload metadata, and supports similarity search with metadata filtering (hybrid search).\n\nYour task:\nBuild a class  VectorStore  that:\n  1.  add(self, id, vector, payload)  — stores one point: {id, vector, payload}\n  2.  search(self, query_vector, top_k=3, filter_fn=None)  —\n        computes cosine similarity between query_vector and every stored vector\n        if filter_fn is given, first drops any point where filter_fn(point['payload']) is False (this is Qdrant's payload filtering)\n        returns the top_k remaining points sorted by similarity score, highest first\n\nTest it with 5 real-style NuraKnect DM examples (toy embeddings), then:\n  a. Run search() with no filter — get the top 3 overall\n  b. Run search() with  filter_fn=lambda p: p['category'] == 'purchase_intent' — get the top matches restricted to that category only\n\nThis is exactly the hybrid search pattern (semantic similarity + metadata filter) you will use in real Qdrant for NuraKnect.",
         "hint": "Reuse cosine_similarity from the RAG challenge (Course 6) — the math does not change just because you're calling it a 'vector database' now. Filter BEFORE ranking, not after, so top_k is computed only over the allowed subset.",
-        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\nclass VectorStore:\n    def __init__(self):\n        self.points = []\n\n    def add(self, id, vector, payload):\n        self.points.append({\"id\": id, \"vector\": vector, \"payload\": payload})\n\n    def search(self, query_vector, top_k=3, filter_fn=None):\n        candidates = self.points\n        if filter_fn is not None:\n            candidates = [p for p in candidates if filter_fn(p[\"payload\"])]\n        scored = [\n            {**p, \"score\": cosine_similarity(query_vector, p[\"vector\"])}\n            for p in candidates\n        ]\n        scored.sort(key=lambda p: p[\"score\"], reverse=True)\n        return scored[:top_k]\n\n\nstore = VectorStore()\nstore.add(\"dm1\", [0.9, 0.1, 0.0], {\"category\": \"purchase_intent\", \"text\": \"How much is it?\"})\nstore.add(\"dm2\", [0.1, 0.9, 0.0], {\"category\": \"question\", \"text\": \"Do you ship to India?\"})\nstore.add(\"dm3\", [0.85, 0.15, 0.0], {\"category\": \"purchase_intent\", \"text\": \"What's the pricing?\"})\nstore.add(\"dm4\", [0.0, 0.1, 0.9], {\"category\": \"complaint\", \"text\": \"My order never arrived\"})\nstore.add(\"dm5\", [0.88, 0.1, 0.05], {\"category\": \"purchase_intent\", \"text\": \"Cost for annual plan?\"})\n\nquery = [0.88, 0.12, 0.0]  # embedding for: \"what's the cost?\"\n\nprint(\"-- no filter --\")\nfor r in store.search(query, top_k=3):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n\nprint(\"-- filtered to purchase_intent --\")\nfor r in store.search(query, top_k=3, filter_fn=lambda p: p[\"category\"] == \"purchase_intent\"):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n"
-      }
+        "starterCode": "import math\n\ndef cosine_similarity(vec_a, vec_b):\n    dot = sum(a * b for a, b in zip(vec_a, vec_b))\n    mag_a = math.sqrt(sum(a * a for a in vec_a))\n    mag_b = math.sqrt(sum(b * b for b in vec_b))\n    if mag_a == 0 or mag_b == 0:\n        return 0.0\n    return dot / (mag_a * mag_b)\n\n\nclass VectorStore:\n    def __init__(self):\n        self.points = []\n\n    def add(self, id, vector, payload):\n        self.points.append({\"id\": id, \"vector\": vector, \"payload\": payload})\n\n    def search(self, query_vector, top_k=3, filter_fn=None):\n        candidates = self.points\n        if filter_fn is not None:\n            candidates = [p for p in candidates if filter_fn(p[\"payload\"])]\n        scored = [\n            {**p, \"score\": cosine_similarity(query_vector, p[\"vector\"])}\n            for p in candidates\n        ]\n        scored.sort(key=lambda p: p[\"score\"], reverse=True)\n        return scored[:top_k]\n\n\nstore = VectorStore()\nstore.add(\"dm1\", [0.9, 0.1, 0.0], {\"category\": \"purchase_intent\", \"text\": \"How much is it?\"})\nstore.add(\"dm2\", [0.1, 0.9, 0.0], {\"category\": \"question\", \"text\": \"Do you ship to India?\"})\nstore.add(\"dm3\", [0.85, 0.15, 0.0], {\"category\": \"purchase_intent\", \"text\": \"What's the pricing?\"})\nstore.add(\"dm4\", [0.0, 0.1, 0.9], {\"category\": \"complaint\", \"text\": \"My order never arrived\"})\nstore.add(\"dm5\", [0.88, 0.1, 0.05], {\"category\": \"purchase_intent\", \"text\": \"Cost for annual plan?\"})\n\nquery = [0.88, 0.12, 0.0]  # embedding for: \"what's the cost?\"\n\nprint(\"-- no filter --\")\nfor r in store.search(query, top_k=3):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n\nprint(\"-- filtered to purchase_intent --\")\nfor r in store.search(query, top_k=3, filter_fn=lambda p: p[\"category\"] == \"purchase_intent\"):\n    print(f\"{r['id']}  score={r['score']:.3f}  {r['payload']['text']}\")\n",
+        "tests": "_s = VectorStore()\n_s.add(\"a\", [1.0, 0.0], {\"cat\": \"x\"})\n_s.add(\"b\", [0.0, 1.0], {\"cat\": \"y\"})\n_s.add(\"c\", [0.9, 0.1], {\"cat\": \"y\"})\nassert [r[\"id\"] for r in _s.search([1.0, 0.0], top_k=2)] == [\"a\", \"c\"], \"search must rank by cosine similarity, highest first\"\nassert len(_s.search([1.0, 0.0], top_k=1)) == 1, \"top_k limits the number of results\"\nassert [r[\"id\"] for r in _s.search([1.0, 0.0], top_k=3, filter_fn=lambda p: p[\"cat\"] == \"y\")] == [\"c\", \"b\"], \"the filter must drop points before ranking\"\nassert _s.search([1.0, 0.0], filter_fn=lambda p: False) == [], \"a filter that matches nothing returns an empty list\"\nassert all(\"score\" in r for r in _s.search([1.0, 0.0])), \"every result carries its score\"",
+        "hints": [
+          "Keep self.points as a list of {id, vector, payload} dicts; add() just appends one.",
+          "Filter first: candidates = [p for p in self.points if filter_fn(p[\"payload\"])] when filter_fn is given.",
+          "Score each remaining point with cosine_similarity, sort by score descending, return scored[:top_k]."
+        ]
+      },
+      "kind": "course",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "vector databases",
+        "metadata filtering",
+        "semantic search"
+      ]
+    },
+    {
+      "id": "c201",
+      "title": "Hybrid search explained (BM25 plus vectors)",
+      "platform": "Weaviate",
+      "url": "https://weaviate.io/blog/hybrid-search-explained",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 5,
+      "why": "Vectors miss exact terms like product codes or names; keyword search misses paraphrases. Hybrid search combines both, which NuraKnect needs for price and SKU questions.",
+      "kind": "article",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c8"
+      ],
+      "skills": [
+        "hybrid search",
+        "BM25",
+        "rank fusion"
+      ]
+    },
+    {
+      "id": "c202",
+      "title": "Rerankers and two-stage retrieval",
+      "platform": "Pinecone",
+      "url": "https://www.pinecone.io/learn/series/rag/rerankers/",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 6,
+      "why": "Fast retrieval pulls 50 candidates; a reranker reorders them so the best 3 reach the prompt. Often the cheapest quality gain in a RAG pipeline.",
+      "kind": "article",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c6"
+      ],
+      "skills": [
+        "reranking",
+        "cross-encoder",
+        "two-stage retrieval"
+      ]
+    },
+    {
+      "id": "c203",
+      "title": "Contextual retrieval",
+      "platform": "Anthropic",
+      "url": "https://www.anthropic.com/news/contextual-retrieval",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 7,
+      "why": "Adds a short chunk-specific context before embedding so a chunk like 'the price went up' knows which plan it belongs to. Reported to cut failed retrievals substantially when combined with BM25 and reranking.",
+      "kind": "article",
+      "price": "free",
+      "recommended": true,
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c201"
+      ],
+      "skills": [
+        "contextual retrieval",
+        "chunking",
+        "prompt caching"
+      ]
+    },
+    {
+      "id": "c204",
+      "title": "HyDE: hypothetical document embeddings",
+      "platform": "arXiv",
+      "url": "https://arxiv.org/abs/2212.10496",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 8,
+      "why": "Embed a model-written hypothetical answer instead of the short question to find better matches. Useful when users send vague one-line DMs.",
+      "kind": "article",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c6"
+      ],
+      "skills": [
+        "HyDE",
+        "query rewriting",
+        "dense retrieval"
+      ]
+    },
+    {
+      "id": "c211",
+      "title": "RAGAS: evaluating a RAG pipeline",
+      "platform": "Ragas",
+      "url": "https://docs.ragas.io/en/stable/getstarted/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 9,
+      "why": "Gives you numbers (faithfulness, context precision and recall) so retrieval changes are measured rather than guessed.",
+      "kind": "docs",
+      "price": "free",
+      "recommended": true,
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c6"
+      ],
+      "skills": [
+        "RAG evaluation",
+        "faithfulness",
+        "context recall"
+      ]
+    },
+    {
+      "id": "c207",
+      "title": "Qdrant quickstart",
+      "platform": "Qdrant",
+      "url": "https://qdrant.tech/documentation/quickstart/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 10,
+      "why": "Purpose-built vector database with payload filtering and hybrid queries. The layer's build tasks use it.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "pickGroup": "vector-db",
+      "prereqs": [
+        "c8"
+      ],
+      "skills": [
+        "Qdrant",
+        "payload filters",
+        "collections"
+      ]
+    },
+    {
+      "id": "c208",
+      "title": "pgvector",
+      "platform": "GitHub (pgvector)",
+      "url": "https://github.com/pgvector/pgvector#getting-started",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 11,
+      "why": "Vectors inside Postgres: one database for users, DMs and embeddings. Good fit if NuraKnect already runs on Postgres.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "pickGroup": "vector-db",
+      "prereqs": [
+        "c8"
+      ],
+      "skills": [
+        "pgvector",
+        "Postgres",
+        "HNSW index"
+      ]
+    },
+    {
+      "id": "c209",
+      "title": "Chroma getting started",
+      "platform": "Chroma",
+      "url": "https://docs.trychroma.com/docs/overview/getting-started",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 12,
+      "why": "Smallest setup for local prototypes: pip install and go. Good for the first PDF Q&A.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "pickGroup": "vector-db",
+      "prereqs": [
+        "c8"
+      ],
+      "skills": [
+        "Chroma",
+        "local prototype",
+        "collections"
+      ]
+    },
+    {
+      "id": "c212",
+      "title": "Project: PDF Q&A with sources",
+      "platform": "Build",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/06-rag",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 13,
+      "why": "Chunk one PDF (for example NuraKnect's FAQ), embed it, and answer questions with the source passage shown.",
+      "kind": "project",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "beginner",
+      "prereqs": [
+        "c6",
+        "c209"
+      ],
+      "skills": [
+        "chunking",
+        "embeddings",
+        "grounded answers"
+      ],
+      "keep": [
+        "Repo with ingest and ask scripts",
+        "10 test questions with answers and cited passages",
+        "Notes on one wrong answer and why"
+      ]
+    },
+    {
+      "id": "c213",
+      "title": "Project: Hybrid search over NuraKnect DMs",
+      "platform": "Build",
+      "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 14,
+      "why": "Combine keyword and vector search over 50+ DMs and compare it with vectors alone on exact-term queries.",
+      "kind": "project",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "prereqs": [
+        "c201",
+        "c207"
+      ],
+      "skills": [
+        "hybrid search",
+        "rank fusion",
+        "evaluation"
+      ],
+      "keep": [
+        "Index and query code",
+        "10 queries with results for vector-only versus hybrid",
+        "Short note on where hybrid won or lost"
+      ]
+    },
+    {
+      "id": "c214",
+      "title": "Project: Add a reranker and measure before and after",
+      "platform": "Build",
+      "url": "https://www.sbert.net/examples/applications/retrieve_rerank/README.html",
+      "cost": "Free",
+      "duration": "4 hours",
+      "status": "not-started",
+      "order": 15,
+      "why": "Add a cross-encoder reranker to your hybrid search, score both versions with RAGAS or recall@k on 20 queries, and publish the numbers.",
+      "kind": "project",
+      "price": "free",
+      "hours": 4,
+      "track": "optional",
+      "stage": "advanced",
+      "prereqs": [
+        "c202",
+        "c211",
+        "c213"
+      ],
+      "skills": [
+        "reranking",
+        "RAGAS",
+        "recall@k"
+      ],
+      "keep": [
+        "Before and after table on 20 queries",
+        "Latency added by the reranker",
+        "Decision: keep or drop the reranker"
+      ]
+    },
+    {
+      "id": "c205",
+      "title": "GraphRAG (Microsoft)",
+      "platform": "Microsoft",
+      "url": "https://microsoft.github.io/graphrag/",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 16,
+      "why": "Builds a knowledge graph and community summaries to answer questions about a whole corpus. Read to know when plain RAG is not enough.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "advanced",
+      "prereqs": [
+        "c6"
+      ],
+      "skills": [
+        "GraphRAG",
+        "knowledge graph",
+        "global questions"
+      ]
+    },
+    {
+      "id": "c206",
+      "title": "Building Agentic RAG with LlamaIndex",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/building-agentic-rag-with-llamaindex/",
+      "cost": "Free",
+      "duration": "1 hour",
+      "status": "not-started",
+      "order": 17,
+      "why": "Lets an agent decide when and what to retrieve, and break a question into steps. Bridges into Layer 3 agents.",
+      "kind": "course",
+      "price": "free",
+      "hours": 1,
+      "track": "optional",
+      "stage": "advanced",
+      "prereqs": [
+        "c6",
+        "c7"
+      ],
+      "skills": [
+        "agentic RAG",
+        "tool use",
+        "routing"
+      ]
     }
   ],
   "quiz": {
     "status": "locked",
-    "unlockCondition": "Complete all 4 courses in this layer",
+    "unlockCondition": "Complete all core items in this layer",
     "passingScore": 70,
     "questions": [
       {
@@ -120,7 +523,156 @@
         "type": "architectural",
         "question": "Your Qdrant vector database is returning irrelevant results for some NuraKnect DMs. Walk through 3 things you would investigate and exactly how you would fix each one.",
         "hint": "Think about chunking, embedding model, metadata filter"
+      },
+      {
+        "id": "q6",
+        "type": "conceptual",
+        "question": "Two DMs mean the same thing but use different words. Their embeddings are usually...",
+        "hint": "Think about what embeddings capture.",
+        "options": [
+          "Identical vectors, exactly the same",
+          "Far apart in vector space",
+          "Close together in vector space",
+          "Impossible to compare at all"
+        ],
+        "correct": 2,
+        "explanation": "Embeddings place similar meanings near each other even when the wording differs, which is why semantic search works.",
+        "stage": "pre"
+      },
+      {
+        "id": "q7",
+        "type": "conceptual",
+        "question": "What does cosine similarity measure?",
+        "hint": "Picture two arrows from the origin.",
+        "options": [
+          "The angle between two vectors",
+          "The number of shared words",
+          "The length of the longer vector",
+          "The time taken to compute it"
+        ],
+        "correct": 0,
+        "explanation": "Cosine similarity compares direction, ignoring vector length, so it ranks by similarity of meaning.",
+        "stage": "pre"
+      },
+      {
+        "id": "q8",
+        "type": "architectural",
+        "question": "A customer asks about code 'SKU-4471'. Why add keyword search to vector search?",
+        "hint": "Think about exact strings.",
+        "options": [
+          "Vectors cannot store numbers at all",
+          "BM25 removes the need for embeddings",
+          "Keyword search writes the final answer",
+          "Exact terms like codes match best by keyword"
+        ],
+        "correct": 3,
+        "explanation": "Dense vectors blur exact strings, while BM25 matches them precisely. Hybrid search merges both ranked lists.",
+        "stage": "check"
+      },
+      {
+        "id": "q9",
+        "type": "architectural",
+        "question": "Where does a reranker sit in a RAG pipeline?",
+        "hint": "Remember the two-stage idea.",
+        "options": [
+          "Before chunking, splitting the documents",
+          "After first retrieval, reordering the top candidates",
+          "After generation, rewriting the answer",
+          "Inside the vector index as storage"
+        ],
+        "correct": 1,
+        "explanation": "A reranker rescores the top candidates from the first retrieval, then the best few go into the prompt.",
+        "stage": "check"
+      },
+      {
+        "id": "q10",
+        "type": "conceptual",
+        "question": "What does contextual retrieval add to each chunk before it is embedded?",
+        "hint": "Think about a chunk that says only 'it went up 3%'.",
+        "options": [
+          "A short note placing the chunk in its document",
+          "A copy of every other chunk in the file",
+          "A translation into several languages",
+          "A random id so duplicates are removed"
+        ],
+        "correct": 0,
+        "explanation": "A short generated context that situates the chunk in the whole document is prepended, so retrieval can tell which plan or product the chunk is about.",
+        "stage": "post"
+      },
+      {
+        "id": "q11",
+        "type": "practical",
+        "question": "An answer sounds right but states facts missing from the retrieved text. Which RAGAS metric flags it?",
+        "hint": "Look at faithfulness versus recall.",
+        "options": [
+          "Context recall",
+          "Latency p95",
+          "Faithfulness",
+          "Embedding dimension"
+        ],
+        "correct": 2,
+        "explanation": "Faithfulness checks whether the answer's claims are supported by the retrieved context.",
+        "stage": "post"
       }
+    ]
+  },
+  "pickGroups": [
+    {
+      "id": "vector-db",
+      "label": "Vector DB: pick one"
+    }
+  ],
+  "mustKnow": [
+    {
+      "term": "Chunking",
+      "oneLiner": "Splitting documents into pieces small enough to retrieve and fit in context.",
+      "misconception": "Smaller chunks are not always better; too small loses the surrounding meaning."
+    },
+    {
+      "term": "Cosine similarity",
+      "oneLiner": "A score for how closely two embedding vectors point in the same direction.",
+      "misconception": "A high score means similar text, not that the text is true or relevant to the question."
+    },
+    {
+      "term": "Hybrid search",
+      "oneLiner": "Combining keyword (BM25) and vector search, then merging the ranked lists.",
+      "misconception": "Embeddings do not replace keyword search; exact codes and names still need it."
+    },
+    {
+      "term": "Reranker",
+      "oneLiner": "A second model that rescores the top candidates from the first retrieval so the best ones come first.",
+      "misconception": "A reranker does not search the whole corpus; it only reorders what retrieval already found."
+    },
+    {
+      "term": "Retrieval vs answer quality",
+      "oneLiner": "Measure retrieval (did the right passage come back) separately from generation (is the answer faithful to it).",
+      "misconception": "A fluent answer is not proof that retrieval worked."
+    },
+    {
+      "term": "RAG vs fine-tuning",
+      "oneLiner": "RAG supplies facts at request time; fine-tuning changes the model's behaviour or style.",
+      "misconception": "Fine-tuning is not a good way to add fresh facts."
+    }
+  ],
+  "stageGoals": {
+    "beginner": "Build a working PDF question-answering app that cites its source passages.",
+    "intermediate": "Combine keyword and vector search, and measure retrieval quality with a test set and RAGAS.",
+    "advanced": "Add a reranker or graph or agent step and prove with before and after numbers that it helped."
+  },
+  "startHere": "Already built a basic RAG app? Skim c5 to c8, check the pre questions, then start at c201 (hybrid search) and c211 (RAGAS).",
+  "outcomes": [
+    "Build a RAG pipeline that answers from your documents and cites sources",
+    "Choose a vector database for a project and explain the trade-off",
+    "Combine keyword and vector search and say when each wins",
+    "Measure retrieval and answer quality with a test set and RAGAS",
+    "Add a reranker and report its quality gain against its latency cost"
+  ],
+  "portfolioProof": {
+    "title": "NuraKnect retrieval: from PDF Q&A to a measured reranker",
+    "evidence": [
+      "Repo with PDF Q&A, hybrid search and reranker code",
+      "Before and after table on 20 queries (recall@k or RAGAS)",
+      "One-page note on chunking, vector DB choice and what did not work"
     ]
   }
 }

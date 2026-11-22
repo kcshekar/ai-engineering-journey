@@ -2,9 +2,12 @@
   "weeklyPlan": [
     {
       "week": 1,
-      "focus": "Neural Networks",
+      "focus": "Neural Networks and tokens",
       "courses": [
-        "c1"
+        "c1",
+        "c101",
+        "c102",
+        "c111"
       ],
       "dailyMinutes": 90,
       "buildTask": "Write a one paragraph explanation of backpropagation in your own words",
@@ -12,10 +15,11 @@
     },
     {
       "week": 2,
-      "focus": "Transformers & LLMs",
+      "focus": "Transformers & LLMs and embeddings",
       "courses": [
         "c2",
-        "c3"
+        "c3",
+        "c103"
       ],
       "dailyMinutes": 90,
       "buildTask": "Make your first raw OpenAI API call in Python. No framework. Just the API.",
@@ -23,9 +27,15 @@
     },
     {
       "week": 3,
-      "focus": "Prompt Engineering",
+      "focus": "Prompt Engineering, Context and Model Choice",
       "courses": [
-        "c4"
+        "c4",
+        "c104",
+        "c105",
+        "c107",
+        "c108",
+        "c109",
+        "c112"
       ],
       "dailyMinutes": 90,
       "buildTask": "Build NuraKnect's first DM intent classifier using raw LLM API. Classify: complaint, question, purchase intent, greeting.",

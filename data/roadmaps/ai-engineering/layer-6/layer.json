@@ -1,0 +1,679 @@
+{
+  "id": 6,
+  "title": "Production AI Systems",
+  "status": "not-started",
+  "weeks": "19-22",
+  "description": "Serving, cost and latency control, caching, routing, reliability and monitoring: making an AI feature fast, cheap and safe to run",
+  "appliesTo": [
+    "nuraknect"
+  ],
+  "mustKnow": [
+    {
+      "term": "KV cache",
+      "oneLiner": "Stored attention keys and values of earlier tokens, so each new token does not recompute the whole prompt.",
+      "misconception": "It is not a response cache; it lives inside one request and costs GPU memory."
+    },
+    {
+      "term": "Continuous batching",
+      "oneLiner": "The server adds and removes requests from the running batch at every decoding step.",
+      "misconception": "It does not mean waiting to collect a big batch; that would raise latency."
+    },
+    {
+      "term": "Prompt caching",
+      "oneLiner": "The provider reuses its work on an identical prompt prefix and bills those tokens at a lower rate.",
+      "misconception": "It does not cache answers; the model still generates a fresh reply each time."
+    },
+    {
+      "term": "Semantic caching",
+      "oneLiner": "You return a stored answer when a new question is close enough in embedding space.",
+      "misconception": "A high similarity score does not guarantee the same answer is correct."
+    },
+    {
+      "term": "p95 latency",
+      "oneLiner": "95 percent of requests finish faster than this time; it shows what slow users feel.",
+      "misconception": "The average is not enough; a few slow calls can hide inside a good mean."
+    },
+    {
+      "term": "Backoff with jitter",
+      "oneLiner": "After a failure, wait a random, growing time before retrying so clients do not retry in sync."
+    },
+    {
+      "term": "Model routing",
+      "oneLiner": "A rule or small classifier sends each request to the cheapest model that can handle it, with a fallback.",
+      "misconception": "Routing by cost alone can quietly lower quality; measure both."
+    }
+  ],
+  "stageGoals": {
+    "beginner": "Call a model with streaming, retries and a cost log, and read your own token bill.",
+    "intermediate": "Add prompt and semantic caching and a model router, and prove the effect with cost and p95 numbers.",
+    "advanced": "Serve an open model, load-test it, and decide build versus buy with a scorecard."
+  },
+  "pickGroups": [
+    {
+      "id": "local-serving",
+      "label": "Local serving: pick one"
+    }
+  ],
+  "startHere": "If you already call LLM APIs in production, skim c601 and c603, then start at caching (c602, c604) and routing (c605); do the projects in order.",
+  "outcomes": [
+    "Explain the KV cache, batching and why output tokens cost more",
+    "Cut cost and latency with prompt caching, semantic caching and model routing, and measure the result",
+    "Make API calls reliable with streaming, timeouts, retries with jitter and rate-limit handling",
+    "Run an open model locally with vLLM, Ollama or llama.cpp behind an OpenAI-compatible API",
+    "Report p50 and p95 latency and cost per request for an AI feature",
+    "Answer AI system-design questions on serving, cost and capacity"
+  ],
+  "portfolioProof": {
+    "title": "NuraKnect production hardening report",
+    "evidence": [
+      "Streaming, retry and cost-log commit in the reply endpoint",
+      "Cost and p50/p95 latency table: baseline vs cached vs routed",
+      "One-page cost/latency scorecard for a self-hosted model versus the hosted API"
+    ]
+  },
+  "quiz": {
+    "status": "locked",
+    "unlockCondition": "Complete all core items in this layer",
+    "passingScore": 70,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "architectural",
+        "question": "Your NuraKnect reply endpoint costs too much and is slow at the 95th percentile. List the first five things you would measure, then the first three changes you would try, in order.",
+        "hint": "Think tokens in/out per reply, cache hit rate, time to first token, retry rate, model mix. Cheap, reversible changes come first."
+      },
+      {
+        "id": "q2",
+        "type": "conceptual",
+        "question": "Explain the KV cache and continuous batching to a teammate in plain words. Why do they raise throughput, and what do they cost in GPU memory?",
+        "hint": "Think about what is recomputed at each generation step, and how new requests join a running batch."
+      },
+      {
+        "id": "q3",
+        "type": "practical",
+        "question": "Design a semantic cache for NuraKnect DM replies. Which messages are safe to cache, what similarity threshold would you start with, how would you catch a false hit, and when would you invalidate entries?",
+        "hint": "Think about personal data, per-customer facts, a TTL, and logging every hit for review."
+      },
+      {
+        "id": "q4",
+        "type": "architectural",
+        "question": "Decide: keep the hosted API only, or add a self-hosted open model? Give the numbers you would need (traffic, tokens, GPU cost, quality gap, ops effort) and your recommendation for NuraKnect today.",
+        "hint": "Break-even depends on utilisation. Remember on-call effort and the quality difference on your own eval set."
+      },
+      {
+        "id": "q5",
+        "type": "conceptual",
+        "question": "Which HTTP status code usually means you have hit a provider rate limit?",
+        "hint": "It is a 4xx code, not a server error.",
+        "options": [
+          "401",
+          "404",
+          "429",
+          "503"
+        ],
+        "correct": 2,
+        "explanation": "429 means too many requests. 503 is an overloaded service, which you also retry, but 429 is the rate-limit signal.",
+        "stage": "pre"
+      },
+      {
+        "id": "q6",
+        "type": "conceptual",
+        "question": "Why are output tokens usually priced higher than input tokens?",
+        "hint": "Think about how each kind is processed.",
+        "options": [
+          "Output tokens need extra safety checks",
+          "Each output token needs its own sequential forward pass",
+          "Output text is always longer than the prompt",
+          "Input tokens are mostly served from a cache"
+        ],
+        "correct": 1,
+        "explanation": "The model reads the whole prompt in parallel but generates output one token at a time, each needing a forward pass.",
+        "stage": "pre"
+      },
+      {
+        "id": "q7",
+        "type": "practical",
+        "question": "You want prompt caching to help. Where should the stable content (system prompt, tool definitions, fixed examples) go?",
+        "hint": "Caches match a prefix of the prompt.",
+        "options": [
+          "At the end, after the user message",
+          "Split evenly through the prompt",
+          "Anywhere, order does not matter",
+          "At the start, before the changing parts"
+        ],
+        "correct": 3,
+        "explanation": "Prompt caches match an identical prefix, so stable content goes first and the per-request text goes last.",
+        "stage": "check"
+      },
+      {
+        "id": "q8",
+        "type": "conceptual",
+        "question": "What does continuous batching do in a server like vLLM?",
+        "hint": "It is about when requests join the batch.",
+        "options": [
+          "Waits for a full batch before starting",
+          "Lets new requests join between decoding steps",
+          "Runs one request at a time per GPU",
+          "Compresses the batch to save disk space"
+        ],
+        "correct": 1,
+        "explanation": "Requests are added to and removed from the running batch at every decoding step, so the GPU stays busy and short requests do not wait for long ones.",
+        "stage": "check"
+      },
+      {
+        "id": "q9",
+        "type": "practical",
+        "question": "What is the main risk of a semantic cache with a loose similarity threshold?",
+        "hint": "Think about two questions that look alike.",
+        "options": [
+          "Returning an answer cached for a different question",
+          "The cache fills the disk very quickly",
+          "Embeddings stop working after a while",
+          "Every request becomes slower than before"
+        ],
+        "correct": 0,
+        "explanation": "A loose threshold can match a similar-looking but different question and return a wrong answer with full confidence. Tune the threshold on real examples and log hits.",
+        "stage": "post"
+      },
+      {
+        "id": "q10",
+        "type": "practical",
+        "question": "Many clients retry after a 429 with plain exponential backoff and no jitter. What goes wrong?",
+        "hint": "Think about what happens when they all started together.",
+        "options": [
+          "Delays grow too slowly to help",
+          "The cap is never reached",
+          "Retries bunch up and hit the API in waves",
+          "Output tokens are billed twice"
+        ],
+        "correct": 2,
+        "explanation": "Without jitter, clients that failed together retry together, so the load arrives in synchronized waves. Random jitter spreads the retries out.",
+        "stage": "post"
+      }
+    ]
+  },
+  "courses": [
+    {
+      "id": "c601",
+      "title": "Efficiently Serving LLMs",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/efficiently-serving-llms/",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 1,
+      "why": "Builds KV caching, continuous batching and the cost of serving from first principles. This is the mental model behind every latency and cost number in the rest of the layer.",
+      "kind": "course",
+      "price": "free",
+      "hours": 2.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "KV cache",
+        "continuous batching",
+        "throughput vs latency",
+        "TTFT"
+      ],
+      "recommended": true,
+      "pythonChallenge": {
+        "level": 2,
+        "difficulty": "Beginner",
+        "title": "p50 and p95 Latency",
+        "question": "Average latency hides the slow requests your users actually notice. Production teams track percentiles: p50 (median), p95 and p99.\n\nYour task:\nWrite  percentile(values, p)  using the nearest-rank method: sort the values, take rank k = ceil(p / 100 * n) (at least 1), return the k-th smallest value. Do not change the caller's list. Raise ValueError for an empty list (your own check; the tests below do not cover it).\n\nThen write  summarize(latencies_ms)  returning a dict with keys \"p50\", \"p95\", \"p99\" and \"mean\" (the mean rounded to 2 decimals).",
+        "hint": "math.ceil(p / 100 * len(values)) gives the 1-based rank; subtract 1 for the list index.",
+        "starterCode": "import math\n\n\ndef percentile(values, p):\n    # TODO: nearest-rank percentile, without mutating `values`\n    pass\n\n\ndef summarize(latencies_ms):\n    # TODO\n    pass\n",
+        "tests": "assert percentile(list(range(1, 101)), 50) == 50 and percentile(list(range(1, 101)), 95) == 95 and percentile(list(range(1, 101)), 99) == 99, \"nearest-rank on 1..100\"\nassert percentile([7], 95) == 7, \"single value\"\nassert (shuffled := [30, 10, 20]) and percentile(shuffled, 100) == 30 and shuffled == [30, 10, 20], \"p100 is the max and the input list is unchanged\"\nassert summarize([100, 120, 110, 3000]) == {\"p50\": 110, \"p95\": 3000, \"p99\": 3000, \"mean\": 832.5}, \"one slow request dominates p95 and the mean\"",
+        "hints": [
+          "ordered = sorted(values); k = max(1, math.ceil(p / 100 * len(ordered)))",
+          "return ordered[k - 1]",
+          "summarize: call percentile three times and round(sum(x) / len(x), 2) for the mean."
+        ]
+      }
+    },
+    {
+      "id": "c602",
+      "title": "Prompt caching (Anthropic docs, then OpenAI)",
+      "platform": "Anthropic / OpenAI",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-caching",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 2,
+      "why": "Your NuraKnect system prompt and brand rules repeat on every DM. Caching that stable prefix is usually the cheapest win you can ship. Also skim the OpenAI prompt caching guide to compare the two designs.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "prompt caching",
+        "token budgeting",
+        "cache hit rate",
+        "cost per request"
+      ],
+      "recommended": true,
+      "pythonChallenge": {
+        "level": 2,
+        "difficulty": "Beginner",
+        "title": "Token Cost Calculator",
+        "question": "Token budgeting starts with knowing what one call costs. Providers bill input tokens, output tokens, and (when prompt caching is on) cheaper cached input tokens.\n\nYour task:\nWrite  cost_usd(model, input_tokens, output_tokens, cached_tokens=0)  that uses the PRICES table below (USD per 1 million tokens; the numbers are made up for practice, check real prices in the provider docs).\n  - cached_tokens is the part of input_tokens served from the prompt cache and billed at the \"cache_read\" price\n  - the rest of the input is billed at the \"in\" price\n  - output is billed at the \"out\" price\n  - raise ValueError for an unknown model, or if cached_tokens is bigger than input_tokens (your own check; the tests below only test the math)\n\nThen write  monthly_cost(model, calls_per_day, input_tokens, output_tokens, cached_tokens=0, days=30)  for a NuraKnect reply endpoint.",
+        "hint": "Divide every price by 1_000_000. Non-cached input = input_tokens - cached_tokens.",
+        "starterCode": "PRICES = {\n    \"small\": {\"in\": 1.00, \"out\": 5.00, \"cache_read\": 0.10},\n    \"large\": {\"in\": 5.00, \"out\": 25.00, \"cache_read\": 0.50},\n}\n\n\ndef cost_usd(model, input_tokens, output_tokens, cached_tokens=0):\n    # TODO: validate model and cached_tokens, then add up the three parts\n    pass\n\n\ndef monthly_cost(model, calls_per_day, input_tokens, output_tokens, cached_tokens=0, days=30):\n    # TODO: reuse cost_usd\n    pass\n",
+        "tests": "assert abs(cost_usd(\"small\", 1000, 200) - 0.002) < 1e-9, \"small, 1000 in + 200 out should be 0.002\"\nassert abs(cost_usd(\"small\", 1000, 200, cached_tokens=800) - 0.00128) < 1e-9, \"cached tokens use the cache_read price\"\nassert abs(cost_usd(\"large\", 0, 0)) < 1e-12, \"zero tokens cost nothing\"\nassert abs(cost_usd(\"large\", 2000, 100) - 0.0125) < 1e-9, \"large, 2000 in + 100 out should be 0.0125\"\nassert abs(monthly_cost(\"small\", 100, 1000, 200) - 6.0) < 1e-9, \"100 calls x 30 days x 0.002 = 6.0\"",
+        "hints": [
+          "cost = (in - cached) * price_in / 1e6 + cached * cache_read / 1e6 + out * price_out / 1e6",
+          "Check `model not in PRICES` first, then `cached_tokens > input_tokens`, and raise ValueError.",
+          "monthly_cost is just cost_usd(...) * calls_per_day * days."
+        ]
+      }
+    },
+    {
+      "id": "c603",
+      "title": "Timeouts, retries and backoff with jitter",
+      "platform": "AWS Builders' Library",
+      "url": "https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 3,
+      "why": "The standard reference for retrying safely. LLM APIs return 429 and 5xx under load, so retries with jitter and sensible timeouts are part of every production call. Pair it with the rate-limits page of your provider.",
+      "kind": "article",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "retries",
+        "exponential backoff",
+        "jitter",
+        "rate limits",
+        "timeouts"
+      ],
+      "prereqs": [
+        "c602"
+      ],
+      "pythonChallenge": {
+        "level": 3,
+        "difficulty": "Intermediate",
+        "title": "Exponential Backoff With Jitter",
+        "question": "When a provider returns 429 or 503, retrying immediately makes things worse. The standard fix is exponential backoff with jitter: wait a random time between 0 and min(cap, base * 2**attempt).\n\nYour task:\nWrite  backoff_delays(retries, base=0.5, cap=8.0, seed=42)  that returns a list of  retries  delays (seconds), using \"full jitter\":\n  delay_i = rng.uniform(0, min(cap, base * 2**i))   for i = 0, 1, 2, ...\nUse  random.Random(seed)  so the result is repeatable (do not use the global random module).\n\nThen write  worst_case_wait(retries, base=0.5, cap=8.0)  that returns the largest total time you could ever wait: the sum of min(cap, base * 2**i) over all retries. Use it to decide if your retry budget fits inside a request timeout.",
+        "hint": "Create rng = random.Random(seed) once, then use a list comprehension over range(retries).",
+        "starterCode": "import random\n\n\ndef backoff_delays(retries, base=0.5, cap=8.0, seed=42):\n    # TODO: full jitter with a private random.Random(seed)\n    pass\n\n\ndef worst_case_wait(retries, base=0.5, cap=8.0):\n    # TODO: sum of the upper bounds\n    pass\n",
+        "tests": "assert len(backoff_delays(5)) == 5, \"should return one delay per retry\"\nassert all(0 <= x <= min(8.0, 0.5 * 2**i) for i, x in enumerate(backoff_delays(5))), \"each delay must be within [0, min(cap, base*2**i)]\"\nassert backoff_delays(5) == backoff_delays(5), \"same seed must give the same delays\"\nassert backoff_delays(5, seed=1) != backoff_delays(5, seed=2), \"different seeds should differ\"\nassert max(backoff_delays(20, base=1, cap=4)) <= 4, \"the cap must hold for large attempt numbers\"\nassert abs(worst_case_wait(5) - (0.5 + 1 + 2 + 4 + 8)) < 1e-9 and abs(worst_case_wait(6) - 23.5) < 1e-9, \"worst case adds the capped upper bounds\"",
+        "hints": [
+          "i-th upper bound: min(cap, base * 2 ** i)",
+          "delays = [rng.uniform(0, min(cap, base * 2**i)) for i in range(retries)]",
+          "worst_case_wait = sum(min(cap, base * 2**i) for i in range(retries))"
+        ]
+      }
+    },
+    {
+      "id": "c613",
+      "title": "Project: streaming, retries and a cost log for the NuraKnect reply endpoint",
+      "platform": "Build",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/streaming",
+      "cost": "Free",
+      "duration": "4 hours",
+      "status": "not-started",
+      "order": 4,
+      "why": "Make the reply endpoint feel fast and survive provider errors, and learn what each reply costs. Small change, real production habits.",
+      "kind": "project",
+      "price": "free",
+      "hours": 4,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "streaming",
+        "retries",
+        "cost logging",
+        "error handling"
+      ],
+      "prereqs": [
+        "c602",
+        "c603"
+      ],
+      "keep": [
+        "Commit or PR: streaming + retry with backoff + cost log in the reply endpoint",
+        "A log excerpt showing tokens in/out and cost for 20 replies",
+        "A short note: time to first token before vs after streaming",
+        "A test or script that forces a 429 and shows the retry path"
+      ]
+    },
+    {
+      "id": "c604",
+      "title": "Prompt and semantic caching (AI Engineering from Scratch, Phase 17 lesson 14)",
+      "platform": "AI Engineering from Scratch (MIT)",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/17-infrastructure-and-production/14-prompt-semantic-caching",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 5,
+      "why": "Covers exact-match, prompt and semantic caches and where each one goes wrong. For NuraKnect, repeated questions like opening hours or pricing are the best semantic cache candidates.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "semantic caching",
+        "similarity threshold",
+        "cache invalidation",
+        "TTL"
+      ],
+      "prereqs": [
+        "c602"
+      ],
+      "pythonChallenge": {
+        "level": 3,
+        "difficulty": "Intermediate",
+        "title": "LRU Cache With TTL",
+        "question": "A response cache needs two limits: size (evict the least recently used entry) and age (an entry expires after ttl seconds). Semantic caches and prompt-result caches both rely on this.\n\nYour task:\nBuild class  TTLCache(capacity, ttl, clock)  where clock is a function returning the current time (inject a fake one in tests; in production pass time.monotonic).\n  set(key, value)  stores the value, stamped with clock(); if the cache is over capacity, evict the least recently used key\n  get(key)         returns the value, or None if missing or expired (an expired entry is deleted); a hit counts as \"recently used\"\n  __len__          number of stored entries",
+        "hint": "collections.OrderedDict keeps order: move_to_end(key) on every hit or set, popitem(last=False) removes the oldest.",
+        "starterCode": "from collections import OrderedDict\n\n\nclass TTLCache:\n    def __init__(self, capacity, ttl, clock):\n        self.capacity = capacity\n        self.ttl = ttl\n        self.clock = clock\n        self.data = OrderedDict()  # key -> (value, stored_at)\n\n    def set(self, key, value):\n        # TODO\n        pass\n\n    def get(self, key):\n        # TODO\n        pass\n\n    def __len__(self):\n        return len(self.data)\n",
+        "tests": "assert (now := [0.0]) and (c := TTLCache(2, 10, lambda: now[0])) is not None and c.set(\"a\", 1) is None and c.set(\"b\", 2) is None and c.get(\"a\") == 1 and c.get(\"zzz\") is None, \"basic set, get and miss\"\nassert c.set(\"c\", 3) is None and c.get(\"b\") is None and c.get(\"a\") == 1 and c.get(\"c\") == 3, \"b was least recently used, so it is evicted\"\nassert now.__setitem__(0, 11) is None and c.get(\"a\") is None, \"entries older than ttl must expire\"\nassert len(c) == 1, \"the expired entry must be deleted on get (only c is left)\"\nassert c.set(\"d\", 4) is None and now.__setitem__(0, 15) is None and c.get(\"d\") == 4, \"an entry younger than ttl stays\"",
+        "hints": [
+          "set: store (value, self.clock()), move_to_end, then while len > capacity: popitem(last=False)",
+          "get: if the key is missing return None; if clock() - stored_at > ttl, delete it and return None",
+          "On a fresh hit call move_to_end(key) before returning the value."
+        ]
+      }
+    },
+    {
+      "id": "c605",
+      "title": "Model routing and fallbacks (AI Engineering from Scratch, Phase 17 lesson 16)",
+      "platform": "AI Engineering from Scratch (MIT)",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/17-infrastructure-and-production/16-model-routing",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 6,
+      "why": "Route easy DMs to a cheap model and hard ones to a strong one, with a fallback when a provider is down. Read it with the LiteLLM routing docs open to see how a gateway does it.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "model routing",
+        "fallbacks",
+        "cost vs quality",
+        "gateways"
+      ],
+      "recommended": true,
+      "prereqs": [
+        "c601"
+      ],
+      "pythonChallenge": {
+        "level": 3,
+        "difficulty": "Intermediate",
+        "title": "Rules-and-Budget Model Router",
+        "question": "A router sends easy requests to a cheap model and hard ones to an expensive model, and stops spending when the budget is gone.\n\nYour task:\nWrite  route(prompt, remaining_budget)  returning \"cheap\", \"large\" or \"refuse\". Use COST_PER_CALL below.\nRules, in order:\n  1. If remaining_budget < COST_PER_CALL[\"cheap\"] return \"refuse\"\n  2. A prompt is \"hard\" if it has more than 60 words OR contains any word from HARD_WORDS (case-insensitive, whole word)\n  3. A hard prompt returns \"large\" if remaining_budget >= COST_PER_CALL[\"large\"], otherwise \"cheap\" (a fallback)\n  4. Every other prompt returns \"cheap\"\n\nThen write  run_batch(prompts, budget)  that routes each prompt in turn, subtracts the cost of the chosen model (nothing for \"refuse\") and returns the list of choices.",
+        "hint": "Split the prompt with .lower().split() and compare to a set of hard words. Strip punctuation with .strip('.,?!') on each word.",
+        "starterCode": "COST_PER_CALL = {\"cheap\": 0.001, \"large\": 0.02}\nHARD_WORDS = {\"analyze\", \"compare\", \"explain\", \"refund\", \"legal\"}\n\n\ndef route(prompt, remaining_budget):\n    # TODO\n    pass\n\n\ndef run_batch(prompts, budget):\n    # TODO: use route() and keep a running budget\n    pass\n",
+        "tests": "assert route(\"hi there\", 1.0) == \"cheap\", \"short easy prompt goes to cheap\"\nassert route(\"Please analyze this contract\", 1.0) == \"large\", \"a hard word and enough budget goes to large\"\nassert route(\"Please analyze this contract\", 0.005) == \"cheap\", \"hard but low budget falls back to cheap\"\nassert route(\"hi\", 0.0005) == \"refuse\", \"no budget for even the cheap model\"\nassert route(\" \".join([\"word\"] * 61), 1.0) == \"large\", \"more than 60 words is hard\"\nassert route(\"Can you ANALYZE.\", 1.0) == \"large\", \"hard words are case-insensitive and ignore punctuation\"\nassert run_batch([\"analyze it\", \"hello\", \"hello\"], 0.0225) == [\"large\", \"cheap\", \"cheap\"], \"budget must shrink as calls are made\"\nassert run_batch([\"hello\"] * 3, 0.002) == [\"cheap\", \"cheap\", \"refuse\"], \"the budget runs out after two cheap calls\"",
+        "hints": [
+          "words = {w.strip('.,?!') for w in prompt.lower().split()}",
+          "hard = len(prompt.split()) > 60 or bool(words & HARD_WORDS)",
+          "In run_batch: choice = route(p, budget); if choice != 'refuse': budget -= COST_PER_CALL[choice]. Watch for float drift when the budget hits zero."
+        ]
+      }
+    },
+    {
+      "id": "c614",
+      "title": "Project: prompt and semantic caching plus a cheap/expensive router, with measured cost and p95 latency",
+      "platform": "Build",
+      "url": "https://docs.litellm.ai/docs/routing",
+      "cost": "Free",
+      "duration": "5 hours",
+      "status": "not-started",
+      "order": 7,
+      "why": "Put caching and routing in front of the reply endpoint and measure the effect on cost and tail latency. The numbers are the portfolio proof.",
+      "kind": "project",
+      "price": "free",
+      "hours": 5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "caching",
+        "routing",
+        "benchmarking",
+        "p95 latency"
+      ],
+      "prereqs": [
+        "c604",
+        "c605",
+        "c613"
+      ],
+      "keep": [
+        "Commit or PR: prompt cache, semantic cache and the router",
+        "A table: cost per 100 replies and p50/p95 latency for baseline, cached, and routed",
+        "The similarity threshold you chose and one false hit you found",
+        "A one-paragraph note on what you would change before real traffic"
+      ]
+    },
+    {
+      "id": "c606",
+      "title": "vLLM: quickstart and serving docs",
+      "platform": "vLLM",
+      "url": "https://docs.vllm.ai/en/latest/getting_started/quickstart/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 8,
+      "why": "The most widely used open-source serving engine, with an OpenAI-compatible server. Choose it if you have (or can rent) a GPU and want to see continuous batching and the KV cache at work.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "vLLM",
+        "OpenAI-compatible server",
+        "continuous batching",
+        "GPU memory"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c607",
+      "title": "Ollama: docs and API",
+      "platform": "Ollama",
+      "url": "https://docs.ollama.com/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 9,
+      "why": "The easiest way to run an open model on a laptop, with a simple local HTTP API. Choose it if you have no GPU or want results in an hour.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "Ollama",
+        "local models",
+        "quantized models",
+        "local HTTP API"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c608",
+      "title": "llama.cpp: server and quantized models",
+      "platform": "llama.cpp",
+      "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 10,
+      "why": "The C/C++ engine behind many local runtimes, with an OpenAI-compatible server and GGUF quantized models. Choose it if you want to see what Ollama hides.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "llama.cpp",
+        "GGUF quantization",
+        "CPU inference",
+        "OpenAI-compatible server"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c615",
+      "title": "Project: serve an open model behind the same API, load-test it, write a cost/latency scorecard",
+      "platform": "Build",
+      "url": "https://docs.vllm.ai/en/latest/",
+      "cost": "Free",
+      "duration": "6 hours",
+      "status": "not-started",
+      "order": 11,
+      "why": "Serve one open model with the tool you picked, point the reply endpoint at it, load-test it, and compare with the hosted API. A one-page scorecard shows you can reason about build-vs-buy.",
+      "kind": "project",
+      "price": "free",
+      "hours": 6,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "self-hosting",
+        "load testing",
+        "cost modelling",
+        "latency"
+      ],
+      "prereqs": [
+        "c614"
+      ],
+      "keep": [
+        "Commit or PR: a config switch between the hosted API and the local server",
+        "Load-test results at 1, 4 and 16 concurrent requests (p50, p95, tokens/sec)",
+        "One-page scorecard: cost per 1k replies, p95 latency, quality notes, build-vs-buy verdict",
+        "The exact model, quantization and hardware you used"
+      ]
+    },
+    {
+      "id": "c610",
+      "title": "Structured outputs (Anthropic docs, then OpenAI)",
+      "platform": "Anthropic / OpenAI",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/structured-outputs",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 12,
+      "why": "Reliable JSON is what lets NuraKnect route, log and cost-track replies without brittle parsing. Compare the Anthropic and OpenAI structured-output guides.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "structured outputs",
+        "JSON schema",
+        "validation",
+        "parse failures"
+      ]
+    },
+    {
+      "id": "c611",
+      "title": "Langfuse: tracing and prompt versioning",
+      "platform": "Langfuse",
+      "url": "https://langfuse.com/docs/prompts/get-started",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 13,
+      "why": "Shows how to version prompts and tie each version to traces, cost and latency, so you can see which prompt change made things better or worse. Any similar tool is fine; the habit is what matters.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "prompt versioning",
+        "tracing",
+        "monitoring",
+        "cost tracking"
+      ]
+    },
+    {
+      "id": "c609",
+      "title": "AI engineering interview bank: system design, inference serving, cost and capacity",
+      "platform": "AI Engineering from Scratch (MIT)",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/interviews/questions/system-design",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 14,
+      "why": "Practice the system-design questions interviewers ask about production AI. Answer out loud before you read the answers, then also try the inference-serving and cost-capacity cards.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "system design",
+        "interview practice",
+        "capacity planning",
+        "trade-offs"
+      ],
+      "recommended": true,
+      "prereqs": [
+        "c601",
+        "c604",
+        "c605"
+      ]
+    },
+    {
+      "id": "c612",
+      "title": "Claude Code best practices (AI coding tools)",
+      "platform": "Anthropic",
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 15,
+      "why": "AI coding tools are now part of an applied AI engineer's workflow. Learn how to give an agent context, plans and checks so it speeds you up without silently breaking things.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "beginner",
+      "skills": [
+        "Claude Code",
+        "AI coding tools",
+        "context management",
+        "verification"
+      ]
+    },
+    {
+      "id": "c616",
+      "title": "Multimodal and Voice: Vision Inputs and Realtime Speech",
+      "platform": "Anthropic + OpenAI docs",
+      "url": "https://platform.claude.com/docs/en/build-with-claude/vision",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 16,
+      "why": "Customers send screenshots and voice notes in DMs. Learn how image inputs are sent and billed, then skim the OpenAI Realtime guide (platform.openai.com/docs/guides/realtime) to see how low-latency speech-to-speech sessions differ from text calls.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "vision inputs",
+        "image tokens",
+        "realtime audio"
+      ]
+    }
+  ]
+}

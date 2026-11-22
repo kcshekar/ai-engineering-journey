@@ -1,0 +1,52 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 11,
+      "focus": "When to fine-tune, and the dataset",
+      "courses": [
+        "c401",
+        "c402",
+        "c403"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Project c413: collect and anonymise DM threads, write the cleaning rules, and reach 200 chat-format examples with a train/eval split.",
+      "pythonTask": "20 min daily: write the JSONL validator and the dedupe and fixed-seed split functions, and run them on your dataset."
+    },
+    {
+      "week": 12,
+      "focus": "Instruction tuning and LoRA",
+      "courses": [
+        "c404",
+        "c405"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Finish the dataset (c413) and write a baseline: run 20 eval prompts through a well-prompted base model and save the replies.",
+      "pythonTask": "20 min daily: LoRA parameter calculator, then compute the numbers for the model you plan to tune."
+    },
+    {
+      "week": 13,
+      "focus": "Training stack and the first LoRA run",
+      "courses": [
+        "c406",
+        "c407",
+        "c408",
+        "c409"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Project c414: pick one training stack (c407, c408 or c409), fine-tune a small open model in free Colab, and compare it with the baseline on your eval split.",
+      "pythonTask": "20 min daily: a small eval script that scores replies (format checks, length, exact match) and prints a comparison table."
+    },
+    {
+      "week": 14,
+      "focus": "Quantization, serving and optional preference tuning",
+      "courses": [
+        "c410",
+        "c411",
+        "c412"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Optional project c415: merge, convert to GGUF, serve locally and rerun the eval on fp16 and 4-bit. If short on time, read c411 and c412 instead.",
+      "pythonTask": "20 min daily: int8 quantize and dequantize with max error, then check how error grows with outliers."
+    }
+  ]
+}

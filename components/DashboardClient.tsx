@@ -8,7 +8,7 @@ import ProgressBar from "./ProgressBar"
 import StreakGraph from "./StreakGraph"
 import { api } from "@/lib/api-client"
 import {
-  getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, isLayerWorkDone,
+  getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, applyItemToggle, getLayerHours,
   calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
 } from "@/lib/loader"
 import type { RoadmapData, ActivityDay, CourseMetaEntry, LayerProgressEntry } from "@/types"
@@ -56,20 +56,7 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
         }
       }
       const lp = newProgress.layerProgress[key]
-      const idx = lp.coursesCompleted.indexOf(courseId)
-      if (idx > -1) {
-        lp.coursesCompleted.splice(idx, 1)
-      } else {
-        lp.coursesCompleted.push(courseId)
-        if (!lp.started) { lp.started = true; lp.startedDate = new Date().toISOString().split("T")[0] }
-      }
-      const layer = prev.layers.find((l) => l.id === layerId)
-      if (layer && isLayerWorkDone(layer, lp.coursesCompleted)) {
-        // Keep the first completion date when an optional or extra pick-group item is toggled.
-        if (!lp.completed) { lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0] }
-      } else {
-        lp.completed = false; lp.completedDate = null
-      }
+      applyItemToggle(prev.layers.find((l) => l.id === layerId), lp, courseId)
       api.saveLayerProgress(layerId, lp)
       return { ...prev, progress: newProgress }
     })
@@ -153,7 +140,13 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
               {currentLayerStatus.replace("-", " ")}
             </div>
           </div>
-          <ProgressBar label="Course progress" value={completedCount} max={getRequiredCount(currentLayer)} />
+          <ProgressBar label="Core progress" value={completedCount} max={getRequiredCount(currentLayer)} />
+          {(() => {
+            const { required, optional } = getLayerHours(currentLayer)
+            return required + optional > 0 ? (
+              <div className="hours-chip"><Clock size={13} /><span>~{required}h core</span>{optional > 0 && <span className="hours-chip-optional">+{optional}h optional</span>}</div>
+            ) : null
+          })()}
           {deadlineStatus.status !== "none" && (
             <div className={`deadline-badge-dash deadline-${deadlineStatus.status}`}>
               {deadlineStatus.status === "overdue"

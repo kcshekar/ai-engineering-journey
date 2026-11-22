@@ -183,3 +183,210 @@ Mastering prompts is the highest-leverage skill for Applied AI Engineers.
   inputs, measure, refine. Treat prompts like code.
 
 ### NuraKnect Production Prompt
+
+---
+
+# New items (roadmap v2)
+
+## Item 101 — Tokenizers: how text becomes tokens
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What is a token, and why is it not a word?
+- How many tokens is one typical NuraKnect DM?
+- Why do non-English or emoji-heavy DMs cost more tokens?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 102 — Sampling: temperature, top-k and top-p
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What does temperature change about next-token choice?
+- What does top-p do, and when would you change it?
+- Which setting would you use for classification and which for reply drafts?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 103 — Embeddings (ML Crash Course)
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What is an embedding in one sentence?
+- Why does distance between vectors mean similarity of meaning?
+- What could you embed in NuraKnect, and what would you compare it to?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 104 — Effective context engineering for AI agents
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What is the difference between prompt engineering and context engineering?
+- What would you keep, summarise or drop from a long DM thread?
+- What is your token budget per NuraKnect reply?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 105 — Context engineering lesson (hands-on)
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What does your context assembler do when it is over budget?
+- Where does summarisation lose important information?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 107 — Choosing a model (capability, cost, latency)
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What three things decide your model choice?
+- What is your test set for NuraKnect intent labelling?
+- When is a bigger model worth the cost?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 108 — OpenAI API docs: text generation (closed model)
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- Which model and settings would you call first for NuraKnect?
+- What does one 1,000-DM day cost with it?
+- What data leaves your system?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 109 — Hugging Face LLM Course: Transformers models and open weights
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- What does running an open-weights model change about cost, privacy and quality?
+- What hardware would NuraKnect need to run one?
+
+### What Surprised Me
+(At least 1 thing.)
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 111 — Project: Token and cost meter for NuraKnect DMs
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- Script that prints tokens and cost per DM: (link or paste it here)
+- A short table of 30 DMs with token counts: (link or paste it here)
+- One paragraph: which prompt part costs the most: (link or paste it here)
+
+### What I Built
+(Describe it in 3–5 lines.)
+
+### What I Would Change Next Time
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 112 — Project: DM intent classifier with structured JSON
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- Prompt file and JSON schema: (link or paste it here)
+- Results table for 20 DMs at two temperatures: (link or paste it here)
+- Notes on every label that changed: (link or paste it here)
+
+### What I Built
+(Describe it in 3–5 lines.)
+
+### What I Would Change Next Time
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+
+## Item 113 — Project: Model bake-off, hosted vs local
+
+### Summary
+(Write 3–5 sentences in your own words.)
+
+### Key Concepts
+- Comparison table: accuracy, p50 latency, cost per 1,000 DMs: (link or paste it here)
+- The 30-DM test set: (link or paste it here)
+- A one-page recommendation for NuraKnect: (link or paste it here)
+
+### What I Built
+(Describe it in 3–5 lines.)
+
+### What I Would Change Next Time
+
+### Connection to NuraKnect
+(How does this apply to your product?)
+
+---
+

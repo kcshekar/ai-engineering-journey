@@ -5,15 +5,16 @@ import LayerCard from "./LayerCard"
 import WeeklyPlan from "./WeeklyPlan"
 import QuizSection from "./QuizSection"
 import { api } from "@/lib/api-client"
-import { getCompletedCount, getRequiredCount, isLayerWorkDone, isQuizUnlocked } from "@/lib/loader"
-import type { Layer, RoadmapProgress, LayerProgressEntry } from "@/types"
+import { getCompletedCount, getRequiredCount, applyItemToggle, isQuizUnlocked } from "@/lib/loader"
+import type { Layer, RoadmapProgress, LayerProgressEntry, Course } from "@/types"
 
 interface Props {
   layer: Layer
   initialProgress: RoadmapProgress
+  allCourses: Course[]
 }
 
-export default function LayerDetailClient({ layer, initialProgress }: Props) {
+export default function LayerDetailClient({ layer, initialProgress, allCourses }: Props) {
   const [progress, setProgress] = useState(initialProgress)
 
   const refreshActivity = useCallback(() => {}, [])
@@ -30,19 +31,7 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
         }
       }
       const lp = np.layerProgress[key]
-      const idx = lp.coursesCompleted.indexOf(courseId)
-      if (idx > -1) {
-        lp.coursesCompleted.splice(idx, 1)
-      } else {
-        lp.coursesCompleted.push(courseId)
-        if (!lp.started) { lp.started = true; lp.startedDate = new Date().toISOString().split("T")[0] }
-      }
-      if (isLayerWorkDone(layer, lp.coursesCompleted)) {
-        // Keep the first completion date when an optional or extra pick-group item is toggled.
-        if (!lp.completed) { lp.completed = true; lp.completedDate = new Date().toISOString().split("T")[0] }
-      } else {
-        lp.completed = false; lp.completedDate = null
-      }
+      applyItemToggle(layer, lp, courseId)
       api.saveLayerProgress(layerId, lp)
       return np
     })
@@ -77,7 +66,21 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
     })
   }, [])
 
+  const handleSaveQuiz = useCallback((score: number) => {
+    setProgress((prev) => {
+      const np = JSON.parse(JSON.stringify(prev))
+      const key = String(layer.id)
+      if (!np.layerProgress[key]) np.layerProgress[key] = { started: false, completed: false, coursesCompleted: [], quizScore: null, quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {} }
+      const lp = np.layerProgress[key]
+      lp.quizScore = score
+      lp.quizAttempts = (lp.quizAttempts ?? 0) + 1
+      api.saveLayerProgress(layer.id, { quizScore: lp.quizScore, quizAttempts: lp.quizAttempts })
+      return np
+    })
+  }, [layer.id])
+
   const completedCount = getCompletedCount(layer, progress)
+  const lpNow = progress.layerProgress[String(layer.id)] as LayerProgressEntry | undefined
   const quizUnlocked   = isQuizUnlocked(layer, progress)
 
   return (
@@ -89,6 +92,7 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
         onActivity={refreshActivity}
         onSaveDates={handleSaveDates}
         onSaveCourseTimeline={handleSaveCourseTimeline}
+        allCourses={allCourses}
       />
       <WeeklyPlan weeklyPlan={layer.weeklyPlan} currentWeek={progress.currentWeek} />
       <QuizSection
@@ -96,6 +100,10 @@ export default function LayerDetailClient({ layer, initialProgress }: Props) {
         isUnlocked={quizUnlocked}
         completedCount={completedCount}
         totalCourses={getRequiredCount(layer)}
+        layerId={layer.id}
+        quizScore={lpNow?.quizScore ?? null}
+        quizAttempts={lpNow?.quizAttempts ?? 0}
+        onSaveQuiz={handleSaveQuiz}
       />
     </div>
   )

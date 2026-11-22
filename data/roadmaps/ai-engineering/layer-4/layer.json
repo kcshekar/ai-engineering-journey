@@ -1,0 +1,642 @@
+{
+  "id": 4,
+  "title": "Fine-tuning & Training",
+  "status": "not-started",
+  "weeks": "11-14",
+  "description": "When to fine-tune, building datasets, LoRA/QLoRA, quantization and preference tuning, then a tuned model you can compare and serve",
+  "appliesTo": [
+    "nuraknect"
+  ],
+  "mustKnow": [
+    {
+      "term": "Fine-tuning vs prompting vs RAG",
+      "oneLiner": "Prompt first, add retrieval for changing facts, fine-tune for stable style, format or behaviour.",
+      "misconception": "Fine-tuning is the way to teach a model new facts."
+    },
+    {
+      "term": "SFT (instruction tuning)",
+      "oneLiner": "Supervised training on prompt-and-reply pairs so the model follows your format and tone.",
+      "misconception": "You need thousands of examples; a few hundred clean ones can shift behaviour."
+    },
+    {
+      "term": "LoRA / PEFT",
+      "oneLiner": "Freeze the base model and train small low-rank adapters, about 1% of the parameters or fewer.",
+      "misconception": "LoRA is a lower-quality shortcut; on most tasks it is close to full fine-tuning."
+    },
+    {
+      "term": "QLoRA",
+      "oneLiner": "LoRA on top of a 4-bit quantized frozen base, so a 7-8B model trains on one consumer GPU.",
+      "misconception": "The adapter is trained in 4-bit; only the frozen base is quantized."
+    },
+    {
+      "term": "Quantization (GGUF, AWQ, bitsandbytes)",
+      "oneLiner": "Store weights in fewer bits to save memory and speed up inference, at some quality cost.",
+      "misconception": "Quantization is free; always re-run your eval."
+    },
+    {
+      "term": "Train/eval split and leakage",
+      "oneLiner": "Hold out examples the model never sees; duplicates across the split inflate your scores.",
+      "misconception": "Low training loss means the model is good."
+    },
+    {
+      "term": "DPO and GRPO/RLVR",
+      "oneLiner": "Preference and reward-based tuning after SFT: DPO uses chosen/rejected pairs; GRPO with verifiable rewards uses checkable answers.",
+      "misconception": "You need RL to get a useful tuned model; SFT alone is often enough."
+    }
+  ],
+  "stageGoals": {
+    "beginner": "Decide whether a task needs fine-tuning, and build a clean, validated 200-example chat dataset with a fixed-seed train/eval split.",
+    "intermediate": "Run a QLoRA fine-tune of a small open model in free Colab and show how it compares with a well-prompted baseline on a held-out set.",
+    "advanced": "Merge, quantize and serve the tuned model locally, and measure the quality, speed and memory cost of each quantization level."
+  },
+  "pickGroups": [
+    {
+      "id": "training-stack",
+      "label": "Training stack: pick one"
+    }
+  ],
+  "startHere": "If you already fine-tuned a model with PEFT, skim c401 to c404 and start at c405; if you only prompt today, start at c401 and do the dataset project early.",
+  "outcomes": [
+    "Decide between prompting, RAG and fine-tuning for a given NuraKnect task and explain the trade-off",
+    "Build, clean, validate and split a chat-format instruction dataset",
+    "Fine-tune a small open model with QLoRA in free Colab using one training stack",
+    "Compare a tuned model with a prompted baseline on a held-out eval set",
+    "Quantize a model to GGUF and serve it locally while measuring the quality cost",
+    "Explain where DPO and GRPO fit after supervised fine-tuning"
+  ],
+  "portfolioProof": {
+    "title": "A tuned open model with a measured comparison",
+    "evidence": [
+      "A cleaned 200-example dataset with a data card and a reproducible split",
+      "A Colab notebook for the LoRA run with loss curve and settings",
+      "An eval table: tuned vs prompted baseline, plus fp16 vs 4-bit if you did the advanced project",
+      "A short write-up of when you would and would not fine-tune for NuraKnect"
+    ]
+  },
+  "quiz": {
+    "status": "locked",
+    "unlockCondition": "Complete all core items in this layer",
+    "passingScore": 70,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "conceptual",
+        "question": "Your NuraKnect assistant must answer in your brand voice and also quote current prices. Which parts would you fine-tune, and which would you leave to retrieval or prompts? Defend the split.",
+        "hint": "Style and format are learned behaviours; prices change and need a source of truth."
+      },
+      {
+        "id": "q2",
+        "type": "architectural",
+        "question": "Design the data flow from raw Instagram DMs to a train/eval split you trust. Where do privacy, dedupe and leakage get handled?",
+        "hint": "Think about anonymising before anything is stored, dedupe before splitting and splitting by conversation."
+      },
+      {
+        "id": "q3",
+        "type": "practical",
+        "question": "Your LoRA run's training loss falls nicely but the tuned model is no better than the prompted base on eval. List three things you would check first.",
+        "hint": "Eval set quality, overfitting, data that does not match the target behaviour, learning rate and epochs."
+      },
+      {
+        "id": "q4",
+        "type": "practical",
+        "question": "You must serve the tuned model on a 16 GB laptop. Walk through the steps from adapter to running endpoint and the checks you would run after quantizing.",
+        "hint": "Merge, convert to GGUF, pick a quant level, rerun the same eval and compare latency and memory."
+      },
+      {
+        "id": "q5",
+        "type": "conceptual",
+        "question": "A teammate says the model needs to know your latest product catalogue. What is the best first approach?",
+        "hint": "Choose the approach that keeps facts easy to update.",
+        "options": [
+          "Fine-tune on the catalogue every week",
+          "Retrieve catalogue entries at query time",
+          "Train a new model from scratch",
+          "Raise the temperature setting"
+        ],
+        "correct": 1,
+        "explanation": "Facts that change belong in retrieval (RAG), where you can update the source without retraining. Fine-tuning is better for style, format and behaviour.",
+        "stage": "pre"
+      },
+      {
+        "id": "q6",
+        "type": "conceptual",
+        "question": "Why do you keep a held-out eval set that the model never trains on?",
+        "hint": "Think about what a training score can and cannot tell you.",
+        "options": [
+          "It makes training run faster",
+          "It lowers the memory needed",
+          "It lets you use a larger learning rate",
+          "It measures performance on unseen examples"
+        ],
+        "correct": 3,
+        "explanation": "Only unseen examples show whether the model generalises. Scores on training data hide memorisation and overfitting.",
+        "stage": "pre"
+      },
+      {
+        "id": "q7",
+        "type": "conceptual",
+        "question": "In LoRA, a layer with d_in 4096, d_out 4096 and rank r=8 trains how many parameters?",
+        "hint": "Use r * (d_in + d_out).",
+        "options": [
+          "65,536",
+          "16,777,216",
+          "32,768",
+          "8,192"
+        ],
+        "correct": 0,
+        "explanation": "LoRA trains A (r x d_in) and B (d_out x r): 8 * (4096 + 4096) = 65,536 parameters, instead of the 16,777,216 in the full matrix.",
+        "stage": "check"
+      },
+      {
+        "id": "q8",
+        "type": "conceptual",
+        "question": "What does QLoRA add on top of plain LoRA?",
+        "hint": "It is about how the frozen base weights are stored.",
+        "options": [
+          "Fully trains every layer in 4-bit",
+          "A reward model for preference data",
+          "A 4-bit quantized frozen base model",
+          "A larger adapter rank by default"
+        ],
+        "correct": 2,
+        "explanation": "QLoRA keeps the frozen base model in 4-bit (NF4) and trains LoRA adapters on top, which cuts memory enough for a free Colab GPU.",
+        "stage": "check"
+      },
+      {
+        "id": "q9",
+        "type": "conceptual",
+        "question": "Which data does DPO need?",
+        "hint": "It learns from comparisons, not single answers.",
+        "options": [
+          "Only unlabeled raw text",
+          "Prompts with chosen and rejected replies",
+          "A separate trained reward model's outputs only",
+          "Unit tests that grade each answer"
+        ],
+        "correct": 1,
+        "explanation": "DPO trains directly on preference pairs: a prompt with a chosen and a rejected reply. It removes the separate reward model that classic RLHF needs.",
+        "stage": "post"
+      },
+      {
+        "id": "q10",
+        "type": "practical",
+        "question": "You quantize a tuned model from fp16 to 4-bit to run it locally. What should you do next?",
+        "hint": "Compression is a trade-off you must measure.",
+        "options": [
+          "Assume quality is unchanged",
+          "Retrain the model from scratch",
+          "Delete the original fp16 weights",
+          "Re-run your eval and compare with fp16"
+        ],
+        "correct": 3,
+        "explanation": "Quantization trades quality for size and speed, and the loss varies by model and task. Re-run the same eval to measure it before shipping.",
+        "stage": "post"
+      }
+    ]
+  },
+  "courses": [
+    {
+      "id": "c401",
+      "title": "Finetuning Large Language Models",
+      "platform": "DeepLearning.AI",
+      "url": "https://www.deeplearning.ai/short-courses/finetuning-large-language-models/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 1,
+      "why": "A short, practical tour of what fine-tuning changes, how instruction data is prepared and how a run is evaluated. It sets the vocabulary for the rest of the layer.",
+      "kind": "course",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "fine-tuning basics",
+        "instruction data",
+        "evaluation"
+      ],
+      "recommended": true,
+      "pythonChallenge": {
+        "level": 2,
+        "difficulty": "Beginner",
+        "title": "Validate a JSONL Chat Dataset",
+        "question": "Fine-tuning data is only as good as its format. Most trainers (OpenAI, TRL, Unsloth) expect one JSON object per line, shaped like {\"messages\": [{\"role\": ..., \"content\": ...}, ...]}. A single bad line can crash a run an hour in.\n\nYour task:\nWrite  validate_line(line)  that takes ONE line of a JSONL file (a string) and returns a list of error strings. An empty list means the line is valid.\n\nA line is valid when:\n  1. It parses as JSON and is an object with a non-empty \"messages\" list\n  2. Every message is an object with role in {\"system\", \"user\", \"assistant\"} and a non-empty string \"content\"\n  3. At least one message has role \"user\"\n  4. The LAST message has role \"assistant\" (that is the reply the model learns to produce)\n\nThen write  validate_file(lines)  that returns {line_number: [errors]} (line numbers start at 1) for the invalid lines only.\n\nTry it on a few NuraKnect-style DM examples, including a broken one.",
+        "hint": "Return early with one error when json.loads fails. After that, collect all the rule violations into the list instead of stopping at the first one.",
+        "starterCode": "import json\n\nVALID_ROLES = {\"system\", \"user\", \"assistant\"}\n\ndef validate_line(line):\n    errors = []\n    # TODO: parse JSON (return [\"invalid json\"] on failure)\n    # TODO: check \"messages\" is a non-empty list\n    # TODO: check each message role and content\n    # TODO: check there is a user message and the last message is from the assistant\n    return errors\n\ndef validate_file(lines):\n    # TODO: return {line_number: errors} for invalid lines only (numbers start at 1)\n    return {}\n\ngood = '{\"messages\": [{\"role\": \"user\", \"content\": \"Do you ship to Canada?\"}, {\"role\": \"assistant\", \"content\": \"Yes, 5-7 days.\"}]}'\nprint(validate_line(good))\n",
+        "tests": "assert validate_line('{\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}, {\"role\": \"assistant\", \"content\": \"hello\"}]}') == [], \"a valid line should return []\"\nassert len(validate_line(\"not json\")) >= 1, \"broken JSON should produce an error\"\nassert len(validate_line('{\"messages\": [{\"role\": \"user\", \"content\": \"hi\"}]}')) >= 1, \"last message must be from the assistant\"\nassert len(validate_line('{\"messages\": [{\"role\": \"robot\", \"content\": \"hi\"}, {\"role\": \"assistant\", \"content\": \"x\"}]}')) >= 1, \"unknown role should be rejected\"\nassert len(validate_line('{\"messages\": [{\"role\": \"user\", \"content\": \"  \"}, {\"role\": \"assistant\", \"content\": \"x\"}]}')) >= 1, \"empty content should be rejected\"\nassert list(validate_file(['{\"messages\": [{\"role\": \"user\", \"content\": \"a\"}, {\"role\": \"assistant\", \"content\": \"b\"}]}', \"oops\"]).keys()) == [2], \"validate_file should report only line 2\"",
+        "hints": [
+          "json.loads raises json.JSONDecodeError (a ValueError) on bad input.",
+          "Use isinstance(x, list) and isinstance(m, dict) checks before indexing so a wrong shape gives an error, not a crash.",
+          "validate_file: loop with enumerate(lines, start=1), call validate_line, keep the entry only if the result is non-empty."
+        ]
+      }
+    },
+    {
+      "id": "c402",
+      "title": "OpenAI fine-tuning guide (when to fine-tune)",
+      "platform": "OpenAI Docs",
+      "url": "https://platform.openai.com/docs/guides/fine-tuning",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 2,
+      "why": "Read it for the decision, not the API: when prompting or RAG is enough and when fine-tuning pays off. NuraKnect reply style is a fine-tuning candidate; its product facts belong in RAG.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "fine-tune vs prompt vs RAG",
+        "dataset format",
+        "cost trade-offs"
+      ],
+      "prereqs": [
+        "c401"
+      ]
+    },
+    {
+      "id": "c403",
+      "title": "AI Engineering from Scratch: Data Pipelines (Phase 10, lesson 03)",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/03-data-pipelines",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 3,
+      "why": "Dataset quality decides the result. This lesson covers cleaning, dedupe, filtering and splits, which is the exact work of turning NuraKnect DMs into training data.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "data cleaning",
+        "dedupe",
+        "train/eval split",
+        "jsonl"
+      ],
+      "prereqs": [
+        "c402"
+      ],
+      "pythonChallenge": {
+        "level": 3,
+        "difficulty": "Intermediate",
+        "title": "Dedupe and Split with a Fixed Seed",
+        "question": "Duplicate examples are the quiet killer of fine-tuning evals: if the same DM appears in train and eval, your score is inflated and you will not notice. You also need the split to be reproducible so a re-run gives the same eval set.\n\nYour task:\nWrite  dedupe_and_split(examples, eval_fraction=0.2, seed=42)  where examples is a list of dicts {\"prompt\": str, \"reply\": str}.\n\n  1. Remove duplicates by normalised prompt (lowercase, strip, collapse repeated whitespace). Keep the FIRST occurrence.\n  2. Shuffle the unique examples with  random.Random(seed)  (do not touch the global random state and do not mutate the input list).\n  3. eval size = max(1, round(n * eval_fraction)) where n is the unique count.\n  4. Return (train, eval) as two lists.\n\nThe same input and seed must always give the same split, and no prompt may appear in both lists.",
+        "hint": "Build a seen set of normalised prompts while looping. Normalise with ' '.join(text.lower().split()). Copy the list before shuffling.",
+        "starterCode": "import random\n\ndef normalise(text):\n    # TODO: lowercase, strip and collapse whitespace\n    return text\n\ndef dedupe_and_split(examples, eval_fraction=0.2, seed=42):\n    # TODO: 1) dedupe by normalised prompt, keep the first\n    # TODO: 2) shuffle a copy with random.Random(seed)\n    # TODO: 3) eval size = max(1, round(n * eval_fraction))\n    train, held_out = [], []\n    return train, held_out\n\ndata = [{\"prompt\": f\"Question {i}\", \"reply\": f\"Answer {i}\"} for i in range(10)]\ndata += [{\"prompt\": \"  question 3 \", \"reply\": \"dup\"}, {\"prompt\": \"QUESTION   4\", \"reply\": \"dup\"}]\ntrain, held_out = dedupe_and_split(data)\nprint(len(train), len(held_out))\n",
+        "tests": "_data = [{\"prompt\": f\"Question {i}\", \"reply\": f\"Answer {i}\"} for i in range(10)] + [{\"prompt\": \"  question 3 \", \"reply\": \"dup\"}, {\"prompt\": \"QUESTION   4\", \"reply\": \"dup\"}]\n_copy = list(_data)\n_tr, _ev = dedupe_and_split(_data)\nassert len(_tr) + len(_ev) == 10, \"duplicates (after normalising) should be removed, leaving 10 unique examples\"\nassert len(_ev) == 2, \"eval size should be round(10 * 0.2) = 2\"\nassert dedupe_and_split(_data) == (_tr, _ev), \"the same seed must give the same split\"\nassert not ({normalise(e[\"prompt\"]) for e in _tr} & {normalise(e[\"prompt\"]) for e in _ev}), \"no prompt may appear in both train and eval\"\nassert _data == _copy, \"do not mutate the input list\"\nassert len(dedupe_and_split(_data[:3], eval_fraction=0.01)[1]) == 1, \"eval should have at least 1 example\"",
+        "hints": [
+          "Loop over examples; if normalise(e['prompt']) is already in seen, skip it, otherwise add it and append e to unique.",
+          "rng = random.Random(seed); items = list(unique); rng.shuffle(items).",
+          "n_eval = max(1, round(len(items) * eval_fraction)); return items[n_eval:], items[:n_eval]"
+        ]
+      }
+    },
+    {
+      "id": "c404",
+      "title": "AI Engineering from Scratch: Instruction Tuning / SFT (Phase 10, lesson 06)",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/06-instruction-tuning-sft",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 4,
+      "why": "Builds the supervised fine-tuning loop from scratch: chat templates, loss masking on the assistant tokens, and why a small clean set can change behaviour.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "SFT",
+        "chat templates",
+        "loss masking",
+        "instruction tuning"
+      ],
+      "prereqs": [
+        "c403"
+      ]
+    },
+    {
+      "id": "c405",
+      "title": "AI Engineering from Scratch: Fine-Tuning with LoRA and QLoRA (Phase 11, lesson 08)",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/08-fine-tuning-lora",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 5,
+      "why": "The core technique of the layer: low-rank adapters, 4-bit QLoRA, merging weights, and how the 2026 toolkits (PEFT, TRL, Unsloth, Axolotl) wrap them.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "LoRA",
+        "QLoRA",
+        "rank",
+        "adapter merge"
+      ],
+      "recommended": true,
+      "prereqs": [
+        "c404"
+      ],
+      "pythonChallenge": {
+        "level": 3,
+        "difficulty": "Intermediate",
+        "title": "LoRA Parameter-Count Calculator",
+        "question": "LoRA freezes a weight matrix W (d_out x d_in) and trains two small matrices instead: A (r x d_in) and B (d_out x r). So one adapted layer trains  r * (d_in + d_out)  parameters instead of  d_in * d_out.\n\nYour task:\n  1. Write  lora_params(d_in, d_out, r)  returning the trainable parameters for ONE adapted layer.\n  2. Write  lora_report(layers, r)  where layers is a list of (d_in, d_out) tuples. Return a dict with keys:\n       \"lora\"    : total LoRA parameters across all layers\n       \"full\"    : total parameters if you trained those layers fully\n       \"percent\" : lora / full * 100\n\nSanity check from the lesson: a 4096 x 4096 layer at r=16 trains 131,072 parameters, about 0.78% of 16,777,216.",
+        "hint": "Sum r * (d_in + d_out) over the layers for 'lora' and d_in * d_out for 'full'. Guard against an empty layers list (full == 0).",
+        "starterCode": "def lora_params(d_in, d_out, r):\n    # TODO: parameters in A (r x d_in) plus B (d_out x r)\n    return 0\n\ndef lora_report(layers, r):\n    # TODO: totals across layers and the percentage\n    return {\"lora\": 0, \"full\": 0, \"percent\": 0.0}\n\nprint(lora_params(4096, 4096, 16))\nprint(lora_report([(4096, 4096)] * 4, 16))\n",
+        "tests": "assert lora_params(4096, 4096, 16) == 131072, \"4096x4096 at r=16 should be 131072\"\nassert lora_params(4096, 1024, 8) == 8 * (4096 + 1024), \"use r * (d_in + d_out)\"\n_rep = lora_report([(4096, 4096)] * 4, 16)\nassert _rep[\"lora\"] == 4 * 131072, \"lora total should sum over layers\"\nassert _rep[\"full\"] == 4 * 4096 * 4096, \"full total should be d_in * d_out per layer\"\nassert abs(_rep[\"percent\"] - 0.78125) < 1e-6, \"percent should be lora / full * 100\"\nassert lora_report([], 8)[\"percent\"] == 0.0, \"an empty layer list should not crash\"",
+        "hints": [
+          "A has r * d_in parameters and B has d_out * r parameters.",
+          "Use sum() with a generator over layers for each total.",
+          "percent = lora / full * 100 if full else 0.0"
+        ]
+      }
+    },
+    {
+      "id": "c406",
+      "title": "Hugging Face PEFT documentation",
+      "platform": "Hugging Face",
+      "url": "https://huggingface.co/docs/peft/index",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "status": "not-started",
+      "order": 6,
+      "why": "The library under most LoRA tooling. Read the quickstart and LoraConfig so you know which knobs (r, alpha, target modules, dropout) the higher-level trainers are setting for you.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "PEFT",
+        "LoraConfig",
+        "target modules"
+      ],
+      "prereqs": [
+        "c405"
+      ]
+    },
+    {
+      "id": "c407",
+      "title": "TRL: SFTTrainer (Hugging Face)",
+      "platform": "Hugging Face",
+      "url": "https://huggingface.co/docs/trl/sft_trainer",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 7,
+      "why": "The reference trainer from Hugging Face. Pick it if you want the most standard code path and a direct route to DPO and GRPO later.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "TRL",
+        "SFTTrainer",
+        "chat datasets"
+      ],
+      "pickGroup": "training-stack",
+      "prereqs": [
+        "c406"
+      ]
+    },
+    {
+      "id": "c408",
+      "title": "Unsloth: fine-tuning guide and free Colab notebooks",
+      "platform": "Unsloth",
+      "url": "https://docs.unsloth.ai/get-started/fine-tuning-llms-guide",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 8,
+      "why": "Fastest path to a working QLoRA run on a free Colab GPU, with ready notebooks. Recommended for your NuraKnect experiment because it removes setup friction.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "Unsloth",
+        "QLoRA notebook",
+        "free Colab"
+      ],
+      "pickGroup": "training-stack",
+      "recommended": true,
+      "prereqs": [
+        "c406"
+      ]
+    },
+    {
+      "id": "c409",
+      "title": "Axolotl documentation",
+      "platform": "Axolotl",
+      "url": "https://docs.axolotl.ai/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "status": "not-started",
+      "order": 9,
+      "why": "Config-driven fine-tuning (YAML, no training code). Pick it if you prefer reproducible config files and plan to move to multi-GPU runs.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "Axolotl",
+        "YAML config",
+        "reproducible runs"
+      ],
+      "pickGroup": "training-stack",
+      "prereqs": [
+        "c406"
+      ]
+    },
+    {
+      "id": "c410",
+      "title": "AI Engineering from Scratch: Quantization (Phase 10, lesson 11)",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/11-quantization",
+      "cost": "Free",
+      "duration": "2 hours",
+      "status": "not-started",
+      "order": 10,
+      "why": "How int8, 4-bit, GPTQ, AWQ and GGUF trade quality for memory. You need this to serve a tuned model on a laptop or a small server.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "quantization",
+        "GGUF",
+        "AWQ",
+        "bitsandbytes"
+      ],
+      "prereqs": [
+        "c405"
+      ],
+      "pythonChallenge": {
+        "level": 4,
+        "difficulty": "Advanced",
+        "title": "int8 Quantize and Dequantize",
+        "question": "Quantization stores weights in fewer bits to save memory. The simplest scheme is symmetric int8: pick one scale so the largest absolute value maps to 127, round every value to an integer, and multiply back by the scale to recover an approximation.\n\nYour task:\n  1. quantize_int8(values) returns (q, scale) where scale = max(abs(values)) / 127 (use scale 1.0 if all values are 0) and q[i] = round(values[i] / scale), clamped to the range -127..127.\n  2. dequantize_int8(q, scale) returns [x * scale for x in q].\n  3. max_error(values) returns the largest absolute difference between the original values and the round-tripped ones.\n\nTry it on [0.5, -1.2, 3.3, 0.01] and see how the tiny value suffers.",
+        "hint": "Python's round() works here. The biggest possible error per value is scale / 2, because rounding moves a value at most half a step.",
+        "starterCode": "def quantize_int8(values):\n    # TODO: scale = max(abs) / 127 (1.0 if all zeros); q = clamp(round(v / scale), -127, 127)\n    return [], 1.0\n\ndef dequantize_int8(q, scale):\n    # TODO\n    return []\n\ndef max_error(values):\n    # TODO: largest |original - round_tripped|\n    return 0.0\n\nprint(max_error([0.5, -1.2, 3.3, 0.01]))\n",
+        "tests": "_q, _s = quantize_int8([1.0, -1.0, 0.5])\nassert _q[0] == 127 and _q[1] == -127, \"the largest magnitude should map to +/-127\"\nassert abs(_s - 1.0 / 127) < 1e-9, \"scale should be max(abs) / 127\"\nassert quantize_int8([0.0, 0.0]) == ([0, 0], 1.0), \"all zeros should use scale 1.0\"\nassert all(-127 <= v <= 127 for v in quantize_int8([5.0, -9.0, 2.5])[0]), \"q must stay inside -127..127\"\nassert len(dequantize_int8(*quantize_int8([0.5, -1.2]))) == 2, \"dequantize should return one value per input\"\n_vals = [0.5, -1.2, 3.3, 0.01]\nassert max_error(_vals) <= (3.3 / 127) / 2 + 1e-9, \"error can never exceed scale / 2\"",
+        "hints": [
+          "max(abs(v) for v in values) gives the largest magnitude.",
+          "Clamp with max(-127, min(127, n)).",
+          "max_error: q, s = quantize_int8(values); back = dequantize_int8(q, s); return max(abs(a - b) for a, b in zip(values, back))"
+        ]
+      }
+    },
+    {
+      "id": "c411",
+      "title": "AI Engineering from Scratch: DPO (Phase 10, lesson 08) and TRL DPOTrainer",
+      "platform": "AI Engineering from Scratch",
+      "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/08-dpo",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 11,
+      "why": "Preference tuning without a reward model: train on chosen vs rejected replies. Useful once SFT works and you have pairs, for example replies you approved vs rejected in NuraKnect.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 2.5,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "DPO",
+        "preference pairs",
+        "TRL DPOTrainer"
+      ],
+      "prereqs": [
+        "c404"
+      ]
+    },
+    {
+      "id": "c412",
+      "title": "Unsloth: reinforcement learning guide (GRPO and RLVR)",
+      "platform": "Unsloth",
+      "url": "https://docs.unsloth.ai/basics/reinforcement-learning-rl-guide",
+      "cost": "Free",
+      "duration": "2.5 hours",
+      "status": "not-started",
+      "order": 12,
+      "why": "GRPO with verifiable rewards trains models on tasks with a checkable answer (math, code, format rules). Optional reading so you can recognise where it applies and where it does not.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2.5,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "GRPO",
+        "RLVR",
+        "reward functions"
+      ],
+      "prereqs": [
+        "c411"
+      ]
+    },
+    {
+      "id": "c413",
+      "title": "Project: build a 200-example NuraKnect instruction dataset",
+      "platform": "Build",
+      "url": "https://huggingface.co/docs/datasets/index",
+      "cost": "Free",
+      "duration": "5 hours",
+      "status": "not-started",
+      "order": 13,
+      "why": "Turn real (anonymised) DM threads into 200 clean chat-format examples with a fixed-seed train/eval split. Data work is where most fine-tuning projects succeed or fail.",
+      "kind": "project",
+      "price": "free",
+      "hours": 5,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "dataset building",
+        "cleaning",
+        "train/eval split"
+      ],
+      "keep": [
+        "The cleaned train.jsonl and eval.jsonl (anonymised) or a 10-row sample",
+        "The validation and split script",
+        "A one-page data card: source, cleaning rules, counts, known gaps"
+      ],
+      "prereqs": [
+        "c403"
+      ],
+      "recommended": true
+    },
+    {
+      "id": "c414",
+      "title": "Project: LoRA fine-tune a small open model and compare to prompting",
+      "platform": "Build",
+      "url": "https://docs.unsloth.ai/get-started/unsloth-notebooks",
+      "cost": "Free",
+      "duration": "7 hours",
+      "status": "not-started",
+      "order": 14,
+      "why": "Fine-tune a small open model on your dataset in free Colab, then compare it against a well-prompted base model on your eval split. The comparison is the point.",
+      "kind": "project",
+      "price": "free",
+      "hours": 7,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "QLoRA",
+        "Colab",
+        "before/after eval"
+      ],
+      "keep": [
+        "The Colab notebook with outputs",
+        "Training loss curve and key settings (r, lr, epochs)",
+        "A table of eval results: tuned vs prompted baseline",
+        "Three example replies each, side by side"
+      ],
+      "prereqs": [
+        "c413",
+        "c405"
+      ]
+    },
+    {
+      "id": "c415",
+      "title": "Project: quantize and serve the tuned model locally with an eval comparison",
+      "platform": "Build",
+      "url": "https://github.com/ggml-org/llama.cpp",
+      "cost": "Free",
+      "duration": "6 hours",
+      "status": "not-started",
+      "order": 15,
+      "why": "Merge the adapter, quantize to GGUF, serve it locally with llama.cpp and rerun your eval across fp16 and 4-bit. You learn what quantization costs in quality, speed and memory.",
+      "kind": "project",
+      "price": "free",
+      "hours": 6,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "GGUF",
+        "llama.cpp",
+        "serving",
+        "eval comparison"
+      ],
+      "keep": [
+        "Model size, memory and tokens/sec for each quantization level",
+        "Eval scores for fp16 vs 4-bit on the same split",
+        "The exact conversion and serve commands"
+      ],
+      "prereqs": [
+        "c414",
+        "c410"
+      ]
+    }
+  ]
+}

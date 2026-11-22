@@ -14,7 +14,8 @@ export default async function LayerDetailPage({ params }: Props) {
   const { id } = await params
   const layerId = parseInt(id)
 
-  const layer = getRoadmapLayers("ai-engineering").find((l) => l.id === layerId)
+  const allLayers = getRoadmapLayers("ai-engineering")
+  const layer = allLayers.find((l) => l.id === layerId)
   if (!layer) notFound()
 
   const session = await auth()
@@ -53,5 +54,5 @@ export default async function LayerDetailPage({ params }: Props) {
     totalHoursSpent: 0,
   }
 
-  return <LayerDetailClient layer={layer} initialProgress={initialProgress} />
+  return <LayerDetailClient layer={layer} initialProgress={initialProgress} allCourses={allLayers.flatMap((l) => l.courses)} />
 }

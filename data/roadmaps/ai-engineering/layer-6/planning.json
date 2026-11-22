@@ -1,0 +1,55 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 19,
+      "focus": "Cost, latency and reliability basics",
+      "courses": [
+        "c601",
+        "c602",
+        "c603",
+        "c613"
+      ],
+      "dailyMinutes": 95,
+      "buildTask": "Project c613: add streaming, retries with backoff and a cost log to the NuraKnect reply endpoint.",
+      "pythonTask": "Challenges: p50/p95 from a list, token-cost calculator, backoff with jitter (20 min daily)."
+    },
+    {
+      "week": 20,
+      "focus": "Caching and routing",
+      "courses": [
+        "c604",
+        "c605",
+        "c614"
+      ],
+      "dailyMinutes": 100,
+      "buildTask": "Project c614: add prompt and semantic caching and a cheap/expensive router; measure cost and p95 latency before and after.",
+      "pythonTask": "Challenges: LRU cache with TTL, rules-and-budget router (20 min daily)."
+    },
+    {
+      "week": 21,
+      "focus": "Serving an open model",
+      "courses": [
+        "c606",
+        "c607",
+        "c608",
+        "c615",
+        "c610"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Optional project c615: serve an open model behind the same API, load-test it, write the one-page scorecard. Read only the one serving tool you picked in depth.",
+      "pythonTask": "Re-solve the routing challenge with a third (local) model option."
+    },
+    {
+      "week": 22,
+      "focus": "Ops, interviews and review",
+      "courses": [
+        "c611",
+        "c609",
+        "c612"
+      ],
+      "dailyMinutes": 80,
+      "buildTask": "Version one NuraKnect prompt in a tracing tool. Do 5 system-design questions out loud from the interview bank, then take the layer quiz.",
+      "pythonTask": "Review all five challenges and write one more test for your cache and router."
+    }
+  ]
+}
