@@ -111,8 +111,8 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
   - multiple-choice questions: `correct` is in range, the correct answer isn't always in the same position, and it isn't usually the longest option (the same idea as AI Engineering from Scratch's `check_quiz_bias.py`)
   Then make `verify` run `tsc --noEmit && node scripts/check-content.mjs`.
 - [x] T3 Update `lib/loader.ts` so that layer completion, the quiz unlock and overall progress count only core items. Pick groups count as 1. Missing `track` defaults to core, so layers 1–2 behave exactly as they do now. Add `getLayerHours()`.
-- [ ] T4 Run a read-only check query against dev before and after: `SELECT layer_id, courses_completed FROM progress;` The output must be unchanged.
-  - Status 2026-11-22: blocked. There is no `.env.local` on this machine, so dev Turso is unreachable and the "before" snapshot could not be taken ahead of T3. T3 writes nothing to the DB, and an old-vs-new loader comparison over every completed-id subset of layers 1–2 gave 0 differences in 6144 comparisons. When `.env.local` exists, run the query once to confirm the rows look sane (every id is in its layer).
+- [x] T4 Run a read-only check query against dev before and after: `SELECT layer_id, courses_completed FROM progress;` The output must be unchanged.
+  - Done 2026-11-22. No "before" snapshot was possible (no `.env.local` before T3), and T3 writes nothing to the DB. The "after" query, run by the owner, returned layer 1 `c1–c4` and layer 2 `c5–c8`. Every id is in its own layer, and all items are core with no pick groups, so both layers count 4 of 4 under the old and the new loader (backed by the 0-difference comparison over 6144 cases).
 - Exit:
   - `npm run verify` is green, with the content check passing on layers 1–2.
   - The check query output is the same before and after.
