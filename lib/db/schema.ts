@@ -67,3 +67,15 @@ export const exercises = sqliteTable("exercises", {
 }, (t) => [
   uniqueIndex("exercises_user_layer_course").on(t.userId, t.layerId, t.courseId),
 ])
+
+// Login accounts. `id` is the user id that every other table is keyed by.
+// password_hash is "scrypt:<salt hex>:<hash hex>" (lib/password.ts); set it with `npm run set-password`.
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  updatedAt: text("updated_at"),
+}, (t) => [
+  uniqueIndex("users_email").on(t.email),
+])

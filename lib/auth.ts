@@ -1,12 +1,13 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { users } from "@/lib/db/schema"
 import { verifyPassword } from "@/lib/password"
 
-// Single owner account. The email and a scrypt hash of the password live in env vars
-// (AUTH_USER_EMAIL, AUTH_USER_PASSWORD_HASH); make the hash with `npm run hash-password`.
-// Never put a password or its hash in this file.
-const OWNER = { id: "kcshekar", name: "Chandu" }
+// Accounts live in the `users` table; set or change a password with `npm run set-password`.
+// Never put a password or its hash in code, env files or docs.
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
@@ -19,10 +20,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       async authorize(credentials) {
         const email = String(credentials?.email ?? "").trim().toLowerCase()
         const password = String(credentials?.password ?? "")
-        const ownerEmail = (process.env.AUTH_USER_EMAIL ?? "").trim().toLowerCase()
-        if (!ownerEmail || email !== ownerEmail) return null
-        if (!verifyPassword(password, process.env.AUTH_USER_PASSWORD_HASH)) return null
-        const user = { ...OWNER, email: ownerEmail }
+        if (!email || !password) return null
+        const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1)
+        if (!user || !verifyPassword(password, user.passwordHash)) return null
         return { id: user.id, name: user.name, email: user.email }
       },
     }),

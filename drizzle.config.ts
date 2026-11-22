@@ -1,7 +1,8 @@
 import { defineConfig } from "drizzle-kit"
-import { config } from "dotenv"
+import { loadEnvConfig } from "@next/env"
 
-config({ path: ".env.local" })
+// Same env files and order as Next.js (.env.local, then .env).
+loadEnvConfig(process.cwd())
 
 export default defineConfig({
   dialect: "turso",

@@ -2,8 +2,10 @@
 
 ## Now
 - Roadmap content v2 is done (decision 0001, accepted). All 6 layers use the new shape.
-- Login moved to env vars (`AUTH_USER_EMAIL`, `AUTH_USER_PASSWORD_HASH`, made with `npm run hash-password`). Yours to finish:
-  - set a NEW password and put both vars in `.env.local` and in Vercel before the next deploy, or login fails
+- Login now lives in the `users` table (2026-11-22). Yours to finish:
+  - run `npm run set-password` before you log out (the table is empty until you do), using the id `kcshekar` default
+  - then remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your env file and from Vercel
+  - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against that one too
   - the old plaintext password is still in git history; it is retired, so never reuse it
 - Remove the stray `download` file from git history (commands in the hand-off; it is now in `.gitignore`).
 

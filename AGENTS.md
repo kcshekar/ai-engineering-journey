@@ -6,7 +6,7 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - Dev: `npm run dev` (Next.js with Turbopack) → http://localhost:3000
 - Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 10 s. No lint yet.
 - Test: `npm test` (Node's built-in runner, `tests/*.test.mjs`; needs Node 22.18+ because it loads `.ts` files directly).
-- New login password hash: `npm run hash-password` (prints an `AUTH_USER_PASSWORD_HASH=` line; the password is never stored).
+- Set or change the login: `npm run set-password` (asks for email and password, writes a scrypt hash to the `users` table; run it yourself, it needs a terminal for hidden input).
 - Build: `npm run build`
 - Migrate: `npm run migrate` (`drizzle-kit push`). It pushes `lib/db/schema.ts` straight to Turso and writes no migration files (`/drizzle` is gitignored).
 - DB browser: `npm run db:studio`
@@ -14,7 +14,7 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 ## Ports and environments
 | Environment | Where | Ports | How to reach it | Limits |
 |---|---|---|---|---|
-| Dev | local | 3000 | `npm run dev` | uses the Turso DB in `.env.local` |
+| Dev | local | 3000 | `npm run dev` | uses the Turso DB in `.env` (Next.js also reads `.env.local` first) |
 | Prod | Vercel (per memory notes; unverified) | n/a | n/a | the user deploys |
 
 ## Layout
@@ -25,8 +25,8 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - `components/`: client components. Ignore the `*.bak` files.
 
 ## Rules for this repo
-- Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `AUTH_SECRET`, `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` live in `.env.local` (names only in `.env.example`). Never read or print that file.
-- Login: one owner account. `lib/auth.ts` checks the email and a scrypt hash from env vars (`lib/password.ts`). Never put a password or hash in code, docs or memory files. Old commits still contain a retired plaintext password; it must never be reused.
+- Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN` and `AUTH_SECRET` live in `.env` on this machine (gitignored; names only in `.env.example`). Never read or print env files, and never grep a folder that contains them. Scripts load them with `@next/env`, the same way Next.js does.
+- Login: accounts live in the `users` table (id, email, name, scrypt `password_hash`); `lib/auth.ts` looks the email up and checks the hash (`lib/password.ts`). The owner's id is `kcshekar`, which every other table is keyed by. Never put a password or hash in code, env files, docs or memory files. Old commits still contain a retired plaintext password; it must never be reused.
 - Package manager: npm (`package-lock.json`).
 - Schema changes: edit `lib/db/schema.ts`, run `npm run migrate` against dev, then run a check query.
 

@@ -7,7 +7,7 @@ import path from "node:path"
 import {
   getRequiredCount, countDoneUnits, isLayerWorkDone, isQuizUnlocked, applyItemToggle, getLayerHours,
 } from "../lib/loader.ts"
-import { verifyPassword } from "../lib/password.ts"
+import { verifyPassword, hashPassword } from "../lib/password.ts"
 
 const item = (id, extra = {}) => ({ id, title: id, platform: "", url: "", cost: "", duration: "", status: "", order: 1, why: "", ...extra })
 const layer = (courses, extra = {}) => ({ id: 9, title: "t", status: "", weeks: "1-2", description: "", appliesTo: [], weeklyPlan: [], quiz: { status: "", unlockCondition: "", passingScore: 70, questions: [] }, courses, ...extra })
@@ -78,7 +78,7 @@ test("quiz unlock: the stored completed flag or finished work", () => {
   assert.equal(isQuizUnlocked(L, { layerProgress: {} }), false)
 })
 
-test("password: scrypt hash in the hash-password format verifies, anything else fails", () => {
+test("password: hashPassword output verifies, a wrong password or bad format fails", () => {
   const salt = randomBytes(16)
   const stored = `scrypt:${salt.toString("hex")}:${scryptSync("correct horse battery", salt, 64).toString("hex")}`
   assert.equal(verifyPassword("correct horse battery", stored), true)
@@ -86,6 +86,10 @@ test("password: scrypt hash in the hash-password format verifies, anything else 
   assert.equal(verifyPassword("correct horse battery", undefined), false)
   assert.equal(verifyPassword("correct horse battery", "plain-text-password"), false)
   assert.equal(verifyPassword("", stored), false)
+  const made = hashPassword("another long password")
+  assert.match(made, /^scrypt:[0-9a-f]{32}:[0-9a-f]{128}$/)
+  assert.equal(verifyPassword("another long password", made), true)
+  assert.notEqual(hashPassword("same"), hashPassword("same"), "every hash gets a new salt")
 })
 
 test("real content: every layer has core work and its ids are unique across the roadmap", () => {
