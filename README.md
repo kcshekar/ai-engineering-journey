@@ -28,7 +28,7 @@ npm run dev
 ```
 
 The app opens at `http://localhost:3000`.
-Note: currently single-user. Put `DATABASE_URL`, `DATABASE_AUTH_TOKEN` and `AUTH_SECRET` in `.env.local` (never commit it). Run `npm run verify` before committing: it type-checks and validates the roadmap JSON.
+Note: currently single-user. Copy `.env.example` to `.env.local` and fill in `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `AUTH_SECRET`, `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` (make the hash with `npm run hash-password`). Never commit `.env.local`. Run `npm run verify` before committing: it type-checks and validates the roadmap JSON.
 
 ## How it works
 
@@ -72,7 +72,7 @@ ai-engineering-journey/
 **Frontend:** Next.js 15 with Turbopack  
 **Backend:** API routes with NextAuth v5  
 **Database:** Turso (LibSQL) - cloud SQLite with local sync  
-**Authentication:** Credentials-based (email/password)
+**Authentication:** NextAuth credentials for one owner; the email and a scrypt password hash come from env vars
 
 ## Learning Philosophy
 

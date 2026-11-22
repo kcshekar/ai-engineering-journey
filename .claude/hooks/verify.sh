@@ -3,7 +3,7 @@
 # Exit 2 tells Claude to keep fixing (Claude Code stops after 8 blocks in a row).
 # /repo-init fills CHECKS; each line is "<path regex>=><command>", run from the repo root.
 CHECKS=(
-  '\.(ts|tsx)$|tsconfig\.json$=>npx tsc --noEmit'
+  '\.(ts|tsx|mjs)$|tsconfig\.json$|^package\.json$|^data/roadmaps/|^tests/=>npm run verify'
 )
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 input=$(cat)

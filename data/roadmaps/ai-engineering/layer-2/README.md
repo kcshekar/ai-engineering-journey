@@ -56,7 +56,7 @@ to your DM manager? What feature did you build or improve?)
 
 ---
 
-## Course 6 — Building RAG Agents with LLMs
+## Course 6 — Building and Evaluating Advanced RAG
 
 ### Summary
 (Write 3–5 sentences. What is RAG at its core and why does it exist?)
@@ -221,7 +221,7 @@ and query strategy you would use for NuraKnect DM memory)
 | id | Title | Kind | Hours | Track |
 |---|---|---|---|---|
 | c5 | Building Systems with the ChatGPT API | course | 1.5 | core |
-| c6 | Building RAG Agents with LLMs | course | 2 | core |
+| c6 | Building and Evaluating Advanced RAG | course | 2 | core |
 | c7 | LangChain for LLM Application Development | course | 2 | core |
 | c8 | Vector Databases from Embeddings to Applications | course | 2 | core |
 | c201 | Hybrid search explained (BM25 plus vectors) | article | 1 | core |

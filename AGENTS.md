@@ -4,7 +4,9 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 
 ## Commands
 - Dev: `npm run dev` (Next.js with Turbopack) → http://localhost:3000
-- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, quiz answers). About 5 s. There are no unit tests or lint yet.
+- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 10 s. No lint yet.
+- Test: `npm test` (Node's built-in runner, `tests/*.test.mjs`; needs Node 22.18+ because it loads `.ts` files directly).
+- New login password hash: `npm run hash-password` (prints an `AUTH_USER_PASSWORD_HASH=` line; the password is never stored).
 - Build: `npm run build`
 - Migrate: `npm run migrate` (`drizzle-kit push`). It pushes `lib/db/schema.ts` straight to Turso and writes no migration files (`/drizzle` is gitignored).
 - DB browser: `npm run db:studio`
@@ -23,8 +25,8 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - `components/`: client components. Ignore the `*.bak` files.
 
 ## Rules for this repo
-- Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN` and `AUTH_SECRET` live in `.env.local`. Never read or print that file.
-- The users list in `lib/auth.ts` is hardcoded and contains a credential. Don't copy credentials into docs or memory files.
+- Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN`, `AUTH_SECRET`, `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` live in `.env.local` (names only in `.env.example`). Never read or print that file.
+- Login: one owner account. `lib/auth.ts` checks the email and a scrypt hash from env vars (`lib/password.ts`). Never put a password or hash in code, docs or memory files. Old commits still contain a retired plaintext password; it must never be reused.
 - Package manager: npm (`package-lock.json`).
 - Schema changes: edit `lib/db/schema.ts`, run `npm run migrate` against dev, then run a check query.
 

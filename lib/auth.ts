@@ -1,15 +1,12 @@
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 
-// Hardcoded for now — replace authorize() body with a DB lookup for real multi-user auth
-const USERS = [
-  {
-    id: "kcshekar",
-    name: "Chandu",
-    email: "korpolechandrashekar@gmail.com",
-    password: "learning2024",
-  },
-]
+import { verifyPassword } from "@/lib/password"
+
+// Single owner account. The email and a scrypt hash of the password live in env vars
+// (AUTH_USER_EMAIL, AUTH_USER_PASSWORD_HASH); make the hash with `npm run hash-password`.
+// Never put a password or its hash in this file.
+const OWNER = { id: "kcshekar", name: "Chandu" }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
@@ -20,12 +17,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const user = USERS.find(
-          (u) =>
-            u.email === credentials?.email &&
-            u.password === credentials?.password
-        )
-        if (!user) return null
+        const email = String(credentials?.email ?? "").trim().toLowerCase()
+        const password = String(credentials?.password ?? "")
+        const ownerEmail = (process.env.AUTH_USER_EMAIL ?? "").trim().toLowerCase()
+        if (!ownerEmail || email !== ownerEmail) return null
+        if (!verifyPassword(password, process.env.AUTH_USER_PASSWORD_HASH)) return null
+        const user = { ...OWNER, email: ownerEmail }
         return { id: user.id, name: user.name, email: user.email }
       },
     }),

@@ -9,14 +9,16 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && node scripts/check-content.mjs",
-    "migrate": "drizzle-kit push"
+    "verify": "npm run typecheck && node scripts/check-content.mjs && npm test",
+    "migrate": "drizzle-kit push",
+    "hash-password": "node scripts/hash-password.mjs",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",
     "@monaco-editor/react": "^4.7.0",
     "dotenv": "^17.4.2",
-    "drizzle-orm": "^0.41.0",
+    "drizzle-orm": "^0.45.4",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.468.0",
     "next": "^15.3.1",
@@ -30,7 +32,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "drizzle-kit": "^0.30.0",
+    "drizzle-kit": "^0.31.11",
     "typescript": "^5"
   }
 }

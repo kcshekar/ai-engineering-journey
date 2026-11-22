@@ -56,7 +56,7 @@ to your DM manager? What feature did you build or improve?)
 
 ---
 
-## Course 6 — Building RAG Agents with LLMs
+## Course 6 — Building and Evaluating Advanced RAG
 
 ### Summary
 (Write 3–5 sentences. What is RAG at its core and why does it exist?)
