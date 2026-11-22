@@ -122,7 +122,8 @@ This plan uses the research on 5 AI roadmap sources (Nov 2026) to improve the tr
 
 ### Phase 2: Layer page redesign (bold, modern)
 - Entry: Phase 1 exit met.
-- [ ] T1 Add a Must-know card at the top of the layer page, plus a total-hours chip.
+- [x] T1 Add a Must-know card at the top of the layer page, plus a total-hours chip.
+  - Done 2026-11-22 in `LayerCard.tsx` and `globals.css`. Both render only when the layer has `mustKnow` or `hours`, so layers 1–2 look unchanged until Phase 3 adds that data. The browser check moves to the Phase 2 exit, once there is data to show.
 - [ ] T2 Group items under Beginner, Intermediate and Advanced sections, each with its stage goal. Ungrouped items stay in one list.
 - [ ] T3 Item card changes:
   - an icon for each kind

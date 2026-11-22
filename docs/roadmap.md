@@ -1,8 +1,8 @@
 # Roadmap
 
 ## Now
-- Active plan: [Roadmap content v2](plans/roadmap-content-v2.md). Phase 1 is done (optional types, a content check in `verify`, completion counted on core items, dev progress rows checked).
-- Next task: Phase 2, T1: the "Must know" card on the layer page.
+- Active plan: [Roadmap content v2](plans/roadmap-content-v2.md). Phase 1 is done. Phase 2 T1 is done (Must-know card and hours chip).
+- Next task: Phase 2, T2: group items under Beginner, Intermediate and Advanced sections.
 - Still open (yours): rotate the login password that is in git history (`lib/auth.ts` and an old memory file).
 
 ## Next

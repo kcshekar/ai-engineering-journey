@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play, Pencil, X, AlertTriangle, AlertCircle } from "lucide-react"
+import { Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play, Pencil, X, AlertTriangle, AlertCircle, Lightbulb } from "lucide-react"
 import ProgressBar from "./ProgressBar"
 import CoursePanel from "./CoursePanel"
 import { api } from "@/lib/api-client"
-import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum, countDoneUnits, getRequiredCount } from "@/lib/loader"
+import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum, countDoneUnits, getRequiredCount, getLayerHours } from "@/lib/loader"
 import type { Layer, RoadmapProgress, LayerProgressEntry, CourseMetaEntry } from "@/types"
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
@@ -95,6 +95,45 @@ function CourseTimeline({
   )
 }
 
+function HoursChip({ layer }: { layer: Layer }) {
+  const { required, optional } = getLayerHours(layer)
+  if (!required && !optional) return null
+  return (
+    <div className="hours-chip" title="Estimated study time">
+      <Clock size={13} />
+      {required > 0 && <span>~{required}h core</span>}
+      {optional > 0 && <span className="hours-chip-optional">+{optional}h optional</span>}
+    </div>
+  )
+}
+
+function MustKnowCard({ layer }: { layer: Layer }) {
+  const terms = layer.mustKnow ?? []
+  if (!terms.length) return null
+  return (
+    <section className="must-know" aria-labelledby={`must-know-${layer.id}`}>
+      <div className="must-know-head">
+        <h3 id={`must-know-${layer.id}`}><Lightbulb size={16} /> Must know</h3>
+        <span className="must-know-count">{terms.length} terms</span>
+      </div>
+      <ul className="must-know-grid">
+        {terms.map((t) => (
+          <li key={t.term} className="must-know-term">
+            <span className="must-know-name">{t.term}</span>
+            <p>{t.oneLiner}</p>
+            {t.misconception && (
+              <details className="must-know-trap">
+                <summary>Common trap</summary>
+                <p>{t.misconception}</p>
+              </details>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 interface Props {
   layer: Layer
   progress: RoadmapProgress
@@ -141,6 +180,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
         <div className="layer-title-area">
           <h2>Layer {layer.id}: {layer.title}</h2>
           <p>{layer.description}</p>
+          <HoursChip layer={layer} />
         </div>
         <div className="layer-progress-bar">
           <ProgressBar
@@ -206,6 +246,8 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
           </div>
         )}
       </div>
+
+      <MustKnowCard layer={layer} />
 
       {(deadlineStatus === "danger" || deadlineStatus === "overdue") && (
         <div className={`deadline-banner deadline-banner-${deadlineStatus}`}>
