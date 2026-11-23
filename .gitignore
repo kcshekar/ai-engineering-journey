@@ -17,3 +17,4 @@ node_modules
 
 # stray local file, never commit
 /download
+__pycache__/

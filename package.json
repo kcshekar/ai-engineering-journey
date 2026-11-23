@@ -6,7 +6,6 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
     "verify": "npm run typecheck && node scripts/check-content.mjs && npm test",
@@ -17,7 +16,6 @@
   "dependencies": {
     "@libsql/client": "^0.14.0",
     "@monaco-editor/react": "^4.7.0",
-    "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.4",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.468.0",

@@ -21,8 +21,8 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - `app/(app)/`: dashboard, layers, notes, projects pages. `app/(auth)/login`.
 - `app/api/*`: route handlers (activity, code, course-meta, layer-progress, notes, auth).
 - `lib/db/`: Drizzle schema and client (Turso/libsql). `lib/auth.ts`: NextAuth v5 credentials.
-- `data/roadmaps/<id>/`: roadmap content (`meta.json`, `progress.json`, `layer-N/layer.json`, notes).
-- `components/`: client components. Ignore the `*.bak` files.
+- `data/roadmaps/<id>/`: roadmap content (`meta.json`, `layer-N/layer.json`, `planning.json`, notes).
+- `components/`: client components.
 
 ## Rules for this repo
 - Env vars: `DATABASE_URL`, `DATABASE_AUTH_TOKEN` and `AUTH_SECRET` live in `.env` on this machine (gitignored; names only in `.env.example`). Never read or print env files, and never grep a folder that contains them. Scripts load them with `@next/env`, the same way Next.js does.

@@ -7,7 +7,7 @@
   - then remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your env file and from Vercel
   - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against that one too
   - the old plaintext password is still in git history; it is retired, so never reuse it
-- Repo cleanup: section B is done (2026-11-23). Section A of `docs/plans/repo-cleanup.md` waits for your OK.
+- Repo cleanup is done (2026-11-23; the plan is deleted, git keeps it). Optional: purge `memory/project_learningtracker.md` from git history like `download`.
 - Remove the stray `download` file from git history (commands in the hand-off; it is now in `.gitignore`).
 
 ## Next

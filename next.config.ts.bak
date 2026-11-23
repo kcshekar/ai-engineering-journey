@@ -1,8 +1,0 @@
-import type { NextConfig } from "next"
-
-const config: NextConfig = {
-  serverExternalPackages: ["next-auth", "@auth/core"],
-  transpilePackages: ["framer-motion", "motion-dom", "motion-utils"],
-}
-
-export default config
