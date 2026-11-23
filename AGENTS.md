@@ -4,7 +4,8 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 
 ## Commands
 - Dev: `npm run dev` (Next.js with Turbopack) → http://localhost:3000
-- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 10 s. No lint yet.
+- Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `npm run lint`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 20 s.
+- Lint: `npm run lint` (ESLint 9 with `eslint-config-next`; warnings don't fail it, errors do).
 - Test: `npm test` (Node's built-in runner, `tests/*.test.mjs`; needs Node 22.18+ because it loads `.ts` files directly).
 - Set or change the login: `npm run set-password` (asks for email and password, writes a scrypt hash to the `users` table; run it yourself, it needs a terminal for hidden input).
 - Build: `npm run build`

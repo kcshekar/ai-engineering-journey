@@ -8,7 +8,8 @@
     "start": "next start",
     "db:studio": "drizzle-kit studio",
     "typecheck": "tsc --noEmit",
-    "verify": "npm run typecheck && node scripts/check-content.mjs && npm test",
+    "lint": "eslint .",
+    "verify": "npm run typecheck && npm run lint && node scripts/check-content.mjs && npm test",
     "migrate": "drizzle-kit push",
     "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/",
     "set-password": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/set-password.mjs"
@@ -31,6 +32,8 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.11",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.29",
     "typescript": "^5"
   }
 }

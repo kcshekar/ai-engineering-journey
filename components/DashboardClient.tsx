@@ -1,17 +1,15 @@
 "use client"
 
-import { useState, useCallback } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Clock, Layers, Flame, Target, Hammer, Terminal } from "lucide-react"
 import RoadmapSelector from "./RoadmapSelector"
 import ProgressBar from "./ProgressBar"
 import StreakGraph from "./StreakGraph"
-import { api } from "@/lib/api-client"
 import {
-  getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, applyItemToggle, getLayerHours,
+  getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, getLayerHours,
   calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
 } from "@/lib/loader"
-import type { RoadmapData, ActivityDay, CourseMetaEntry, LayerProgressEntry } from "@/types"
+import type { RoadmapData, ActivityDay, LayerProgressEntry } from "@/types"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -24,12 +22,9 @@ interface Props {
 }
 
 export default function DashboardClient({ initialRoadmap, initialActivityMap }: Props) {
-  const [roadmap, setRoadmap]       = useState(initialRoadmap)
-  const [activityMap, setActivityMap] = useState(initialActivityMap)
-
-  const refreshActivity = useCallback(() => {
-    api.getActivity().then((m) => setActivityMap(m as Record<string, ActivityDay>))
-  }, [])
+  // Read-only view: the dashboard never edits progress, so it renders the server data directly.
+  const roadmap = initialRoadmap
+  const activityMap = initialActivityMap
 
   const currentLayer   = getCurrentLayer(roadmap.layers, roadmap.progress)
   const currentWeekPlan = getCurrentWeek(currentLayer, roadmap.progress.currentWeek)
@@ -43,61 +38,6 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
 
   const circumference = 2 * Math.PI * 64
   const strokeOffset  = circumference - (overallPercent / 100) * circumference
-
-  const handleToggleCourse = useCallback((layerId: number, courseId: string) => {
-    setRoadmap((prev) => {
-      const newProgress = JSON.parse(JSON.stringify(prev.progress))
-      const key = String(layerId)
-      if (!newProgress.layerProgress[key]) {
-        newProgress.layerProgress[key] = {
-          started: false, completed: false, coursesCompleted: [],
-          quizScore: null, quizAttempts: 0, startedDate: null, completedDate: null,
-          deadline: null, courseTimelines: {},
-        }
-      }
-      const lp = newProgress.layerProgress[key]
-      applyItemToggle(prev.layers.find((l) => l.id === layerId), lp, courseId)
-      api.saveLayerProgress(layerId, lp)
-      return { ...prev, progress: newProgress }
-    })
-    api.logActivity("complete").then(refreshActivity)
-  }, [refreshActivity])
-
-  const handleSaveLayerDates = useCallback((layerId: number, patch: Record<string, unknown>) => {
-    api.saveLayerProgress(layerId, patch)
-    setRoadmap((prev) => {
-      const newProgress = JSON.parse(JSON.stringify(prev.progress))
-      const key = String(layerId)
-      if (!newProgress.layerProgress[key]) {
-        newProgress.layerProgress[key] = {
-          started: false, completed: false, coursesCompleted: [], quizScore: null,
-          quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
-        }
-      }
-      Object.assign(newProgress.layerProgress[key], patch)
-      return { ...prev, progress: newProgress }
-    })
-  }, [])
-
-  const handleSaveCourseTimeline = useCallback((layerId: number, courseId: string, patch: Record<string, unknown>) => {
-    api.saveCourseTimeline(layerId, courseId, patch)
-    setRoadmap((prev) => {
-      const newProgress = JSON.parse(JSON.stringify(prev.progress))
-      const key = String(layerId)
-      if (!newProgress.layerProgress[key]) {
-        newProgress.layerProgress[key] = {
-          started: false, completed: false, coursesCompleted: [], quizScore: null,
-          quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
-        }
-      }
-      if (!newProgress.layerProgress[key].courseTimelines) newProgress.layerProgress[key].courseTimelines = {}
-      newProgress.layerProgress[key].courseTimelines[courseId] = {
-        ...(newProgress.layerProgress[key].courseTimelines[courseId] || {}),
-        ...patch,
-      }
-      return { ...prev, progress: newProgress }
-    })
-  }, [])
 
   return (
     <motion.div className="dashboard" variants={pageVariants} initial="initial" animate="in">

@@ -33,8 +33,6 @@ export async function POST(req: NextRequest) {
   const today = new Date().toISOString().split("T")[0]
   const id = `${userId}-${today}`
 
-  const countCol = type === "view" ? "viewCount" : type === "notes" ? "notesCount" : type === "code" ? "codeCount" : "completeCount"
-
   const existing = await db.select().from(activity).where(eq(activity.id, id)).then((r) => r[0])
 
   if (existing) {

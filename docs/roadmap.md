@@ -1,21 +1,19 @@
 # Roadmap
 
 ## Now
-- Roadmap content v2 is done (decision 0001, accepted). All 6 layers use the new shape.
-- Login now lives in the `users` table (2026-11-22). Yours to finish:
-  - run `npm run set-password` before you log out (the table is empty until you do), using the id `kcshekar` default
-  - then remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your env file and from Vercel
-  - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against that one too
-  - the old plaintext password is still in git history; it is retired, so never reuse it
-- Repo cleanup is done (2026-11-23; the plan is deleted, git keeps it). Optional: purge `memory/project_learningtracker.md` from git history like `download`.
-- Remove the stray `download` file from git history (commands in the hand-off; it is now in `.gitignore`).
+- Active plan: `docs/plans/next-16-upgrade.md` (draft, waiting for your go). Clears the last high `npm audit` finding.
+- Yours to finish (outside the repo):
+  - remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your `.env` and from Vercel (nothing reads them now)
+  - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against it
+  - optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history (commands in the hand-off); the retired password in old commits must never be reused
 
 ## Next
-- `npm audit` (2026-11-22, after fixes): 8 left (1 high, 5 moderate, 2 low), none critical.
-  - postcss inside Next.js (high): needs Next 16, a major upgrade. Low risk here because postcss only processes our own CSS at build time. Plan the Next 16 upgrade separately.
+- `npm audit` (2026-11-23): 8 left (1 high, 5 moderate, 2 low), none critical.
+  - postcss inside Next.js (high): fixed by the Next 16 plan.
   - esbuild through drizzle-kit (moderate): dev tool only; affects `drizzle-kit studio` while it runs.
   - dompurify through monaco-editor (moderate): the editor loads its code from a CDN at runtime, so this copy is not what runs.
-- Add lint.
+- API input checks: the POST routes trust the body (for example `/api/course-timeline` returns 500 on a missing `layerId`). Return 400 instead. Low risk (login required, single user).
+- Lint warnings: 3 `react-hooks/exhaustive-deps` in `CoursePanel.tsx` and `LayerCard.tsx`; each changes when an effect re-runs, so fix them one at a time.
 
 ## Later
 - Multi-user support, monitoring and data export (from the old gaps list, now deleted; git history has it).

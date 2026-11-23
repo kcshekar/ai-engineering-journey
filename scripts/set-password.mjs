@@ -54,4 +54,4 @@ await db.execute({
           password_hash = excluded.password_hash, updated_at = excluded.updated_at`,
   args: [id, email, name, hashPassword(first), new Date().toISOString()],
 })
-console.log(`Saved login for user "${id}" (${email}). You can remove AUTH_USER_EMAIL and AUTH_USER_PASSWORD_HASH from your env files and Vercel.`)
+console.log(`Saved login for user "${id}" (${email}).`)
