@@ -1,11 +1,11 @@
 # learningtracker
 
-Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps from JSON and stores progress, notes and code in Turso. It has a single user (the owner).
+Personal AI-engineering learning tracker: a Next.js 16 app that reads roadmaps from JSON and stores progress, notes and code in Turso. It has a single user (the owner).
 
 ## Commands
-- Dev: `npm run dev` (Next.js with Turbopack) → http://localhost:3000
+- Dev: `npm run dev` (Next.js 16, Turbopack by default) → http://localhost:3000. Dev writes to `.next/dev`, so `npm run build` can run alongside it.
 - Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `npm run lint`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 20 s.
-- Lint: `npm run lint` (ESLint 9 with `eslint-config-next`; warnings don't fail it, errors do).
+- Lint: `npm run lint` (ESLint 9 with `eslint-config-next` 16; warnings don't fail it, errors do). Three React Compiler rules are set to warn in `eslint.config.mjs` until `CoursePanel` and `ThemeProvider` are refactored.
 - Test: `npm test` (Node's built-in runner, `tests/*.test.mjs`; needs Node 22.18+ because it loads `.ts` files directly).
 - Set or change the login: `npm run set-password` (asks for email and password, writes a scrypt hash to the `users` table; run it yourself, it needs a terminal for hidden input).
 - Build: `npm run build`
@@ -35,3 +35,13 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - Pending work: `docs/roadmap.md`, starting with `## Now`.
 - Active plans: `docs/plans/`. Delete a plan when it's done; git keeps it.
 - Decisions: `docs/decisions/`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
