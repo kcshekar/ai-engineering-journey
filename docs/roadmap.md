@@ -2,6 +2,7 @@
 
 ## Now
 - Active plan: `docs/plans/next-16-upgrade.md` (draft, waiting for your go). Clears the last high `npm audit` finding.
+- Draft plan, waiting for your approval: `docs/plans/ux-course-upgrade.md` (branch `feat/ux-course-research`). It covers the UX redesign, the 2026 curriculum refresh and a new Layer 7 FDE. Research and the tracker are in `docs/research/`; the proposed decision is 0002. P1 needs the Next 16 upgrade merged first.
 - Yours to finish (outside the repo):
   - remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your `.env` and from Vercel (nothing reads them now)
   - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against it
