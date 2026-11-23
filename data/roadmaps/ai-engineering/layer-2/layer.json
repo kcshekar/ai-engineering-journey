@@ -1,11 +1,10 @@
 {
   "id": 2,
   "title": "Applied LLMs",
-  "status": "not-started",
   "weeks": "4-6",
   "description": "RAG systems, embeddings, vector databases, and LangChain — turning LLM knowledge into real products",
   "appliesTo": [
-    "cuva-ai",
+    "work-platform",
     "nuraknect"
   ],
   "courses": [
@@ -16,9 +15,8 @@
       "url": "https://www.deeplearning.ai/short-courses/building-systems-with-chatgpt/",
       "cost": "Free",
       "duration": "90 minutes",
-      "status": "not-started",
       "order": 1,
-      "why": "Teaches multi-step LLM chains — exactly what Cuva AI workflow orchestration does. AutoGen patterns become clear.",
+      "why": "Teaches multi-step LLM chains — exactly what work-platform workflow orchestration does. AutoGen patterns become clear.",
       "pythonChallenge": {
         "level": 5,
         "difficulty": "Advanced",
@@ -52,9 +50,8 @@
       "url": "https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 2,
-      "why": "Core RAG architecture end to end. Applies directly to NuraKnect conversation memory and Cuva AI knowledge retrieval.",
+      "why": "Core RAG architecture end to end. Applies directly to NuraKnect conversation memory and work-platform knowledge retrieval.",
       "pythonChallenge": {
         "level": 6,
         "difficulty": "Advanced",
@@ -88,7 +85,6 @@
       "url": "https://www.deeplearning.ai/short-courses/langchain-for-llm-application-development/",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 3,
       "why": "Bridge between AutoGen patterns already known and LangGraph coming in Layer 3. Learn LCEL and chain composition.",
       "pythonChallenge": {
@@ -123,7 +119,6 @@
       "url": "https://www.deeplearning.ai/short-courses/vector-databases-embeddings-applications",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 4,
       "why": "Pinecone and Qdrant hands-on. Semantic search, metadata filtering, hybrid search. Foundation for RAG in both products.",
       "pythonChallenge": {
@@ -158,7 +153,6 @@
       "url": "https://weaviate.io/blog/hybrid-search-explained",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 5,
       "why": "Vectors miss exact terms like product codes or names; keyword search misses paraphrases. Hybrid search combines both, which NuraKnect needs for price and SKU questions.",
       "kind": "article",
@@ -182,7 +176,6 @@
       "url": "https://www.pinecone.io/learn/series/rag/rerankers/",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 6,
       "why": "Fast retrieval pulls 50 candidates; a reranker reorders them so the best 3 reach the prompt. Often the cheapest quality gain in a RAG pipeline.",
       "kind": "article",
@@ -206,7 +199,6 @@
       "url": "https://www.anthropic.com/news/contextual-retrieval",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 7,
       "why": "Adds a short chunk-specific context before embedding so a chunk like 'the price went up' knows which plan it belongs to. Reported to cut failed retrievals substantially when combined with BM25 and reranking.",
       "kind": "article",
@@ -231,7 +223,6 @@
       "url": "https://arxiv.org/abs/2212.10496",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 8,
       "why": "Embed a model-written hypothetical answer instead of the short question to find better matches. Useful when users send vague one-line DMs.",
       "kind": "article",
@@ -255,7 +246,6 @@
       "url": "https://docs.ragas.io/en/stable/getstarted/",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 9,
       "why": "Gives you numbers (faithfulness, context precision and recall) so retrieval changes are measured rather than guessed.",
       "kind": "docs",
@@ -280,7 +270,6 @@
       "url": "https://qdrant.tech/documentation/quickstart/",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 10,
       "why": "Purpose-built vector database with payload filtering and hybrid queries. The layer's build tasks use it.",
       "kind": "docs",
@@ -305,7 +294,6 @@
       "url": "https://github.com/pgvector/pgvector#getting-started",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 11,
       "why": "Vectors inside Postgres: one database for users, DMs and embeddings. Good fit if NuraKnect already runs on Postgres.",
       "kind": "repo",
@@ -330,7 +318,6 @@
       "url": "https://docs.trychroma.com/docs/overview/getting-started",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 12,
       "why": "Smallest setup for local prototypes: pip install and go. Good for the first PDF Q&A.",
       "kind": "docs",
@@ -355,7 +342,6 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/06-rag",
       "cost": "Free",
       "duration": "3 hours",
-      "status": "not-started",
       "order": 13,
       "why": "Chunk one PDF (for example NuraKnect's FAQ), embed it, and answer questions with the source passage shown.",
       "kind": "project",
@@ -385,7 +371,6 @@
       "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
       "cost": "Free",
       "duration": "3 hours",
-      "status": "not-started",
       "order": 14,
       "why": "Combine keyword and vector search over 50+ DMs and compare it with vectors alone on exact-term queries.",
       "kind": "project",
@@ -415,7 +400,6 @@
       "url": "https://www.sbert.net/examples/applications/retrieve_rerank/README.html",
       "cost": "Free",
       "duration": "4 hours",
-      "status": "not-started",
       "order": 15,
       "why": "Add a cross-encoder reranker to your hybrid search, score both versions with RAGAS or recall@k on 20 queries, and publish the numbers.",
       "kind": "project",
@@ -446,7 +430,6 @@
       "url": "https://microsoft.github.io/graphrag/",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 16,
       "why": "Builds a knowledge graph and community summaries to answer questions about a whole corpus. Read to know when plain RAG is not enough.",
       "kind": "docs",
@@ -470,7 +453,6 @@
       "url": "https://www.deeplearning.ai/short-courses/building-agentic-rag-with-llamaindex/",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 17,
       "why": "Lets an agent decide when and what to retrieve, and break a question into steps. Bridges into Layer 3 agents.",
       "kind": "course",
@@ -490,7 +472,6 @@
     }
   ],
   "quiz": {
-    "status": "locked",
     "unlockCondition": "Complete all core items in this layer",
     "passingScore": 70,
     "questions": [
@@ -515,7 +496,7 @@
       {
         "id": "q4",
         "type": "conceptual",
-        "question": "When would you use RAG versus fine-tuning for Cuva AI? Give one specific use case where RAG is better and one where fine-tuning is better. Explain why each time.",
+        "question": "When would you use RAG versus fine-tuning for the work platform? Give one specific use case where RAG is better and one where fine-tuning is better. Explain why each time.",
         "hint": "Think about data freshness, cost, and accuracy"
       },
       {

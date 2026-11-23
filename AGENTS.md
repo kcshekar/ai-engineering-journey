@@ -34,4 +34,3 @@ Personal AI-engineering learning tracker: a Next.js 15 app that reads roadmaps f
 - Pending work: `docs/roadmap.md`, starting with `## Now`.
 - Active plans: `docs/plans/`. Delete a plan when it's done; git keeps it.
 - Decisions: `docs/decisions/`.
-- `GAPS_AND_RISKS.md`: known gaps backlog. `PROJECT_OVERVIEW.md`, `PUBLIC_STORY.md`: positioning. `MIGRATION_COMPLETE.md`: architecture and API notes from the Next.js migration.

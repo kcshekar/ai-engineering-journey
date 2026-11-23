@@ -27,7 +27,6 @@ export interface Course {
   cost: string
   duration: string
   videos?: number
-  status: string
   order: number
   why: string
   pythonChallenge?: PythonChallenge
@@ -83,7 +82,6 @@ export interface QuizQuestion {
 }
 
 export interface Quiz {
-  status: string
   unlockCondition: string
   passingScore: number
   questions: QuizQuestion[]
@@ -92,7 +90,6 @@ export interface Quiz {
 export interface Layer {
   id: number
   title: string
-  status: string
   weeks: string
   description: string
   appliesTo: string[]
@@ -139,9 +136,7 @@ export interface RoadmapMeta {
   id: string
   title: string
   description: string
-  author: string
   totalLayers: number
-  estimatedMonths: number
   currentLayer: number
   startDate: string
   targetRole: string

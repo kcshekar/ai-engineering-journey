@@ -36,7 +36,7 @@ Each roadmap lives in `data/roadmaps/<id>/`:
 
 | File | Purpose |
 |------|---------|
-| `meta.json` | Roadmap title, author, total layers, target role |
+| `meta.json` | Roadmap title, description, total layers, current layer, start date, target role |
 | `layer-N/layer.json` | The layer's items (courses, videos, docs, repos, projects), Must-know terms, stage goals, outcomes and quiz |
 | `layer-N/planning.json` | The weekly plan: focus, items, build task and Python task per week |
 | `layer-N/notes.md`, `README.md` | Note prompts and a summary for the layer |
@@ -109,7 +109,7 @@ Every layer has 3 projects (one per stage), Python challenges with automatic che
 
 ## Getting Started
 
-See [MIGRATION_COMPLETE.md](./MIGRATION_COMPLETE.md) for architecture and API notes, and [AGENTS.md](./AGENTS.md) for commands and repo rules.
+See [AGENTS.md](./AGENTS.md) for commands, layout and repo rules.
 
 ## Author
 

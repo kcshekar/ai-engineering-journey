@@ -9,8 +9,8 @@ import {
 } from "../lib/loader.ts"
 import { verifyPassword, hashPassword } from "../lib/password.ts"
 
-const item = (id, extra = {}) => ({ id, title: id, platform: "", url: "", cost: "", duration: "", status: "", order: 1, why: "", ...extra })
-const layer = (courses, extra = {}) => ({ id: 9, title: "t", status: "", weeks: "1-2", description: "", appliesTo: [], weeklyPlan: [], quiz: { status: "", unlockCondition: "", passingScore: 70, questions: [] }, courses, ...extra })
+const item = (id, extra = {}) => ({ id, title: id, platform: "", url: "", cost: "", duration: "", order: 1, why: "", ...extra })
+const layer = (courses, extra = {}) => ({ id: 9, title: "t", weeks: "1-2", description: "", appliesTo: [], weeklyPlan: [], quiz: { unlockCondition: "", passingScore: 70, questions: [] }, courses, ...extra })
 const entry = (ids, extra = {}) => ({ started: false, completed: false, coursesCompleted: [...ids], quizScore: null, quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {}, ...extra })
 
 // core a, core b, optional c, pick group g = {d, e}

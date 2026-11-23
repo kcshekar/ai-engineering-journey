@@ -12,23 +12,16 @@ export default async function ProjectsPage() {
     <div>
       <div className="section-title"><FolderGit2 /> Projects</div>
       <div className="projects-grid">
-        <a
-          className="project-card"
-          href="https://github.com/kcshekar/ai-engineering-journey/tree/main/projects/cuva-ai"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
+        <div className="project-card">
           <div className="card-icon cyan"><Cpu /></div>
-          <div className="card-name">Cuva AI</div>
-          <div className="card-desc">AI-powered workflow orchestration platform using AutoGen agents for complex task automation.</div>
+          <div className="card-name">Enterprise workflow agents</div>
+          <div className="card-desc">Day-job work: multi-agent workflow orchestration with AutoGen for complex task automation. Details are private.</div>
           <div className="card-tags">
             <span className="card-tag">AutoGen</span>
             <span className="card-tag">Orchestration</span>
             <span className="card-tag">Python</span>
           </div>
-          <div className="card-link">Architecture notes <ExternalLink /></div>
-        </a>
+        </div>
         <a
           className="project-card"
           href="https://github.com/kcshekar/ai-engineering-journey/tree/main/projects/nuraknect"

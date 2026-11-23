@@ -18,7 +18,7 @@ What was the main thing this course taught you?)
 #### Multi-step LLM Chains
 - What is a chain in the context of LLMs?
 - How is a chain different from a single LLM call?
-- How does this relate to what AutoGen does in Cuva AI?
+- How does this relate to what AutoGen does in the work platform?
 
 #### Input/Output Moderation
 - What is moderation and why does it matter in production?
@@ -26,7 +26,7 @@ What was the main thing this course taught you?)
 
 #### Chain of Thought in Chains
 - How does chain of thought work at the system level, not just prompt?
-- When would you use it in a Cuva AI workflow step?
+- When would you use it in a work-platform workflow step?
 
 #### Classification Chains
 - How do you route different inputs to different processing paths?
@@ -47,9 +47,9 @@ What was the main thing this course taught you?)
 ```
 
 ### Connection to My Products
-**Cuva AI:** (How specifically does what you learned apply to
+**Work platform:** (How specifically does what you learned apply to
 your AutoGen workflow orchestration? Be specific about which
-part of the Cuva AI system this affects.)
+part of the work-platform system this affects.)
 
 **NuraKnect:** (How specifically does what you learned apply
 to your DM manager? What feature did you build or improve?)
@@ -70,7 +70,7 @@ to your DM manager? What feature did you build or improve?)
 #### Document Processing Pipeline
 - What is chunking and why does chunk size matter?
 - What chunking strategy would you use for NuraKnect DM history?
-- What chunking strategy would you use for Cuva AI workflow docs?
+- What chunking strategy would you use for work-platform workflow docs?
 
 #### Embedding Generation
 - What is an embedding in plain English?
@@ -102,7 +102,7 @@ to your DM manager? What feature did you build or improve?)
 for NuraKnect conversation memory. Be specific.)
 
 ### Connection to My Products
-**Cuva AI:**
+**Work platform:**
 **NuraKnect:**
 
 ---
@@ -125,12 +125,12 @@ for NuraKnect conversation memory. Be specific.)
 
 #### Tools and Agents in LangChain
 - How does a LangChain agent decide which tool to use?
-- How does this compare to how AutoGen assigns tools in Cuva AI?
+- How does this compare to how AutoGen assigns tools in the work platform?
 
 #### LangChain vs AutoGen — Honest Comparison
 - Where is LangChain better than AutoGen?
 - Where is AutoGen better than LangChain?
-- What does this mean for Cuva AI architecture going forward?
+- What does this mean for work-platform architecture going forward?
 
 ### What Surprised Me
 
@@ -139,7 +139,7 @@ for NuraKnect conversation memory. Be specific.)
 ### Python Code
 
 ### Connection to My Products
-**Cuva AI:**
+**Work platform:**
 **NuraKnect:**
 
 ---
@@ -184,7 +184,7 @@ for NuraKnect conversation memory. Be specific.)
 and query strategy you would use for NuraKnect DM memory)
 
 ### Connection to My Products
-**Cuva AI:**
+**Work platform:**
 **NuraKnect:**
 
 ---
@@ -196,7 +196,7 @@ and query strategy you would use for NuraKnect DM memory)
 2.
 3.
 
-### What Changed in How I Think About Cuva AI
+### What Changed in How I Think About the Work Platform
 
 ### What Changed in How I Think About NuraKnect
 

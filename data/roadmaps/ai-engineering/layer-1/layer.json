@@ -1,11 +1,10 @@
 {
   "id": 1,
   "title": "AI Foundation",
-  "status": "in-progress",
   "weeks": "1-3",
   "description": "Neural networks, transformers, LLMs, and prompt engineering",
   "appliesTo": [
-    "cuva-ai",
+    "work-platform",
     "nuraknect"
   ],
   "courses": [
@@ -17,7 +16,6 @@
       "cost": "Free",
       "duration": "3.5 hours",
       "videos": 4,
-      "status": "not-started",
       "order": 1,
       "why": "Visual, intuitive understanding of how AI learns. Opens the black box permanently.",
       "pythonChallenge": {
@@ -53,7 +51,6 @@
       "url": "https://www.deeplearning.ai/short-courses/how-transformer-llms-work/",
       "cost": "Free",
       "duration": "90 minutes",
-      "status": "not-started",
       "order": 2,
       "why": "Best visual explanation of transformers. Directly explains what AutoGen agents do under the hood.",
       "pythonChallenge": {
@@ -90,7 +87,6 @@
       "cost": "Free",
       "duration": "5 hours",
       "videos": 3,
-      "status": "not-started",
       "order": 3,
       "why": "Builds from scratch in Python. Turns abstract concepts into code you have written yourself.",
       "pythonChallenge": {
@@ -125,7 +121,6 @@
       "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/",
       "cost": "Free",
       "duration": "90 minutes",
-      "status": "not-started",
       "order": 4,
       "why": "Directly applicable to NuraKnect DM reply generation this same week.",
       "pythonChallenge": {
@@ -161,7 +156,6 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/01-tokenizers",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 5,
       "why": "Tokens are what you are billed for and what the context window counts. Seeing BPE once makes NuraKnect prompt cost and truncation bugs easy to reason about.",
       "kind": "repo",
@@ -186,7 +180,6 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/practice/top-k-top-p-sampling",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 6,
       "why": "Explains why the same DM can get different labels or replies, and which knob to turn (temperature 0 for classification, higher for varied replies).",
       "kind": "repo",
@@ -211,7 +204,6 @@
       "url": "https://developers.google.com/machine-learning/crash-course/embeddings",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 7,
       "why": "First look at embeddings as vectors where meaning is distance. Layer 2 builds NuraKnect memory search on this idea.",
       "kind": "course",
@@ -235,7 +227,6 @@
       "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
       "cost": "Free",
       "duration": "1.5 hours",
-      "status": "not-started",
       "order": 8,
       "why": "Prompt engineering is only one part: you also choose what history, tools and retrieved text reach the model. This is the skill behind a good NuraKnect reply with long DM threads.",
       "kind": "article",
@@ -262,7 +253,6 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/05-context-engineering",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 9,
       "why": "Code-along for the article above: build a context assembler with a token budget, then trim and summarise. Optional second pass if you want runnable practice.",
       "kind": "repo",
@@ -286,7 +276,6 @@
       "url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
       "cost": "Free",
       "duration": "1 hour",
-      "status": "not-started",
       "order": 10,
       "why": "A repeatable way to pick the cheapest model that passes your own test set, instead of defaulting to the biggest. Directly applies to NuraKnect classify vs reply steps.",
       "kind": "docs",
@@ -310,7 +299,6 @@
       "url": "https://platform.openai.com/docs/guides/text",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 11,
       "why": "The closed-model path: a hosted API, no GPU, best raw capability, pay per token. Read it if you want to ship NuraKnect fastest.",
       "kind": "docs",
@@ -335,7 +323,6 @@
       "url": "https://huggingface.co/learn/llm-course/chapter1/1",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 12,
       "why": "The open-model path: download weights, run them yourself, control cost and data. Read it if privacy or per-token cost for NuraKnect worries you.",
       "kind": "course",
@@ -360,7 +347,6 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/projects/token-counter-and-cost-meter",
       "cost": "Free",
       "duration": "2 hours",
-      "status": "not-started",
       "order": 13,
       "why": "Count tokens for 30 sample DMs and estimate the monthly cost at 1,000 DMs a day. Makes tokens and pricing concrete.",
       "kind": "project",
@@ -389,7 +375,6 @@
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
       "cost": "Free",
       "duration": "3 hours",
-      "status": "not-started",
       "order": 14,
       "why": "Classify 20 real-style DMs into 4 intents with a JSON schema, run it at temperature 0 and at 0.8, and count how often labels flip.",
       "kind": "project",
@@ -420,7 +405,6 @@
       "url": "https://docs.ollama.com/quickstart",
       "cost": "Free",
       "duration": "4 hours",
-      "status": "not-started",
       "order": 15,
       "why": "Run the same 30 DMs through one hosted model and one local Ollama model, and compare accuracy, latency and cost per 1,000 DMs.",
       "kind": "project",
@@ -445,14 +429,13 @@
     }
   ],
   "quiz": {
-    "status": "locked",
     "unlockCondition": "Complete all core items in this layer",
     "passingScore": 70,
     "questions": [
       {
         "id": "q1",
         "type": "explain",
-        "question": "In your own words, explain what a Transformer is and why it matters for what you are building on Cuva AI.",
+        "question": "In your own words, explain what a Transformer is and why it matters for what you are building on the work platform.",
         "hint": "Think about attention, context, and how your AutoGen agents process instructions"
       },
       {
@@ -476,7 +459,7 @@
       {
         "id": "q5",
         "type": "architectural",
-        "question": "Your AutoGen agent on Cuva AI keeps giving inconsistent outputs for the same input. Based on what you learned about LLMs, what are 3 possible reasons and how would you fix each?",
+        "question": "Your AutoGen agent on the work platform keeps giving inconsistent outputs for the same input. Based on what you learned about LLMs, what are 3 possible reasons and how would you fix each?",
         "hint": "Think about temperature, prompt design, and model determinism"
       },
       {
