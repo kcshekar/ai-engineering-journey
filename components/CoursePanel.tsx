@@ -171,66 +171,132 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const [notes, setNotes]               = useState("")
   const [code, setCode]                 = useState("")
   const [loadedKey, setLoadedKey]       = useState<string | null>(null)
+  const [failedKey, setFailedKey]       = useState<string | null>(null)
+  const [attempt, setAttempt]           = useState(0)
   const [isDirty, setIsDirty]           = useState(false)
-  const [saveStatus, setSaveStatus]     = useState<"idle"|"saving"|"saved">("idle")
+  const [saveStatus, setSaveStatus]     = useState<"idle"|"saving"|"saved"|"error">("idle")
+  const [closeBlocked, setCloseBlocked] = useState(false)
   const [copied, setCopied]             = useState(false)
   const [output, setOutput]             = useState<{type:string;text:string}[]>([])
   const [isRunning, setIsRunning]       = useState(false)
   const outputRef                       = useRef<HTMLDivElement>(null)
   const activityTimer                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // Latest text and edit counters for saving: a save writes what was typed up to its start and
+  // only marks the panel clean if nothing was typed while it ran.
+  const notesRef                        = useRef("")
+  const codeRef                         = useRef("")
+  const editVersion                     = useRef(0)
+  const savedVersion                    = useRef(0)
+  const saveChain                       = useRef<Promise<boolean>>(Promise.resolve(true))
 
-  // "Loading" until this item's notes and code have arrived; derived, so no state is set during the effect.
-  const loading = loadedKey !== `${layerId}:${course.id}`
+  // Load state is derived from keys, so no state is set synchronously in the effect.
+  // A failed load blocks editing and saving: saving an empty editor would overwrite the real notes.
+  const loadKey   = `${layerId}:${course.id}:${attempt}`
+  const loadError = failedKey === loadKey
+  const loading   = loadedKey !== loadKey && !loadError
   const onViewed = useEffectEvent(() => onMetaChange())
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([
-      api.getNotes(course.id, layerId).catch(() => ({ content: "" })),
-      api.getCode(course.id, layerId).catch(() => ({ content: "" })),
-    ]).then(([n, c]) => {
-      if (cancelled) return
-      setNotes((n as {content:string}).content ?? "")
-      setCode((c as {content:string}).content ?? "")
-      setIsDirty(false); setLoadedKey(`${layerId}:${course.id}`)
-    })
+    const key = `${layerId}:${course.id}:${attempt}`
+    Promise.all([api.getNotes(course.id, layerId), api.getCode(course.id, layerId)])
+      .then(([n, c]) => {
+        if (cancelled) return
+        notesRef.current = n.content ?? ""
+        codeRef.current = c.content ?? ""
+        savedVersion.current = editVersion.current
+        setNotes(notesRef.current)
+        setCode(codeRef.current)
+        setIsDirty(false); setLoadedKey(key)
+      })
+      .catch(() => { if (!cancelled) setFailedKey(key) })
+    return () => { cancelled = true }
+  }, [course.id, layerId, attempt])
+
+  useEffect(() => {
     api.logActivity("view")
     api.updateCourseMeta(course.id, { views: "__inc__" }).then(() => onViewed())
-    return () => { cancelled = true }
-  }, [course.id, layerId])
+  }, [course.id])
+
+  // Warn before leaving the page with unsaved notes or code.
+  useEffect(() => {
+    if (!isDirty) return
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault() }
+    window.addEventListener("beforeunload", warn)
+    return () => window.removeEventListener("beforeunload", warn)
+  }, [isDirty])
 
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight
   }, [output])
 
+  const markEdited = useCallback(() => {
+    editVersion.current += 1
+    setIsDirty(true); setCloseBlocked(false)
+    if (saveStatus === "error") setSaveStatus("idle")
+  }, [saveStatus])
+
   const handleNotesChange = useCallback((val: string) => {
-    setNotes(val); setIsDirty(true)
+    notesRef.current = val
+    setNotes(val); markEdited()
     clearTimeout(activityTimer.current)
     activityTimer.current = setTimeout(() => api.logActivity("notes").then(onActivity), 3000)
-  }, [onActivity])
+  }, [onActivity, markEdited])
 
   const handleCodeChange = useCallback((val: string | undefined) => {
-    setCode(val ?? ""); setIsDirty(true)
+    codeRef.current = val ?? ""
+    setCode(val ?? ""); markEdited()
     clearTimeout(activityTimer.current)
     activityTimer.current = setTimeout(() => api.logActivity("code").then(onActivity), 3000)
-  }, [onActivity])
+  }, [onActivity, markEdited])
 
-  const handleSave = useCallback(async () => {
-    if (!isDirty) return
-    setSaveStatus("saving")
-    await Promise.all([
-      api.saveNotes(course.id, layerId, notes),
-      api.saveCode(course.id, layerId, code),
-      api.updateCourseMeta(course.id, {
-        hasNotes: notes.trim().length > 0, noteChars: notes.trim().length,
-        hasCode: code.trim().length > 0,  codeChars: code.trim().length,
-      }).then(onMetaChange),
+  // One save of the latest text. Edits only happen after a successful load (the editors are hidden
+  // otherwise), so with no new edits nothing is written. Edits typed while it runs stay unsaved.
+  const runSave = useCallback(async (): Promise<boolean> => {
+    const version = editVersion.current
+    if (version === savedVersion.current) {
+      setSaveStatus((s) => (s === "saving" ? "idle" : s))
+      return true
+    }
+    const notesNow = notesRef.current, codeNow = codeRef.current
+    const [notesOk, codeOk] = await Promise.all([
+      api.saveNotes(course.id, layerId, notesNow),
+      api.saveCode(course.id, layerId, codeNow),
     ])
+    if (!notesOk || !codeOk) { setSaveStatus("error"); return false }
+    savedVersion.current = Math.max(savedVersion.current, version)
+    api.updateCourseMeta(course.id, {
+      hasNotes: notesNow.trim().length > 0, noteChars: notesNow.trim().length,
+      hasCode: codeNow.trim().length > 0,  codeChars: codeNow.trim().length,
+    }).then(onMetaChange)
     api.logActivity("notes")
-    setIsDirty(false); setSaveStatus("saved")
     onActivity?.()
-    setTimeout(() => setSaveStatus("idle"), 2000)
-  }, [course.id, layerId, notes, code, isDirty, onActivity, onMetaChange])
+    const clean = editVersion.current === savedVersion.current
+    if (clean) {
+      setIsDirty(false); setSaveStatus("saved"); setCloseBlocked(false)
+      setTimeout(() => setSaveStatus((s) => (s === "saved" ? "idle" : s)), 2000)
+    } else {
+      setSaveStatus("idle")
+    }
+    return clean
+  }, [course.id, layerId, onActivity, onMetaChange])
+
+  // Saves run one after another, so an older save can never land after a newer one.
+  // Resolves true when nothing is left unsaved.
+  const handleSave = useCallback((): Promise<boolean> => {
+    setSaveStatus("saving")
+    const job = saveChain.current.then(runSave, runSave)
+    saveChain.current = job.catch(() => false)
+    return job
+  }, [runSave])
+
+  // Closing saves unsaved work first. If that save fails, the panel stays open; closing again
+  // without new edits discards them.
+  const requestClose = useCallback(async () => {
+    if (closeBlocked) { onClose(); return }
+    if (await handleSave()) onClose()
+    else setCloseBlocked(true)
+  }, [closeBlocked, handleSave, onClose])
 
   const handleRun = useCallback(async () => {
     if (isRunning || !code.trim()) return
@@ -321,7 +387,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
 
   return (
     <AnimatePresence>
-      <motion.div key="backdrop" className="panel-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} />
+      <motion.div key="backdrop" className="panel-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={requestClose} />
       <motion.div key="panel" className="course-panel"
         initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
         transition={{ type: "spring", stiffness: 320, damping: 32 }}
@@ -343,7 +409,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
             <button className={`panel-btn ${isCompleted ? "panel-btn-done" : "panel-btn-mark"}`} onClick={() => onToggle(layerId, course.id)}>
               <Check size={13} /> {isCompleted ? "Completed" : "Mark done"}
             </button>
-            <button className="panel-btn panel-btn-close" onClick={onClose}><X size={16} /></button>
+            <button className="panel-btn panel-btn-close" onClick={requestClose} aria-label="Close" title="Close"><X size={16} /></button>
           </div>
         </div>
 
@@ -365,8 +431,13 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
         </div>
 
         <div className="panel-body">
-          {loading ? (
-            <div className="panel-loading">Loading…</div>
+          {loadError ? (
+            <div className="panel-load-error" role="alert">
+              <p>Couldn&apos;t load your notes and code for this item. Editing is off, so nothing gets overwritten.</p>
+              <button type="button" className="panel-btn" onClick={() => setAttempt((a) => a + 1)}>Retry</button>
+            </div>
+          ) : loading ? (
+            <div className="panel-loading" role="status">Loading…</div>
           ) : activeTab === "challenge" ? (
             <PythonChallenge challenge={course.pythonChallenge} />
           ) : activeTab === "notes" ? (
@@ -435,14 +506,20 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
             <button
               className={`panel-btn panel-btn-save ${saveStatus}`}
               onClick={handleSave}
-              disabled={!isDirty || saveStatus === "saving"}
+              disabled={!isDirty || saveStatus === "saving" || loading || loadError}
               title="Save (⌘S)"
             >
               {saveStatus === "saved"
                 ? <><Check size={13} /> Saved</>
-                : <><Save size={13} /> {isDirty ? "Save ⌘S" : "No changes"}</>}
+                : <><Save size={13} /> {saveStatus === "saving" ? "Saving…" : isDirty ? "Save ⌘S" : "No changes"}</>}
             </button>
-            {isDirty && <span className="unsaved-hint">Unsaved changes</span>}
+            <span className="unsaved-hint" role="status">
+              {saveStatus === "error"
+                ? closeBlocked
+                  ? "Not saved. Close again to discard your changes, or press Save to retry."
+                  : "Not saved. Check your connection and press Save to retry."
+                : isDirty ? "Unsaved changes" : ""}
+            </span>
           </div>
           <button className="panel-btn panel-btn-summary" onClick={handleCopySummary}>
             {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy summary prompt</>}

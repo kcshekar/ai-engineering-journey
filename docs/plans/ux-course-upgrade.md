@@ -1,9 +1,9 @@
 ---
 type: plan
 title: UX redesign and 2026 curriculum upgrade
-status: draft
+status: active
 size: M
-updated: 2026-11-23
+updated: 2026-11-25
 covers: [docs/research/, docs/decisions/0002-curriculum-structure-and-tracks.md, app/, components/, lib/, types/index.ts, data/roadmaps/ai-engineering/, scripts/check-content.mjs, app/globals.css]
 ---
 
@@ -28,7 +28,8 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 | R7 | "If you are not able to access the full content … let me know or help me with steps on how to get it" | `docs/research/README.md` |
 | R8 | "You can use multiple parallel agents … Update the docs accordingly" | P0 (6 tracks) and every phase |
 | R9 | "during the process anything adapting makes it advantage, then plan it and update" | standing rule: tracker row first, then phase |
-| R10 | "process the above request in separate branch with commit message without adding a claude tag" | all (branch `feat/ux-course-research`) |
+| R10 | "process the above request in separate branch with commit message without adding a claude tag" | all (research on `feat/ux-course-research`, merged 2026-11-25; build work on `feat/ux-course-upgrade`) |
+| R13 | "once you verify with them and it all looks good, shall we proceed with the our initial plan?" (2026-11-25: plan approved after re-checking it against the Next 16, API-input and lint commits) | P1 onward |
 | R11 | "Once everything is done with all things we planned then we merge it main branch" | P8 |
 | R12 | "auto commit and push changes to sub branch not main branch, when planned things are done" | all (commit and push at each green phase) |
 
@@ -56,7 +57,7 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 
 ## Decisions
 
-- `docs/decisions/0002-curriculum-structure-and-tracks.md` (proposed: extend; add Layer 7 FDE and tracks as views)
+- `docs/decisions/0002-curriculum-structure-and-tracks.md` (accepted 2026-11-25: extend; add Layer 7 FDE and tracks as views)
 - 0001 still applies: never rename or remove an item id.
 
 ## Phases
@@ -66,16 +67,27 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 - [x] T1 Project scan and memory notes
 - [x] T2 Six research tracks → `docs/research/01–06`
 - [x] T3 Tracker, research index (blocked content and how to get it), decision 0002, this plan
-- Exit: docs committed and pushed to the branch · artifact page published · you approve the plan.
+- [x] T4 Approved 2026-11-25; research branch merged to main as `6629a73`
+- Exit: docs committed and pushed to the branch · artifact page published · you approve the plan. **Met.**
 - Rollback: delete the branch.
 
 ### P1: Safety and accessibility fixes (S, about 1 day)
-- Entry: **the Next 16 upgrade is merged into main and this branch is rebased on it** (the uncommitted Next 16 work on main must land first, or the UI phases conflict).
-- [ ] T1 FX-01 note-loss guard and autosave; FX-02 single-fire saves with rollback and toast
-- [ ] T2 FX-03, FX-04, FX-09 a11y names, contrast and focus semantics
-- [ ] T3 FX-05 reduced motion; FX-07 loading, error and not-found plus per-page titles
-- [ ] T4 FX-06 real dashboard stats; FX-08 quiz copy; FX-10 local-date streak keys; FX-12 explicit layer start
+- Entry: **the Next 16 upgrade is merged into main and this branch is rebased on it**. Met: branch `feat/ux-course-upgrade` starts from `6629a73` (Next 16, API input checks and clean lint are on main).
+- [x] T1 FX-01 note-loss guard (no autosave, see tracker); FX-02 single-fire saves with rollback and an alert
+- [x] T2 FX-03, FX-04, FX-09 a11y names, contrast and focus semantics
+- [x] T3 FX-05 reduced motion; FX-07 loading, error and not-found plus per-page titles
+- [x] T4 FX-06 real dashboard stats; FX-08 quiz copy; FX-10 local-date keys (streak, deadlines, activity API); FX-12 explicit layer start
 - Exit: `npm run verify` green · new tests for the save rollback and the local-date key · manual: save notes offline (DevTools offline) does not wipe them · tracker rows set to done.
+  - 2026-11-25 review (reviewer subagent, Opus): 0 high, 4 medium, 3 low. Fixed:
+    - saves now queue in order, and text typed during a save stays unsaved
+    - a failed layer save is undone even after later changes, and the layer is re-sent
+    - a start date you set survives the first tick
+    - closing again after new edits tries to save again
+    - the rollback has tests
+    - streak and active days render in the browser only (no hydration mismatch)
+
+    The remaining UTC "today" cases are FX-14 (P4). Verify: 29 tests.
+  - 2026-11-25: verify green (26 tests, 9 new in `tests/progress.test.mjs`, also green with TZ Asia/Kolkata, America/Los_Angeles, Pacific/Kiritimati) · `npm run build` green · tracker updated. **Manual offline check still to do in your browser** (the worktree has no `.env`): open an item → DevTools Network "Offline" → reopen it, and the panel should show "Couldn't load… Retry" with editing off; type, then close, and the panel stays open with "Not saved".
 - Rollback: `git revert` the P1 commits (no DB change).
 
 ### P2: Curriculum refresh, Layer 7 FDE and stage metadata (content only, M)

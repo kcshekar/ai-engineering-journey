@@ -38,6 +38,18 @@ export function dateOrNull(v: unknown): string | null | undefined {
   return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : undefined
 }
 
+/**
+ * The day to log activity under: the client's local "YYYY-MM-DD" when it is within one day of the
+ * server's UTC day (every time zone is), otherwise the UTC day. Keeps the streak on the learner's calendar.
+ */
+export function activityDayOf(v: unknown, now: Date = new Date()): string {
+  const utcDay = now.toISOString().slice(0, 10)
+  const day = dateOrNull(v)
+  if (!day) return utcDay
+  const diff = (Date.parse(day) - Date.parse(utcDay)) / 86400000
+  return Math.abs(diff) <= 1 ? day : utcDay
+}
+
 type FieldChecks = Record<string, (v: unknown) => boolean>
 
 /** Patch keys that are unknown or have a bad value. Own keys only, so "__proto__" and friends are rejected. */

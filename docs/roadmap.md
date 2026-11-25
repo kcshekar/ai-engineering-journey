@@ -1,8 +1,9 @@
 # Roadmap
 
 ## Now
-- Focus: nothing in progress on `main` (2026-11-25). Next 16, API input checks and clean lint are done; verify, build and browser checks are green.
-- Next step: review the draft plan `docs/plans/ux-course-upgrade.md` (UX redesign, 2026 curriculum, Layer 7; decision 0002 proposed). Research is in `docs/research/`. Its P1 needed Next 16, which is done.
+- Active plan: `docs/plans/ux-course-upgrade.md` (approved 2026-11-25; decision 0002 accepted), on branch `feat/ux-course-upgrade`. Tracker: `docs/research/tracker.md`.
+- Done: P1 safety and accessibility fixes (verify and build green). Yours: the offline check for notes in your browser (steps in the plan's P1 exit).
+- Next task: P2 T1, the stage metadata types and content checks, then the curriculum refresh and Layer 7 FDE.
 - Yours: remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from `.env` if they are still there (Vercel never had them; it uses the same Turso DB, so it already has the `users` table).
 - Optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history. The retired password in old commits must never be reused.
 

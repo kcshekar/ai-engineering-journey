@@ -36,12 +36,14 @@ export default function Header() {
             ai-engineering<span>.journey</span>
           </div>
         </div>
-        <nav className="header-nav">
+        <nav className="header-nav" aria-label="Main">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className={`nav-btn ${isActive(item.href) ? "active" : ""}`}
+              aria-label={item.label}
+              aria-current={isActive(item.href) ? "page" : undefined}
             >
               <item.icon />
               <span className="nav-btn-label">{item.label}</span>
@@ -51,6 +53,7 @@ export default function Header() {
             className="nav-btn"
             onClick={() => signOut({ callbackUrl: "/login" })}
             title="Sign out"
+            aria-label="Sign out"
           >
             <LogOut />
             <span className="nav-btn-label">Sign out</span>

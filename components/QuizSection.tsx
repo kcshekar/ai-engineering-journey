@@ -138,12 +138,15 @@ export default function QuizSection({
         {isUnlocked ? <Unlock /> : <Lock />}
       </div>
       <div className="quiz-title">
-        {isUnlocked ? "Quiz Unlocked" : "Layer Quiz"}
+        {isUnlocked ? (final.length > 0 ? "Final check unlocked" : "Quiz unlocked") : "Layer quiz"}
       </div>
       <div className="quiz-subtitle">
         {isUnlocked
-          ? "Quiz unlocked — go to your mentor chat to take the quiz. Questions are designed for conversation, not multiple choice."
-          : quiz.unlockCondition}
+          ? [
+              final.length > 0 && "Take the final check below; your score is saved.",
+              chat.length > 0 && "Then answer the mentor-chat questions in a conversation with Claude.",
+            ].filter(Boolean).join(" ")
+          : `${quiz.unlockCondition} to unlock the final check.${pre.length + check.length > 0 ? " The practice checks below are open now." : ""}`}
       </div>
       {!isUnlocked && (
         <div className="quiz-progress">
@@ -152,7 +155,8 @@ export default function QuizSection({
       )}
       {isUnlocked && (
         <div className="quiz-progress">
-          {chat.length} mentor-chat questions &middot; {quiz.passingScore}% to pass
+          {[final.length > 0 && `${final.length} final-check questions`, chat.length > 0 && `${chat.length} mentor-chat questions`, `${quiz.passingScore}% to pass`]
+            .filter(Boolean).join(" · ")}
         </div>
       )}
 

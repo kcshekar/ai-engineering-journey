@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 import { activity } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { sql } from "drizzle-orm"
-import { badRequest, readBody } from "@/lib/api-input"
+import { activityDayOf, badRequest, readBody } from "@/lib/api-input"
 
 const TYPES = ["view", "notes", "code", "complete"]
 
@@ -32,9 +32,10 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const userId = session.user.id
 
-  const type = (await readBody(req))?.type
+  const body = await readBody(req)
+  const type = body?.type
   if (typeof type !== "string" || !TYPES.includes(type)) return badRequest(`type must be one of ${TYPES.join(", ")}`)
-  const today = new Date().toISOString().split("T")[0]
+  const today = activityDayOf(body?.date)
   const id = `${userId}-${today}`
 
   const existing = await db.select().from(activity).where(eq(activity.id, id)).then((r) => r[0])

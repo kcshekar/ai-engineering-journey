@@ -1,11 +1,13 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import LayerCard from "./LayerCard"
 import WeeklyPlan from "./WeeklyPlan"
 import QuizSection from "./QuizSection"
 import { api } from "@/lib/api-client"
-import { getCompletedCount, getRequiredCount, applyItemToggle, isQuizUnlocked } from "@/lib/loader"
+import {
+  getCompletedCount, getRequiredCount, applyItemToggle, isQuizUnlocked, updateLayerEntry, resolveFailedSave,
+} from "@/lib/loader"
 import type { Layer, RoadmapProgress, LayerProgressEntry, Course } from "@/types"
 
 interface Props {
@@ -14,70 +16,70 @@ interface Props {
   allCourses: Course[]
 }
 
+type Mutate = (lp: LayerProgressEntry) => void
+type Write = (lp: LayerProgressEntry) => Promise<boolean>
+
+const FAILED = "Couldn't save your change, so it was undone. Check your connection and try again."
+
 export default function LayerDetailClient({ layer, initialProgress, allCourses }: Props) {
   const [progress, setProgress] = useState(initialProgress)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  // Latest rendered progress, read when a save fails later. Writes go through one queue so they
+  // reach the server in the order they were made (each toggle writes the whole layer entry).
+  const latest = useRef(progress)
+  const queue = useRef<Promise<unknown>>(Promise.resolve())
+  useEffect(() => { latest.current = progress }, [progress])
 
   const refreshActivity = useCallback(() => {}, [])
 
-  const handleToggleCourse = useCallback((layerId: number, courseId: string) => {
-    setProgress((prev) => {
-      const np = JSON.parse(JSON.stringify(prev))
-      const key = String(layerId)
-      if (!np.layerProgress[key]) {
-        np.layerProgress[key] = {
-          started: false, completed: false, coursesCompleted: [],
-          quizScore: null, quizAttempts: 0, startedDate: null,
-          completedDate: null, deadline: null, courseTimelines: {},
-        }
+  // Show the change at once, then save it. If the save fails, undo it (see resolveFailedSave).
+  const commit = useCallback((layerId: number, mutate: Mutate, undo: Mutate, write: Write) => {
+    const prev = progress
+    const next = updateLayerEntry(prev, layerId, mutate)
+    const entry = next.layerProgress[String(layerId)]
+    setProgress(next)
+    setSaveError(null)
+    queue.current = queue.current.then(async () => {
+      if (await write(entry)) return
+      const { progress: fixed, resync } = resolveFailedSave(latest.current, next, prev, layerId, undo)
+      setProgress(fixed)
+      setSaveError(FAILED)
+      if (resync && !(await api.saveLayerProgress(layerId, { ...resync }))) {
+        setSaveError("Couldn't save your changes. Reload the page when you're back online to see what was stored.")
       }
-      const lp = np.layerProgress[key]
-      applyItemToggle(layer, lp, courseId)
-      api.saveLayerProgress(layerId, lp)
-      return np
     })
+  }, [progress])
+
+  const handleToggleCourse = useCallback((layerId: number, courseId: string) => {
+    // A toggle is its own undo.
+    const toggle: Mutate = (lp) => applyItemToggle(layer, lp, courseId)
+    commit(layerId, toggle, toggle, (lp) => api.saveLayerProgress(layerId, { ...lp }))
     api.logActivity("complete")
-  }, [layer])
+  }, [layer, commit])
 
   const handleSaveDates = useCallback((layerId: number, patch: Record<string, unknown>) => {
-    api.saveLayerProgress(layerId, patch)
-    setProgress((prev) => {
-      const np = JSON.parse(JSON.stringify(prev))
-      const key = String(layerId)
-      if (!np.layerProgress[key]) {
-        np.layerProgress[key] = {
-          started: false, completed: false, coursesCompleted: [], quizScore: null,
-          quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
-        }
-      }
-      Object.assign(np.layerProgress[key], patch)
-      return np
-    })
-  }, [])
+    const before = progress.layerProgress[String(layerId)] as LayerProgressEntry | undefined
+    const old = Object.fromEntries(Object.keys(patch).map((k) => [k, before?.[k as keyof LayerProgressEntry] ?? null]))
+    commit(layerId, (lp) => { Object.assign(lp, patch) }, (lp) => { Object.assign(lp, old) },
+      () => api.saveLayerProgress(layerId, patch))
+  }, [progress, commit])
 
   const handleSaveCourseTimeline = useCallback((layerId: number, courseId: string, patch: Record<string, unknown>) => {
-    api.saveCourseTimeline(layerId, courseId, patch)
-    setProgress((prev) => {
-      const np = JSON.parse(JSON.stringify(prev))
-      const key = String(layerId)
-      if (!np.layerProgress[key]) np.layerProgress[key] = { started: false, completed: false, coursesCompleted: [], quizScore: null, quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {} }
-      if (!np.layerProgress[key].courseTimelines) np.layerProgress[key].courseTimelines = {}
-      np.layerProgress[key].courseTimelines[courseId] = { ...(np.layerProgress[key].courseTimelines[courseId] || {}), ...patch }
-      return np
-    })
-  }, [])
+    const old = progress.layerProgress[String(layerId)]?.courseTimelines?.[courseId]
+    commit(layerId,
+      (lp) => { lp.courseTimelines[courseId] = { ...(lp.courseTimelines[courseId] ?? {}), ...patch } as LayerProgressEntry["courseTimelines"][string] },
+      (lp) => { if (old) lp.courseTimelines[courseId] = old; else delete lp.courseTimelines[courseId] },
+      () => api.saveCourseTimeline(layerId, courseId, patch))
+  }, [progress, commit])
 
   const handleSaveQuiz = useCallback((score: number) => {
-    setProgress((prev) => {
-      const np = JSON.parse(JSON.stringify(prev))
-      const key = String(layer.id)
-      if (!np.layerProgress[key]) np.layerProgress[key] = { started: false, completed: false, coursesCompleted: [], quizScore: null, quizAttempts: 0, startedDate: null, completedDate: null, deadline: null, courseTimelines: {} }
-      const lp = np.layerProgress[key]
-      lp.quizScore = score
-      lp.quizAttempts = (lp.quizAttempts ?? 0) + 1
-      api.saveLayerProgress(layer.id, { quizScore: lp.quizScore, quizAttempts: lp.quizAttempts })
-      return np
-    })
-  }, [layer.id])
+    const before = progress.layerProgress[String(layer.id)]
+    const old = { quizScore: before?.quizScore ?? null, quizAttempts: before?.quizAttempts ?? 0 }
+    commit(layer.id,
+      (lp) => { lp.quizScore = score; lp.quizAttempts = (lp.quizAttempts ?? 0) + 1 },
+      (lp) => { Object.assign(lp, old) },
+      (lp) => api.saveLayerProgress(layer.id, { quizScore: lp.quizScore, quizAttempts: lp.quizAttempts }))
+  }, [progress, layer.id, commit])
 
   const completedCount = getCompletedCount(layer, progress)
   const lpNow = progress.layerProgress[String(layer.id)] as LayerProgressEntry | undefined
@@ -85,6 +87,12 @@ export default function LayerDetailClient({ layer, initialProgress, allCourses }
 
   return (
     <div style={{ display: "grid", gap: 32 }}>
+      {saveError && (
+        <div className="save-error" role="alert">
+          <span>{saveError}</span>
+          <button type="button" className="save-error-close" onClick={() => setSaveError(null)}>Dismiss</button>
+        </div>
+      )}
       <LayerCard
         layer={layer}
         progress={progress}

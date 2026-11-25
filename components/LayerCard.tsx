@@ -184,21 +184,21 @@ function ItemCard({ course, layer, layerProgress, meta, titleById, doneEverywher
       <button
         className="course-checkbox"
         onClick={(e) => { e.stopPropagation(); onToggle(course.id) }}
-        aria-label={done ? `Mark ${course.title} incomplete` : `Mark ${course.title} complete`}
+        role="checkbox"
+        aria-checked={done}
+        aria-label={`Done: ${course.title}`}
       >
         <Check />
       </button>
 
-      <div
-        className="course-info course-info-clickable"
-        role="button"
-        tabIndex={0}
-        onClick={() => onOpen(course)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(course) } }}
-      >
+      {/* The whole card opens the item for mouse users; the title button is the keyboard and screen-reader way in.
+          A role="button" wrapper is avoided because the card also holds the date controls. */}
+      <div className="course-info course-info-clickable" onClick={() => onOpen(course)}>
         <div className="course-title-row">
           {course.kind && <span className={`kind-icon kind-${course.kind}`} title={course.kind}><KindIcon size={14} /></span>}
-          <div className="course-title">{course.title}</div>
+          <button type="button" className="course-title course-title-btn" onClick={(e) => { e.stopPropagation(); onOpen(course) }}>
+            {course.title}
+          </button>
           {course.recommended && <span className="badge-star" title="Recommended"><Star size={11} /> Top pick</span>}
         </div>
         <div className="course-meta">
@@ -310,15 +310,9 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
   }, [])
   useEffect(() => { refreshMetas() }, [refreshMetas])
 
-  const openCoursePanel = useCallback((course: Course) => {
-    setOpenCourse(course)
-    if (!layerProgress?.started) {
-      onSaveDates(layer.id, {
-        started: true,
-        startedDate: layerProgress?.startedDate ?? new Date().toISOString().split("T")[0],
-      })
-    }
-  }, [layer.id, layerProgress?.started, layerProgress?.startedDate, onSaveDates])
+  // Opening an item only opens it. The layer (and its deadline clock) starts on the first tick
+  // (applyItemToggle) or when you set a start date yourself.
+  const openCoursePanel = useCallback((course: Course) => { setOpenCourse(course) }, [])
 
   return (
     <div className="layer-view">
@@ -346,9 +340,9 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
               type="date"
               className="deadline-input"
               defaultValue={layerProgress?.startedDate || ""}
-              onBlur={(e) => { setEditingStart(false); if (e.target.value) onSaveDates(layer.id, { startedDate: e.target.value }) }}
+              onBlur={(e) => { setEditingStart(false); if (e.target.value) onSaveDates(layer.id, { started: true, startedDate: e.target.value }) }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") { setEditingStart(false); if ((e.target as HTMLInputElement).value) onSaveDates(layer.id, { startedDate: (e.target as HTMLInputElement).value }) }
+                if (e.key === "Enter") { setEditingStart(false); if ((e.target as HTMLInputElement).value) onSaveDates(layer.id, { started: true, startedDate: (e.target as HTMLInputElement).value }) }
                 if (e.key === "Escape") setEditingStart(false)
               }}
             />

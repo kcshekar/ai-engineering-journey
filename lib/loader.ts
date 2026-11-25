@@ -1,4 +1,83 @@
-import type { Layer, LayerProgressEntry, WeekPlan, RoadmapProgress } from "@/types"
+import type { Layer, LayerProgressEntry, WeekPlan, RoadmapProgress, ActivityDay } from "@/types"
+
+// Dates are "YYYY-MM-DD" keys in the learner's local time. Never use toISOString() for a day:
+// it is UTC, so east of UTC local midnight becomes the previous day.
+export function localDateKey(d: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// Local midnight of a "YYYY-MM-DD" key. new Date("YYYY-MM-DD") would be UTC midnight instead.
+export function parseDateKey(key: string): Date {
+  const [y, m, d] = key.split("-").map(Number)
+  return new Date(y, m - 1, d)
+}
+
+export function addDays(key: string, days: number): string {
+  const d = parseDateKey(key)
+  d.setDate(d.getDate() + days)
+  return localDateKey(d)
+}
+
+/** Whole days from key a to key b (b - a). */
+export function daysBetween(a: string, b: string): number {
+  return Math.round((parseDateKey(b).getTime() - parseDateKey(a).getTime()) / 86400000)
+}
+
+export function emptyLayerEntry(): LayerProgressEntry {
+  return {
+    started: false, completed: false, coursesCompleted: [], quizScore: null, quizAttempts: 0,
+    startedDate: null, completedDate: null, deadline: null, courseTimelines: {},
+  }
+}
+
+/** A deep copy of progress with one layer's entry changed by mutate; the input is left untouched. */
+export function updateLayerEntry(
+  progress: RoadmapProgress,
+  layerId: number,
+  mutate: (lp: LayerProgressEntry) => void,
+): RoadmapProgress {
+  const next: RoadmapProgress = structuredClone(progress)
+  const lp = (next.layerProgress[String(layerId)] ??= emptyLayerEntry())
+  lp.courseTimelines ??= {}
+  mutate(lp)
+  return next
+}
+
+/**
+ * After a save of change `next` (made from `prev`) failed, what to show now (`cur` is the latest state).
+ * - Nothing changed since: show `prev` again.
+ * - A later change was made: keep it and apply `undo` to that layer only. `resync` is that layer's corrected
+ *   entry, which must be written again, because the later change's write may have carried the failed one.
+ */
+export function resolveFailedSave(
+  cur: RoadmapProgress,
+  next: RoadmapProgress,
+  prev: RoadmapProgress,
+  layerId: number,
+  undo: (lp: LayerProgressEntry) => void,
+): { progress: RoadmapProgress; resync: LayerProgressEntry | null } {
+  if (cur === next) return { progress: prev, resync: null }
+  const progress = updateLayerEntry(cur, layerId, undo)
+  return { progress, resync: progress.layerProgress[String(layerId)] }
+}
+
+/** Estimated hours of finished work: the hours of every completed item. */
+export function getHoursDone(layers: Layer[], progress: RoadmapProgress): number {
+  let hours = 0
+  for (const layer of layers) {
+    const done = new Set(progress.layerProgress[String(layer.id)]?.coursesCompleted ?? [])
+    for (const item of layer.courses) if (done.has(item.id)) hours += item.hours ?? 0
+  }
+  return Math.round(hours * 10) / 10
+}
+
+/** Days with any activity in the last `days` days, today included. */
+export function countActiveDays(activityMap: Record<string, ActivityDay>, today: string, days = 30): number {
+  let count = 0
+  for (let i = 0; i < days; i++) if ((activityMap[addDays(today, -i)]?.total ?? 0) > 0) count++
+  return count
+}
 
 export function getCurrentLayer(layers: Layer[], progress: RoadmapProgress): Layer {
   return layers.find((l) => l.id === progress.currentLayer) ?? layers[0]
@@ -65,14 +144,15 @@ export function isQuizUnlocked(layer: Layer, progress: RoadmapProgress): boolean
 // required work was done before this toggle and is not done after it (the learner unticked a
 // required item), so a layer flagged complete before new items were added keeps its flag.
 export function applyItemToggle(layer: Layer | undefined, lp: LayerProgressEntry, courseId: string): void {
-  const today = new Date().toISOString().split("T")[0]
+  const today = localDateKey()
   const wasDone = layer ? isLayerWorkDone(layer, lp.coursesCompleted) : false
   const idx = lp.coursesCompleted.indexOf(courseId)
   if (idx > -1) {
     lp.coursesCompleted.splice(idx, 1)
   } else {
     lp.coursesCompleted.push(courseId)
-    if (!lp.started) { lp.started = true; lp.startedDate = today }
+    // Keep a start date the learner set before the first tick.
+    if (!lp.started) { lp.started = true; lp.startedDate ??= today }
   }
   if (!layer) return
   if (isLayerWorkDone(layer, lp.coursesCompleted)) {
@@ -128,9 +208,7 @@ export function getLayerDeadline(
 ): string | null {
   if (lp?.deadline) return lp.deadline
   if (!lp?.startedDate) return null
-  const d = new Date(lp.startedDate)
-  d.setDate(d.getDate() + getLayerDuration(layer))
-  return d.toISOString().split("T")[0]
+  return addDays(lp.startedDate, getLayerDuration(layer))
 }
 
 export function getDeadlineStatus(deadline: string | null): {
@@ -140,8 +218,7 @@ export function getDeadlineStatus(deadline: string | null): {
   if (!deadline) return { daysRemaining: null, status: "none" }
   const today = new Date()
   today.setHours(0, 0, 0, 0)
-  const end = new Date(deadline)
-  end.setHours(0, 0, 0, 0)
+  const end = parseDateKey(deadline)
   const diff = Math.round((end.getTime() - today.getTime()) / 86400000)
   if (diff < 0) return { daysRemaining: diff, status: "overdue" }
   if (diff <= 3) return { daysRemaining: diff, status: "danger" }
@@ -163,14 +240,8 @@ export function getCourseSuggestedDates(
   if (weekNum == null) return null
   const minWeek = Math.min(...layer.weeklyPlan.map((w) => w.week))
   const offset = (weekNum - minWeek) * 7
-  const start = new Date(lp.startedDate)
-  start.setDate(start.getDate() + offset)
-  const end = new Date(start)
-  end.setDate(end.getDate() + 6)
-  return {
-    startDate: start.toISOString().split("T")[0],
-    endDate: end.toISOString().split("T")[0],
-  }
+  const startDate = addDays(lp.startedDate, offset)
+  return { startDate, endDate: addDays(startDate, 6) }
 }
 
 export function getCourseTimeline(
@@ -202,8 +273,7 @@ export function getCurrentWeekNum(layer: Layer, lp: LayerProgressEntry | undefin
   const minWeek = Math.min(...weeks)
   const maxWeek = Math.max(...weeks)
   if (!lp?.startedDate) return minWeek
-  const start = new Date(lp.startedDate)
-  const diffDays = Math.floor((Date.now() - start.getTime()) / 86400000)
+  const diffDays = daysBetween(lp.startedDate, localDateKey())
   const weekOffset = Math.floor(diffDays / 7)
   return Math.min(maxWeek, Math.max(minWeek, minWeek + weekOffset))
 }
