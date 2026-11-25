@@ -28,7 +28,7 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 | R7 | "If you are not able to access the full content … let me know or help me with steps on how to get it" | `docs/research/README.md` |
 | R8 | "You can use multiple parallel agents … Update the docs accordingly" | P0 (6 tracks) and every phase |
 | R9 | "during the process anything adapting makes it advantage, then plan it and update" | standing rule: tracker row first, then phase |
-| R10 | "process the above request in separate branch with commit message without adding a claude tag" | all (research on `feat/ux-course-research`, merged 2026-11-25; build work on `feat/ux-course-upgrade`) |
+| R10 | "process the above request in separate branch with commit message without adding a claude tag" | all (research on `feat/ux-course-research`, merged 2026-11-25; P1 on `feat/ux-course-upgrade`, merged as PR #1 `a43a350`; P2 on `feat/ux-course-p2`) |
 | R13 | "once you verify with them and it all looks good, shall we proceed with the our initial plan?" (2026-11-25: plan approved after re-checking it against the Next 16, API-input and lint commits) | P1 onward |
 | R11 | "Once everything is done with all things we planned then we merge it main branch" | P8 |
 | R12 | "auto commit and push changes to sub branch not main branch, when planned things are done" | all (commit and push at each green phase) |
@@ -91,14 +91,15 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 - Rollback: `git revert` the P1 commits (no DB change).
 
 ### P2: Curriculum refresh, Layer 7 FDE and stage metadata (content only, M)
-- Entry: decision 0002 approved. It can run in parallel with P1, since it touches only `data/`, `types/` and `scripts/`.
-- [ ] T1 Types and check: optional layer `stages[]` (kicker, rank, colour, checkpoint, project id) and item `lastChecked`/`versions`; extend `check-content.mjs` (TR-02, CT-17)
-- [ ] T2 L1–L3 items: CT-02, CT-03, CT-04 (primer), CT-05, CT-06, CT-11, CT-12, CT-14, CT-15
-- [ ] T3 L5–L6 items: CT-04 (full), CT-07, CT-08, CT-09, CT-10; L4 marked as fine-tuning-specialist content
-- [ ] T4 Layer 7 FDE: CT-01, plus capstone CT-16 (client engagement)
-- [ ] T5 One outcome-titled project per layer with a time tag, plus a checkpoint per stage (CT-13, LM-05)
-- [ ] T6 Verify every new URL live (parallel agents) and pin versions with a check date
+- Entry: decision 0002 approved. Met: branch `feat/ux-course-p2` from main at `a43a350` (P0 and P1 merged). Touches only `data/`, `types/`, `scripts/` and tests.
+- [x] T1 Types and check: optional layer `stages[]` (kicker, rank, colour, checkpoint, project id) and item `lastChecked`/`versions`; extend `check-content.mjs` (TR-02, CT-17). Done 2026-11-25: `LayerStage` and `StageColor` (accent, cyan, amber, rose, purple) in `types/index.ts`; the checker rejects unknown or duplicate stages, a stage no item uses, missing kicker/rank/checkpoint, a project that is not a same-stage project item, a bad `lastChecked` date, and `versions` without a date; `tests/check-content.test.mjs` (3 tests).
+- [x] T2 L1–L3 items: CT-02, CT-03, CT-04 (primer), CT-05, CT-06, CT-11, CT-12, CT-14, CT-15. Done 2026-11-25: L1 c114–c115, L2 c215–c217 (all optional, so L1–L2 keep 12 required units each); L3 c316–c323, ADK c321 in the `agent-sdk` pick group, c305/c306 now optional as stale vs MCP 2026-07-28 (c306's challenge uses `notifications/initialized`; c305 not re-read [U]), 2 new MCQs.
+- [x] T3 L5–L6 items: CT-04 (full), CT-07, CT-08, CT-09, CT-10; L4 marked as fine-tuning-specialist content. Done 2026-11-25: L5 c516 (OWASP Agentic Top 10; its ASI item titles are only in the PDF [U]), c515 extended into the red-team report; L6 c617–c621 (voice, Docker deploy, Docling, HAX UX). The Docker Python containerize guide is 404, so c619 uses the Dockerfile concepts page. L4 description and startHere say specialist track.
+- [x] T4 Layer 7 FDE: CT-01, plus capstone CT-16 (client engagement). Done 2026-11-25: `layer-7/` with c701–c716, an `identity-provider` pick group, quiz (6 MCQs, 2 open), weeks 23–26; `meta.totalLayers` 7. Core load is about 43 hours (projects 33.5). Salesforce/ServiceNow are not covered directly [U].
+- [x] T5 One outcome-titled project per layer with a time tag, plus a checkpoint per stage (CT-13, LM-05). Done 2026-11-25: `stages` in all 7 layers (21 stages, each with a scenario checkpoint and a same-stage project); project titles state the outcome and hours; bake-offs in c113, c414, c615.
+- [x] T6 Verify every new URL live (parallel agents) and pin versions with a check date. Done 2026-11-25: the 4 content agents fetched each URL; a second curl pass got 200 on all 28 new or changed URLs; 13 `versions` pins all match PyPI on 2026-11-25, each with `lastChecked`.
 - Exit: `npm run verify` green · layers 1–2 still show completed · no existing id renamed or removed (diff check) · tracker updated.
+  - 2026-11-25: **met.** verify green (7 layers, 128 items, 44 auto-scored questions, 32 tests, lint 0 warnings) · `npm run build` green · id diff against main: no id removed; track changes only c305/c306 (L3); required units L1 12→12, L2 12→12, L3 10→11, L5 11→12, L6 9→10, L7 11 · tracker updated. Not done here: the dashboard still reads `meta.totalLayers` (now 7) and overall % counts every layer; track-aware % is TR-01 (P5).
 - Rollback: revert the `data/` and `types/` commits.
 
 ### P3: Design system v2 (M)

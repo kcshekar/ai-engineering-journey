@@ -9,6 +9,29 @@
   ],
   "courses": [
     {
+      "id": "c114",
+      "title": "Engineering baseline: Python async, typing, tests, HTTP and secrets",
+      "platform": "Python docs",
+      "url": "https://docs.python.org/3/library/asyncio.html",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 1,
+      "why": "Start here if Python or TypeScript is not yet second nature. Checklist: async/await, type hints, a pytest test, calling an HTTP API with error handling, and keeping keys in env vars, not code. Use the asyncio docs as the reference and check each item with a small script.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "beginner",
+      "skills": [
+        "python",
+        "async",
+        "typing",
+        "testing",
+        "secrets"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
       "id": "c1",
       "title": "Neural Networks by 3Blue1Brown",
       "platform": "YouTube",
@@ -16,7 +39,7 @@
       "cost": "Free",
       "duration": "3.5 hours",
       "videos": 4,
-      "order": 1,
+      "order": 2,
       "why": "Visual, intuitive understanding of how AI learns. Opens the black box permanently.",
       "pythonChallenge": {
         "level": 1,
@@ -51,7 +74,7 @@
       "url": "https://www.deeplearning.ai/short-courses/how-transformer-llms-work/",
       "cost": "Free",
       "duration": "90 minutes",
-      "order": 2,
+      "order": 3,
       "why": "Best visual explanation of transformers. Directly explains what AutoGen agents do under the hood.",
       "pythonChallenge": {
         "level": 2,
@@ -87,7 +110,7 @@
       "cost": "Free",
       "duration": "5 hours",
       "videos": 3,
-      "order": 3,
+      "order": 4,
       "why": "Builds from scratch in Python. Turns abstract concepts into code you have written yourself.",
       "pythonChallenge": {
         "level": 3,
@@ -121,7 +144,7 @@
       "url": "https://www.deeplearning.ai/short-courses/chatgpt-prompt-engineering-for-developers/",
       "cost": "Free",
       "duration": "90 minutes",
-      "order": 4,
+      "order": 5,
       "why": "Directly applicable to NuraKnect DM reply generation this same week.",
       "pythonChallenge": {
         "level": 4,
@@ -156,7 +179,7 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/10-llms-from-scratch/01-tokenizers",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 5,
+      "order": 6,
       "why": "Tokens are what you are billed for and what the context window counts. Seeing BPE once makes NuraKnect prompt cost and truncation bugs easy to reason about.",
       "kind": "repo",
       "price": "free",
@@ -180,7 +203,7 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/practice/top-k-top-p-sampling",
       "cost": "Free",
       "duration": "1 hour",
-      "order": 6,
+      "order": 7,
       "why": "Explains why the same DM can get different labels or replies, and which knob to turn (temperature 0 for classification, higher for varied replies).",
       "kind": "repo",
       "price": "free",
@@ -204,7 +227,7 @@
       "url": "https://developers.google.com/machine-learning/crash-course/embeddings",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 7,
+      "order": 8,
       "why": "First look at embeddings as vectors where meaning is distance. Layer 2 builds NuraKnect memory search on this idea.",
       "kind": "course",
       "price": "free",
@@ -227,7 +250,7 @@
       "url": "https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 8,
+      "order": 9,
       "why": "Prompt engineering is only one part: you also choose what history, tools and retrieved text reach the model. This is the skill behind a good NuraKnect reply with long DM threads.",
       "kind": "article",
       "price": "free",
@@ -253,7 +276,7 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/05-context-engineering",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 9,
+      "order": 10,
       "why": "Code-along for the article above: build a context assembler with a token budget, then trim and summarise. Optional second pass if you want runnable practice.",
       "kind": "repo",
       "price": "free",
@@ -270,13 +293,36 @@
       ]
     },
     {
+      "id": "c115",
+      "title": "Claude Code for builders: skills, hooks, subagents and CLAUDE.md",
+      "platform": "Claude Code docs",
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 11,
+      "why": "Learn the coding-agent tools you will use in every later layer: CLAUDE.md or AGENTS.md for project rules, skills for repeatable tasks, hooks for guardrails and subagents for side jobs. Read the best practices page, then add one rule file and one skill to a repo.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "coding agents",
+        "claude code",
+        "AGENTS.md",
+        "hooks",
+        "subagents"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
       "id": "c107",
       "title": "Choosing a model (capability, cost, latency)",
       "platform": "Anthropic",
       "url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
       "cost": "Free",
       "duration": "1 hour",
-      "order": 10,
+      "order": 12,
       "why": "A repeatable way to pick the cheapest model that passes your own test set, instead of defaulting to the biggest. Directly applies to NuraKnect classify vs reply steps.",
       "kind": "docs",
       "price": "free",
@@ -299,7 +345,7 @@
       "url": "https://platform.openai.com/docs/guides/text",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 11,
+      "order": 13,
       "why": "The closed-model path: a hosted API, no GPU, best raw capability, pay per token. Read it if you want to ship NuraKnect fastest.",
       "kind": "docs",
       "price": "free",
@@ -323,7 +369,7 @@
       "url": "https://huggingface.co/learn/llm-course/chapter1/1",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 12,
+      "order": 14,
       "why": "The open-model path: download weights, run them yourself, control cost and data. Read it if privacy or per-token cost for NuraKnect worries you.",
       "kind": "course",
       "price": "free",
@@ -342,12 +388,12 @@
     },
     {
       "id": "c111",
-      "title": "Project: Token and cost meter for NuraKnect DMs",
+      "title": "Project: Build a token and cost meter for 30 NuraKnect DMs (2 hours)",
       "platform": "Build",
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/projects/token-counter-and-cost-meter",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 13,
+      "order": 15,
       "why": "Count tokens for 30 sample DMs and estimate the monthly cost at 1,000 DMs a day. Makes tokens and pricing concrete.",
       "kind": "project",
       "price": "free",
@@ -370,12 +416,12 @@
     },
     {
       "id": "c112",
-      "title": "Project: DM intent classifier with structured JSON",
+      "title": "Project: Ship a DM intent classifier that returns checked JSON (3 hours)",
       "platform": "Build",
       "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/overview",
       "cost": "Free",
       "duration": "3 hours",
-      "order": 14,
+      "order": 16,
       "why": "Classify 20 real-style DMs into 4 intents with a JSON schema, run it at temperature 0 and at 0.8, and count how often labels flip.",
       "kind": "project",
       "price": "free",
@@ -400,12 +446,12 @@
     },
     {
       "id": "c113",
-      "title": "Project: Model bake-off, hosted vs local",
+      "title": "Project: Bake-off, hosted vs local model on cost, speed and accuracy (4 hours)",
       "platform": "Build",
       "url": "https://docs.ollama.com/quickstart",
       "cost": "Free",
       "duration": "4 hours",
-      "order": 15,
+      "order": 17,
       "why": "Run the same 30 DMs through one hosted model and one local Ollama model, and compare accuracy, latency and cost per 1,000 DMs.",
       "kind": "project",
       "price": "free",
@@ -590,6 +636,16 @@
       "term": "Training vs inference",
       "oneLiner": "Training changes the weights; inference uses frozen weights to produce output.",
       "misconception": "The model does not learn from your API calls."
+    },
+    {
+      "term": "Context rot and compaction",
+      "oneLiner": "Model quality drops as the context fills with stale or noisy text, so long runs need summarising (compaction) or trimming.",
+      "misconception": "A bigger context window means you can paste everything and the model will use it well."
+    },
+    {
+      "term": "Schema-constrained decoding",
+      "oneLiner": "The model's output is limited at generation time to tokens that fit your JSON schema, so the result always parses.",
+      "misconception": "Asking nicely for JSON in the prompt is enough; it still fails now and then."
     }
   ],
   "stageGoals": {
@@ -597,7 +653,33 @@
     "intermediate": "Design the context for a request, choose a model with a small test set, and measure how settings change outputs.",
     "advanced": "Compare hosted and local models on your own data and defend a model choice with accuracy, latency and cost numbers."
   },
-  "startHere": "Already comfortable with neural nets and prompting? Skip c1 to c3, check the pre questions, then start at c101 (tokens) and c104 (context engineering).",
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "Before the first call",
+      "rank": "Token Reader",
+      "color": "accent",
+      "checkpoint": "Your DM prompt costs twice what you expected at 1,000 DMs a day. Which part of the prompt do you inspect first, and what do you change?",
+      "project": "c111"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Shaping the request",
+      "rank": "Context Designer",
+      "color": "cyan",
+      "checkpoint": "The classifier is right on short DMs and wrong on long threads. What do you change in the context, the temperature or the schema, and how do you test it?",
+      "project": "c112"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Choosing a model",
+      "rank": "Model Judge",
+      "color": "purple",
+      "checkpoint": "A local model is 3x cheaper but 8 points less accurate on your DMs. What numbers decide whether you switch?",
+      "project": "c113"
+    }
+  ],
+  "startHere": "New to Python or TypeScript for AI work? Do the optional engineering baseline checklist (c114) first. Already comfortable with neural nets and prompting? Skip c1 to c3, check the pre questions, then start at c101 (tokens) and c104 (context engineering).",
   "outcomes": [
     "Explain tokens, context windows, sampling and embeddings without jargon",
     "Estimate the token cost of a NuraKnect prompt before sending it",

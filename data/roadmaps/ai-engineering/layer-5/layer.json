@@ -35,8 +35,37 @@
       "misconception": "A strong system prompt prevents it; no prompt alone is a reliable defence."
     },
     {
+      "term": "OWASP LLM Top 10 (2025) IDs",
+      "oneLiner": "LLM01 prompt injection, LLM02 sensitive information disclosure, LLM03 supply chain, LLM04 data and model poisoning, LLM05 improper output handling, LLM06 excessive agency, LLM07 system prompt leakage, LLM08 vector and embedding weaknesses, LLM09 misinformation, LLM10 unbounded consumption.",
+      "misconception": "It is a risk checklist, not a test suite; you still have to write attacks for each ID that applies to your app."
+    },
+    {
+      "term": "Excessive agency",
+      "oneLiner": "LLM06: the model has more tools, permissions or autonomy than the task needs, so one bad output can cause real damage.",
+      "misconception": "A guardrail on the text does not fix it; you fix it by cutting tool scope and requiring approval for risky actions."
+    },
+    {
+      "term": "MCP tool poisoning",
+      "oneLiner": "A malicious or compromised MCP server hides instructions in a tool description or result, and the agent follows them.",
+      "misconception": "Reading the tool name is not enough; the description and the returned data are also untrusted input."
+    },
+    {
+      "term": "OWASP Agentic Top 10 (2026)",
+      "oneLiner": "OWASP's list of the most critical risks for autonomous, tool-using agents, such as goal hijack, tool misuse and identity abuse."
+    },
+    {
       "term": "Guardrail",
       "oneLiner": "A check on inputs, outputs or actions that blocks or rewrites unsafe behaviour."
+    },
+    {
+      "term": "Error analysis",
+      "oneLiner": "Read real traces, label each failure mode, count them, and only then write evals for the most common ones.",
+      "misconception": "Writing generic evals first (helpfulness, tone) misses the failures your users actually hit."
+    },
+    {
+      "term": "Online evals on production traces",
+      "oneLiner": "Score a sample of live traces with automated checks or a judge to catch drift and new failure modes after release.",
+      "misconception": "A green offline golden set does not mean production is fine; real users send inputs your set never saw."
     }
   ],
   "stageGoals": {
@@ -44,6 +73,32 @@
     "intermediate": "Build a calibrated LLM judge, score RAG and agent behaviour, and trace a real app in one observability tool.",
     "advanced": "Red-team your assistant, add a guardrail with measured before/after numbers, and gate evals in CI."
   },
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "Measure first",
+      "rank": "Test Writer",
+      "color": "accent",
+      "checkpoint": "Users say replies feel worse since last week, but you have no numbers. What do you collect, how do you label it, and what single score do you report first?",
+      "project": "c503"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Trust the judge",
+      "rank": "Calibrator",
+      "color": "cyan",
+      "checkpoint": "Your LLM judge agrees with your labels 85% of the time but kappa is 0.3. Is the judge ready to gate releases, and what do you check next?",
+      "project": "c511"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Break it, then fix it",
+      "rank": "Red Teamer",
+      "color": "purple",
+      "checkpoint": "A DM contains hidden text telling your agent to forward the customer list. Which OWASP items does this hit, and which fix goes first: a text guardrail, less tool scope, or an approval step?",
+      "project": "c515"
+    }
+  ],
   "pickGroups": [
     {
       "id": "observability",
@@ -250,7 +305,7 @@
     },
     {
       "id": "c503",
-      "title": "Project: 30-case golden set and pass/fail script for NuraKnect DM replies",
+      "title": "Project: build a 30-case golden set and pass/fail script for NuraKnect DM replies (3 hours)",
       "platform": "Build",
       "url": "https://hamel.dev/blog/posts/evals/",
       "cost": "Free",
@@ -478,7 +533,7 @@
     },
     {
       "id": "c511",
-      "title": "Project: LLM-as-judge with a rubric, calibrated against your own labels",
+      "title": "Project: build an LLM judge you can trust, calibrated against your own labels (4 hours)",
       "platform": "Build",
       "url": "https://docs.ragas.io/en/stable/",
       "cost": "Free",
@@ -528,13 +583,34 @@
       "recommended": true
     },
     {
+      "cost": "Free",
+      "price": "free",
+      "lastChecked": "2026-11-25",
+      "id": "c516",
+      "title": "OWASP Top 10 for Agentic Applications for 2026",
+      "platform": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+      "duration": "2 hours",
+      "order": 13,
+      "why": "The risk list for agents that call tools and act on their own: the step beyond the LLM Top 10 in c512. Read it with your own agent in mind and mark which items apply. [U] The ten item titles (ASI01 to ASI10) are in the downloadable PDF; the web page did not list them when checked, so read the PDF and note the titles in your notes.",
+      "kind": "docs",
+      "hours": 2,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "agent security",
+        "OWASP",
+        "threat modelling"
+      ]
+    },
+    {
       "id": "c513",
       "title": "AI Engineering from Scratch: Phase 11, Guardrails, Safety & Content Filtering",
       "platform": "AI Engineering from Scratch",
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/12-guardrails",
       "cost": "Free",
       "duration": "2.5 hours",
-      "order": 13,
+      "order": 14,
       "why": "Builds input and output guardrails and shows where they fail. Pair it with the OWASP list so every guardrail you add answers a named risk.",
       "kind": "repo",
       "price": "free",
@@ -572,7 +648,7 @@
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/18-ethics-safety-alignment/12-red-teaming-pair-automated-attacks",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 14,
+      "order": 15,
       "why": "Shows how attackers automate jailbreaks and how red teams measure attack success rate. Read it before the advanced project so your before/after numbers use a real metric.",
       "kind": "repo",
       "price": "free",
@@ -591,16 +667,16 @@
     },
     {
       "id": "c515",
-      "title": "Project: red-team the NuraKnect DM assistant, add a guardrail, and gate it in CI",
+      "title": "Project: ship a secure-agent red-team report with fixes and regression tests, gated in CI (6 hours)",
       "platform": "Build",
       "url": "https://github.com/promptfoo/promptfoo",
       "cost": "Free",
-      "duration": "5 hours",
-      "order": 15,
-      "why": "Prove safety with numbers: attack success rate before and after a guardrail, enforced by a CI job that fails on regression.",
+      "duration": "6 hours",
+      "order": 16,
+      "why": "Prove safety with numbers. Attack the DM assistant, map each finding to the OWASP LLM Top 10 and the Agentic Top 10, fix it with a guardrail or by cutting tool scope, and turn every attack into a regression test that fails CI if it comes back.",
       "kind": "project",
       "price": "free",
-      "hours": 5,
+      "hours": 6,
       "track": "core",
       "stage": "advanced",
       "skills": [
@@ -611,12 +687,15 @@
       ],
       "keep": [
         "attacks.jsonl with 20+ injection attempts (direct and via DM content)",
+        "A red-team report mapping each finding to LLM01 (prompt injection), LLM06 (excessive agency), LLM07 (system prompt leakage) and the relevant OWASP Agentic Top 10 items",
         "before/after attack success rate and false-positive rate",
+        "The fixes you made (guardrail, tool scope, approval step) and the regression tests that lock them in",
         "CI workflow file that runs the eval and fails on a drop"
       ],
       "prereqs": [
         "c513",
-        "c506"
+        "c506",
+        "c516"
       ]
     }
   ]

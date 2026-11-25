@@ -7,7 +7,8 @@
         "c1",
         "c101",
         "c102",
-        "c111"
+        "c111",
+        "c114"
       ],
       "dailyMinutes": 90,
       "buildTask": "Write a one paragraph explanation of backpropagation in your own words",
@@ -35,7 +36,8 @@
         "c107",
         "c108",
         "c109",
-        "c112"
+        "c112",
+        "c115"
       ],
       "dailyMinutes": 90,
       "buildTask": "Build NuraKnect's first DM intent classifier using raw LLM API. Classify: complaint, question, purchase intent, greeting.",

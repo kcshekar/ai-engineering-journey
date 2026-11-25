@@ -1,0 +1,56 @@
+{
+  "weeklyPlan": [
+    {
+      "week": 23,
+      "focus": "Discovery, scoping and decisions",
+      "courses": [
+        "c701",
+        "c702",
+        "c703",
+        "c704"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Project c702: interview one real person about a small business process and write the discovery doc with a measured baseline.",
+      "pythonTask": "Write a small script that turns a CSV of task timings into a baseline (mean, p50, p95) (20 min daily)."
+    },
+    {
+      "week": 24,
+      "focus": "Enterprise data and identity",
+      "courses": [
+        "c705",
+        "c706",
+        "c707",
+        "c708",
+        "c709"
+      ],
+      "dailyMinutes": 90,
+      "buildTask": "Pick one identity provider and set up sign-in for a small test app, then sketch the roles your agent needs. Start the mock client environment for c711.",
+      "pythonTask": "Write a role-to-tool permission check and test that a denied role cannot call a tool (20 min daily)."
+    },
+    {
+      "week": 25,
+      "focus": "Secure deploy, audit and compliance",
+      "courses": [
+        "c710",
+        "c711",
+        "c712"
+      ],
+      "dailyMinutes": 110,
+      "buildTask": "Project c711: deploy the agent into the mock client environment with SSO, RBAC and audit logs; prove tenant isolation with a test.",
+      "pythonTask": "Write a structured audit-log helper that redacts personal data before writing (20 min daily)."
+    },
+    {
+      "week": 26,
+      "focus": "Cost, handover and the capstone",
+      "courses": [
+        "c713",
+        "c714",
+        "c715",
+        "c716"
+      ],
+      "dailyMinutes": 120,
+      "buildTask": "Project c716: run the end-to-end engagement (start it in week 25 if you can). Write the cost per task, runbook and ROI readout, then do three timed case drills and take the layer quiz.",
+      "pythonTask": "Write a cost-per-task and break-even calculator from your real usage logs (20 min daily)."
+    }
+  ]
+}

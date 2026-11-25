@@ -3,7 +3,11 @@
     {
       "week": 15,
       "focus": "Eval fundamentals and your first golden set",
-      "courses": ["c501", "c502", "c503"],
+      "courses": [
+        "c501",
+        "c502",
+        "c503"
+      ],
       "dailyMinutes": 90,
       "buildTask": "Collect 30 real or realistic NuraKnect DMs with the reply you would accept. Write run_eval.py that scores each reply pass/fail and prints the pass rate. Commit the baseline.",
       "pythonTask": "20 min daily: build the exact-match and F1 scorer, then read JSONL files and compute metrics per category."
@@ -11,7 +15,12 @@
     {
       "week": 16,
       "focus": "LLM-as-judge, RAG evals and agent evals",
-      "courses": ["c504", "c505", "c506", "c507"],
+      "courses": [
+        "c504",
+        "c505",
+        "c506",
+        "c507"
+      ],
       "dailyMinutes": 90,
       "buildTask": "Write a judge prompt with a rubric and run it on 30 replies. Label the same 30 yourself. Score your RAG pipeline from layer 2 with RAGAS faithfulness and context precision.",
       "pythonTask": "20 min daily: implement Cohen's kappa and the regression gate; practise computing confusion matrices by hand."
@@ -19,7 +28,12 @@
     {
       "week": 17,
       "focus": "Observability and judge calibration",
-      "courses": ["c508", "c509", "c510", "c511"],
+      "courses": [
+        "c508",
+        "c509",
+        "c510",
+        "c511"
+      ],
       "dailyMinutes": 90,
       "buildTask": "Pick one of Langfuse, LangSmith or Helicone and trace NuraKnect's DM pipeline. Finish the judge calibration report: agreement, kappa, and three disagreements explained.",
       "pythonTask": "20 min daily: practise decorators and context managers, which is how tracing libraries wrap your calls."
@@ -27,7 +41,13 @@
     {
       "week": 18,
       "focus": "Safety: prompt injection, guardrails, red teaming, CI",
-      "courses": ["c512", "c513", "c514", "c515"],
+      "courses": [
+        "c512",
+        "c513",
+        "c514",
+        "c515",
+        "c516"
+      ],
       "dailyMinutes": 90,
       "buildTask": "Write 20+ injection attempts against the DM assistant, measure attack success rate, add a guardrail, re-measure, and add a CI job that runs the evals and fails on a drop.",
       "pythonTask": "20 min daily: build the naive prompt-injection detector with regexes and score its precision and recall."

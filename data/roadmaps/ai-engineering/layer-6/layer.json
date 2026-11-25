@@ -40,6 +40,41 @@
       "term": "Model routing",
       "oneLiner": "A rule or small classifier sends each request to the cheapest model that can handle it, with a fallback.",
       "misconception": "Routing by cost alone can quietly lower quality; measure both."
+    },
+    {
+      "term": "Voice latency budget",
+      "oneLiner": "Speech-to-text, the LLM first token and text-to-speech first audio add up, and the total should stay under about 800 ms for a natural turn.",
+      "misconception": "Total reply time does not matter here; time to first audio does, so stream every stage."
+    },
+    {
+      "term": "Queue for long jobs",
+      "oneLiner": "Put slow work (batch summaries, big uploads) on a queue with workers and let the client poll or get a callback, instead of holding an HTTP request open.",
+      "misconception": "A longer request timeout is not a fix; it ties up workers and fails at the first proxy limit."
+    },
+    {
+      "term": "Eval-gated release",
+      "oneLiner": "A prompt, model or config change ships only if the eval suite passes in CI against the current baseline.",
+      "misconception": "Passing unit tests is not enough; a prompt edit can break quality without breaking any code test."
+    },
+    {
+      "term": "Canary release",
+      "oneLiner": "Send a small share of live traffic to the new version, watch quality, cost and errors, then widen or roll back.",
+      "misconception": "It is not the same as a staging test; it uses real users and real inputs."
+    },
+    {
+      "term": "ACL-aware retrieval",
+      "oneLiner": "Filter documents by what the asking user is allowed to see before ranking, so restricted text never reaches the prompt.",
+      "misconception": "Asking the model to hide restricted content is not access control; filter before retrieval."
+    },
+    {
+      "term": "LLM gateway",
+      "oneLiner": "One API in front of several model providers that handles keys, routing, fallbacks and cost logs in one place.",
+      "misconception": "It does not make providers identical; model behaviour and limits still differ."
+    },
+    {
+      "term": "Batch API",
+      "oneLiner": "A provider endpoint that runs many requests asynchronously, usually at about half price with results within a day.",
+      "misconception": "It is for offline work such as evals and bulk labelling, not for user-facing replies."
     }
   ],
   "stageGoals": {
@@ -47,6 +82,32 @@
     "intermediate": "Add prompt and semantic caching and a model router, and prove the effect with cost and p95 numbers.",
     "advanced": "Serve an open model, load-test it, and decide build versus buy with a scorecard."
   },
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "Make it survive",
+      "rank": "Reliable Caller",
+      "color": "accent",
+      "checkpoint": "The provider returns 429 for ten minutes during peak traffic. What does your endpoint do for the user, what does it log, and when does it stop retrying?",
+      "project": "c613"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Make it cheap",
+      "rank": "Cost Cutter",
+      "color": "cyan",
+      "checkpoint": "Semantic cache hit rate is 40% but a user got another customer's answer. What went wrong, and how do you change the threshold and the cache key?",
+      "project": "c614"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Build or buy",
+      "rank": "Capacity Planner",
+      "color": "purple",
+      "checkpoint": "Traffic triples next quarter. Using your scorecard, do you stay on the hosted API, self-host, or split traffic, and at what volume does your answer flip?",
+      "project": "c615"
+    }
+  ],
   "pickGroups": [
     {
       "id": "local-serving",
@@ -304,7 +365,7 @@
     },
     {
       "id": "c613",
-      "title": "Project: streaming, retries and a cost log for the NuraKnect reply endpoint",
+      "title": "Project: ship a streaming reply endpoint with retries and a cost log (4 hours)",
       "platform": "Build",
       "url": "https://platform.claude.com/docs/en/build-with-claude/streaming",
       "cost": "Free",
@@ -411,13 +472,34 @@
       }
     },
     {
+      "cost": "Free",
+      "price": "free",
+      "lastChecked": "2026-11-25",
+      "id": "c619",
+      "title": "Containerise and deploy the service (Docker: write your first Dockerfile)",
+      "platform": "Docker docs",
+      "url": "https://docs.docker.com/build/concepts/dockerfile/",
+      "duration": "2 hours",
+      "order": 7,
+      "why": "Package the reply service so it runs the same everywhere: write a Dockerfile, keep secrets out of the image, and pass config as environment variables. Then add a health check and a rollback plan before you deploy. Note: the Docker Python containerize guide moved and did not load when checked, so this page covers the Dockerfile basics.",
+      "kind": "docs",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "Docker",
+        "deployment",
+        "containers"
+      ]
+    },
+    {
       "id": "c614",
-      "title": "Project: prompt and semantic caching plus a cheap/expensive router, with measured cost and p95 latency",
+      "title": "Project: cut cost and p95 latency with caching and a cheap/expensive router (5 hours)",
       "platform": "Build",
       "url": "https://docs.litellm.ai/docs/routing",
       "cost": "Free",
       "duration": "5 hours",
-      "order": 7,
+      "order": 8,
       "why": "Put caching and routing in front of the reply endpoint and measure the effect on cost and tail latency. The numbers are the portfolio proof.",
       "kind": "project",
       "price": "free",
@@ -443,108 +525,69 @@
       ]
     },
     {
-      "id": "c606",
-      "title": "vLLM: quickstart and serving docs",
-      "platform": "vLLM",
-      "url": "https://docs.vllm.ai/en/latest/getting_started/quickstart/",
       "cost": "Free",
-      "duration": "3 hours",
-      "order": 8,
-      "why": "The most widely used open-source serving engine, with an OpenAI-compatible server. Choose it if you have (or can rent) a GPU and want to see continuous batching and the KV cache at work.",
-      "kind": "docs",
       "price": "free",
-      "hours": 3,
-      "track": "core",
-      "stage": "advanced",
-      "skills": [
-        "vLLM",
-        "OpenAI-compatible server",
-        "continuous batching",
-        "GPU memory"
-      ],
-      "pickGroup": "local-serving",
-      "prereqs": [
-        "c601"
-      ]
-    },
-    {
-      "id": "c607",
-      "title": "Ollama: docs and API",
-      "platform": "Ollama",
-      "url": "https://docs.ollama.com/",
-      "cost": "Free",
-      "duration": "3 hours",
+      "lastChecked": "2026-11-25",
+      "id": "c617",
+      "title": "Realtime voice API: low-latency speech-to-speech sessions (OpenAI Realtime docs)",
+      "platform": "OpenAI docs",
+      "url": "https://developers.openai.com/api/docs/guides/realtime-conversations",
+      "duration": "2.5 hours",
       "order": 9,
-      "why": "The easiest way to run an open model on a laptop, with a simple local HTTP API. Choose it if you have no GPU or want results in an hour.",
+      "why": "Learn how speech-to-speech sessions work over WebRTC or WebSocket: voice activity detection, interruptions, function calling and push-to-talk. This is the base for the voice agent project in c618. LiveKit Agents (docs.livekit.io/agents) is a good open alternative.",
       "kind": "docs",
-      "price": "free",
-      "hours": 3,
-      "track": "core",
-      "stage": "advanced",
-      "skills": [
-        "Ollama",
-        "local models",
-        "quantized models",
-        "local HTTP API"
-      ],
-      "pickGroup": "local-serving",
-      "prereqs": [
-        "c601"
-      ]
-    },
-    {
-      "id": "c608",
-      "title": "llama.cpp: server and quantized models",
-      "platform": "llama.cpp",
-      "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server",
-      "cost": "Free",
-      "duration": "3 hours",
-      "order": 10,
-      "why": "The C/C++ engine behind many local runtimes, with an OpenAI-compatible server and GGUF quantized models. Choose it if you want to see what Ollama hides.",
-      "kind": "repo",
-      "price": "free",
-      "hours": 3,
-      "track": "core",
-      "stage": "advanced",
-      "skills": [
-        "llama.cpp",
-        "GGUF quantization",
-        "CPU inference",
-        "OpenAI-compatible server"
-      ],
-      "pickGroup": "local-serving",
-      "prereqs": [
-        "c601"
-      ]
-    },
-    {
-      "id": "c615",
-      "title": "Project: serve an open model behind the same API, load-test it, write a cost/latency scorecard",
-      "platform": "Build",
-      "url": "https://docs.vllm.ai/en/latest/",
-      "cost": "Free",
-      "duration": "6 hours",
-      "order": 11,
-      "why": "Serve one open model with the tool you picked, point the reply endpoint at it, load-test it, and compare with the hosted API. A one-page scorecard shows you can reason about build-vs-buy.",
-      "kind": "project",
-      "price": "free",
-      "hours": 6,
+      "hours": 2.5,
       "track": "optional",
-      "stage": "advanced",
+      "stage": "intermediate",
       "skills": [
-        "self-hosting",
-        "load testing",
-        "cost modelling",
-        "latency"
+        "realtime API",
+        "voice activity detection",
+        "WebRTC"
+      ]
+    },
+    {
+      "cost": "Free",
+      "price": "free",
+      "lastChecked": "2026-11-25",
+      "id": "c620",
+      "title": "Document parsing and ingestion with Docling",
+      "platform": "Docling (GitHub)",
+      "url": "https://github.com/docling-project/docling",
+      "duration": "2 hours",
+      "order": 10,
+      "why": "Turn PDFs, Word files and slides into clean structured text before chunking. Bad parsing (broken tables, lost headings) quietly ruins retrieval later. Also note which user or group may see each document so retrieval can filter by permissions.",
+      "kind": "repo",
+      "hours": 2,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "document parsing",
+        "ingestion",
+        "RAG"
       ],
-      "prereqs": [
-        "c614"
-      ],
-      "keep": [
-        "Commit or PR: a config switch between the hosted API and the local server",
-        "Load-test results at 1, 4 and 16 concurrent requests (p50, p95, tokens/sec)",
-        "One-page scorecard: cost per 1k replies, p95 latency, quality notes, build-vs-buy verdict",
-        "The exact model, quantization and hardware you used"
+      "versions": {
+        "docling": "2.152.0"
+      }
+    },
+    {
+      "cost": "Free",
+      "price": "free",
+      "lastChecked": "2026-11-25",
+      "id": "c621",
+      "title": "AI product and agent UX patterns (Microsoft Guidelines for Human-AI Interaction)",
+      "platform": "Microsoft HAX Toolkit",
+      "url": "https://www.microsoft.com/en-us/haxtoolkit/ai-guidelines/",
+      "duration": "1.5 hours",
+      "order": 11,
+      "why": "Read the 18 guidelines for how an AI feature should behave: set expectations, show why it answered, let users correct it and collect feedback. Then list the patterns you need in your product: streaming, citations, approvals before actions, and a feedback button.",
+      "kind": "docs",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "AI UX",
+        "human-AI interaction",
+        "feedback loops"
       ]
     },
     {
@@ -590,13 +633,148 @@
       ]
     },
     {
+      "id": "c606",
+      "title": "vLLM: quickstart and serving docs",
+      "platform": "vLLM",
+      "url": "https://docs.vllm.ai/en/latest/getting_started/quickstart/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "order": 14,
+      "why": "The most widely used open-source serving engine, with an OpenAI-compatible server. Choose it if you have (or can rent) a GPU and want to see continuous batching and the KV cache at work.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "vLLM",
+        "OpenAI-compatible server",
+        "continuous batching",
+        "GPU memory"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c607",
+      "title": "Ollama: docs and API",
+      "platform": "Ollama",
+      "url": "https://docs.ollama.com/",
+      "cost": "Free",
+      "duration": "3 hours",
+      "order": 15,
+      "why": "The easiest way to run an open model on a laptop, with a simple local HTTP API. Choose it if you have no GPU or want results in an hour.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "Ollama",
+        "local models",
+        "quantized models",
+        "local HTTP API"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c608",
+      "title": "llama.cpp: server and quantized models",
+      "platform": "llama.cpp",
+      "url": "https://github.com/ggml-org/llama.cpp/tree/master/tools/server",
+      "cost": "Free",
+      "duration": "3 hours",
+      "order": 16,
+      "why": "The C/C++ engine behind many local runtimes, with an OpenAI-compatible server and GGUF quantized models. Choose it if you want to see what Ollama hides.",
+      "kind": "repo",
+      "price": "free",
+      "hours": 3,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "llama.cpp",
+        "GGUF quantization",
+        "CPU inference",
+        "OpenAI-compatible server"
+      ],
+      "pickGroup": "local-serving",
+      "prereqs": [
+        "c601"
+      ]
+    },
+    {
+      "id": "c615",
+      "title": "Bake-off: self-hosted open model vs hosted API on cost and latency, with a build-vs-buy verdict (6 hours)",
+      "platform": "Build",
+      "url": "https://docs.vllm.ai/en/latest/",
+      "cost": "Free",
+      "duration": "6 hours",
+      "order": 17,
+      "why": "Serve one open model with the tool you picked, point the reply endpoint at it, load-test it, and compare it with the hosted API. The one-page scorecard shows you can reason about build-vs-buy.",
+      "kind": "project",
+      "price": "free",
+      "hours": 6,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "self-hosting",
+        "load testing",
+        "cost modelling",
+        "latency"
+      ],
+      "prereqs": [
+        "c614"
+      ],
+      "keep": [
+        "Commit or PR: a config switch between the hosted API and the local server",
+        "Load-test results at 1, 4 and 16 concurrent requests (p50, p95, tokens/sec)",
+        "One-page scorecard: cost per 1k replies, p95 latency, quality notes, build-vs-buy verdict",
+        "The exact model, quantization and hardware you used"
+      ]
+    },
+    {
+      "cost": "Free",
+      "price": "free",
+      "lastChecked": "2026-11-25",
+      "id": "c618",
+      "title": "Project: build a voice agent that answers in under 800 ms with barge-in (8 hours)",
+      "platform": "Build",
+      "url": "",
+      "duration": "8 hours",
+      "order": 18,
+      "why": "Build a small voice agent for NuraKnect support calls and measure where every millisecond goes. The latency budget forces you to stream each stage and handle the caller talking over the agent.",
+      "kind": "project",
+      "hours": 8,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "voice agents",
+        "latency budget",
+        "barge-in"
+      ],
+      "prereqs": [
+        "c617"
+      ],
+      "keep": [
+        "A working voice agent (repo or short screen recording)",
+        "A latency budget table: STT, LLM first token, TTS first audio and total, p50 and p95 over 20 turns",
+        "Proof the total is under about 800 ms, or a note on which stage misses and why",
+        "A barge-in test: the agent stops speaking when the caller interrupts, with a log or recording"
+      ]
+    },
+    {
       "id": "c609",
       "title": "AI engineering interview bank: system design, inference serving, cost and capacity",
       "platform": "AI Engineering from Scratch (MIT)",
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/interviews/questions/system-design",
       "cost": "Free",
       "duration": "3 hours",
-      "order": 14,
+      "order": 19,
       "why": "Practice the system-design questions interviewers ask about production AI. Answer out loud before you read the answers, then also try the inference-serving and cost-capacity cards.",
       "kind": "repo",
       "price": "free",
@@ -623,7 +801,7 @@
       "url": "https://code.claude.com/docs/en/best-practices",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 15,
+      "order": 20,
       "why": "AI coding tools are now part of an applied AI engineer's workflow. Learn how to give an agent context, plans and checks so it speeds you up without silently breaking things.",
       "kind": "docs",
       "price": "free",
@@ -644,7 +822,7 @@
       "url": "https://platform.claude.com/docs/en/build-with-claude/vision",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 16,
+      "order": 21,
       "why": "Customers send screenshots and voice notes in DMs. Learn how image inputs are sent and billed, then skim the OpenAI Realtime guide (platform.openai.com/docs/guides/realtime) to see how low-latency speech-to-speech sessions differ from text calls.",
       "kind": "docs",
       "price": "free",

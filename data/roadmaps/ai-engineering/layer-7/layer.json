@@ -1,0 +1,631 @@
+{
+  "id": 7,
+  "title": "Forward Deployed Engineering",
+  "weeks": "23-26",
+  "description": "Working inside a client's world: discovery and scoping, SOW and decision records, enterprise data and identity, secure deployment, compliance, ROI readouts, handover and case-interview practice",
+  "appliesTo": [
+    "nuraknect"
+  ],
+  "mustKnow": [
+    {
+      "term": "Discovery",
+      "oneLiner": "The early work of finding out what the client really needs, how the work is done today and what a good result looks like.",
+      "misconception": "It is not a requirements list from one meeting; the stated problem is often not the real one."
+    },
+    {
+      "term": "Success metric and baseline",
+      "oneLiner": "A number you can measure that defines a win, plus the value you measured before you built anything.",
+      "misconception": "A metric without a baseline cannot show improvement."
+    },
+    {
+      "term": "SOW",
+      "oneLiner": "A statement of work: what you will deliver, what you will not, by when and how the client accepts it."
+    },
+    {
+      "term": "ADR",
+      "oneLiner": "An architecture decision record: a short note of one decision, the options considered and the reason for the choice.",
+      "misconception": "It is not a design document; it records a single decision and why."
+    },
+    {
+      "term": "Least privilege / RBAC",
+      "oneLiner": "Each user or agent gets only the roles and tool access its job needs, checked on every request.",
+      "misconception": "Signing in does not grant access; authentication and authorization are separate."
+    },
+    {
+      "term": "Multi-tenant isolation",
+      "oneLiner": "Keeping each client's data, prompts and logs separate when one system serves several clients.",
+      "misconception": "A tenant id column alone is not isolation; every query, cache and vector search must enforce it."
+    },
+    {
+      "term": "Token economics / cost per task",
+      "oneLiner": "What one finished task costs in tokens and tooling, compared with what the same task costs today.",
+      "misconception": "Price per million tokens is not the cost of a task; retries, long context and review time add up."
+    },
+    {
+      "term": "Runbook",
+      "oneLiner": "A step-by-step guide that tells the client's on-call person how to spot, check and fix a known problem."
+    },
+    {
+      "term": "Handover",
+      "oneLiner": "Passing the system to the client's team with docs, access, training and a named contact, so they can run it without you."
+    }
+  ],
+  "stageGoals": {
+    "beginner": "Turn a vague client request into a scoped problem with a success metric, a baseline and a written decision record.",
+    "intermediate": "Connect to client systems and deploy the agent into a locked-down environment with SSO, roles and audit logs.",
+    "advanced": "Price the work, plan for compliance, write a runbook and deliver a full client engagement with an ROI readout."
+  },
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "Before you build",
+      "rank": "Scoper",
+      "color": "accent",
+      "checkpoint": "A client says: \"We want an AI to handle our support emails.\" What five questions do you ask first, and which answer would make you say do not build it?",
+      "project": "c702"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Inside their walls",
+      "rank": "Integrator",
+      "color": "cyan",
+      "checkpoint": "The client's security team says your agent may only read tickets for the user who asked. Where do you enforce that, and what log line proves it later?",
+      "project": "c711"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Proving it and leaving",
+      "rank": "Forward deployed engineer",
+      "color": "purple",
+      "checkpoint": "The pilot cost 40 cents per task and saves 6 minutes of a 30 dollar an hour employee. Is it worth it, what would change your answer, and what do you leave behind?",
+      "project": "c716"
+    }
+  ],
+  "pickGroups": [
+    {
+      "id": "identity-provider",
+      "label": "Identity provider docs: pick one"
+    }
+  ],
+  "startHere": "If you already build and deploy web apps, skim c701 and c703, then do the discovery project (c702) before reading identity docs. Pick one identity provider (c705, c706 or c707), not all three.",
+  "outcomes": [
+    "Turn a vague client request into a problem statement, success metrics and a measured baseline",
+    "Write a SOW and ADRs that record scope, non-goals and key decisions",
+    "Integrate with client systems through SQL, REST and webhooks, and read the pitfalls of each",
+    "Deploy an agent into a client-style environment with SSO, RBAC, tenant isolation and audit logs",
+    "Design with SOC 2 and HIPAA in mind, and know what data and residency questions to ask",
+    "Compute cost per task and ROI, and present results to non-technical stakeholders",
+    "Write a runbook and hand a system over to the client's team",
+    "Scope a vague client problem live in a case interview"
+  ],
+  "portfolioProof": {
+    "title": "Forward deployed engineering case study",
+    "evidence": [
+      "Discovery doc with success metrics and a measured baseline",
+      "SOW and ADRs for an end-to-end client engagement",
+      "Demo video, ROI readout and runbook for the capstone"
+    ]
+  },
+  "quiz": {
+    "unlockCondition": "Complete all core items in this layer",
+    "passingScore": 70,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "architectural",
+        "question": "A client asks for an AI that answers all customer emails. Write a one-page discovery plan: who you interview, what you measure for a baseline, which two success metrics you propose, and what you list as non-goals.",
+        "hint": "Think stated versus actual problem, time per email today, error and escalation rate, and what the first release will not do."
+      },
+      {
+        "id": "q2",
+        "type": "architectural",
+        "question": "Plan the handover of your agent to a client team. List what goes in the runbook, who gets which access, how you train them, and the first three alerts they must understand.",
+        "hint": "Think symptoms, checks and safe actions, named owners, rollback steps and who to call when it is not in the runbook."
+      },
+      {
+        "id": "q3",
+        "type": "conceptual",
+        "question": "What is the main reason to measure a baseline during discovery?",
+        "hint": "Think about how you will prove improvement later.",
+        "options": [
+          "It shows the client how much you charge",
+          "It makes the SOW legally binding",
+          "It gives you a before value to compare against",
+          "It chooses the model for you"
+        ],
+        "correct": 2,
+        "explanation": "Without a measured starting point you cannot show that the system improved anything. The baseline is the before in every readout.",
+        "stage": "pre"
+      },
+      {
+        "id": "q4",
+        "type": "practical",
+        "question": "Which approach best enforces that a user sees only their own tickets through your agent?",
+        "hint": "Think about where the rule is checked.",
+        "options": [
+          "Tell the model in the prompt to hide other tickets",
+          "Hide other tickets in the user interface only",
+          "Trust the model to refuse unauthorized requests",
+          "Apply the user's permissions in every tool and query"
+        ],
+        "correct": 3,
+        "explanation": "Authorization has to be enforced in code on every tool call and query, using the signed-in user's identity. A prompt or a hidden button can be bypassed.",
+        "stage": "check"
+      },
+      {
+        "id": "q5",
+        "type": "conceptual",
+        "question": "What does an ADR capture?",
+        "hint": "It is short and about one choice.",
+        "options": [
+          "One decision, its options and the reason",
+          "The whole system design in detail",
+          "A list of all open bugs",
+          "The client's payment terms"
+        ],
+        "correct": 0,
+        "explanation": "An architecture decision record keeps a single decision, the alternatives and the reasoning, so a later team knows why it was made.",
+        "stage": "check"
+      },
+      {
+        "id": "q6",
+        "type": "practical",
+        "question": "A demo shows the agent giving a slightly different answer on a rerun. The client's VP frowns. What should you have done earlier?",
+        "hint": "Think about expectations on non-deterministic output.",
+        "options": [
+          "Set the temperature to zero and promise identical answers",
+          "Hide reruns so the output looks stable",
+          "Explain variation up front and show eval pass rates",
+          "Switch to a rule-based system for everything"
+        ],
+        "correct": 2,
+        "explanation": "Model output varies. Set expectations early and show measured quality, such as pass rates on a fixed test set, instead of promising identical text.",
+        "stage": "check"
+      },
+      {
+        "id": "q7",
+        "type": "practical",
+        "question": "Your pilot costs 0.40 dollars per task and replaces 6 minutes of work at 30 dollars an hour. What is the gross saving per task?",
+        "hint": "Six minutes is a tenth of an hour.",
+        "options": [
+          "2.60 dollars",
+          "0.40 dollars",
+          "3.00 dollars",
+          "5.00 dollars"
+        ],
+        "correct": 0,
+        "explanation": "Six minutes is 3.00 dollars of labor. Subtract 0.40 dollars of model cost to get 2.60 dollars, before review time and fixed costs.",
+        "stage": "post"
+      },
+      {
+        "id": "q8",
+        "type": "conceptual",
+        "question": "Why is a tenant id column on its own not enough for multi-tenant isolation in an AI system?",
+        "hint": "Think about caches and vector search.",
+        "options": [
+          "Databases cannot filter on it",
+          "Caches, search indexes and logs can also leak across tenants",
+          "It slows every query too much",
+          "Tenant ids are always public"
+        ],
+        "correct": 1,
+        "explanation": "Isolation must hold in every layer: queries, prompt caches, vector search and logs. One missed filter leaks a client's data into another's answer.",
+        "stage": "post"
+      }
+    ]
+  },
+  "courses": [
+    {
+      "id": "c701",
+      "title": "What are Forward Deployed Engineers, and why are they so in demand?",
+      "platform": "The Pragmatic Engineer",
+      "url": "https://newsletter.pragmaticengineer.com/p/forward-deployed-engineers",
+      "cost": "Free",
+      "duration": "1 hour",
+      "order": 1,
+      "why": "Explains what an FDE does day to day: scoping, custom integrations and customer ownership. Read it first so you know what the rest of this layer is training you for.",
+      "kind": "article",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "FDE role",
+        "scoping",
+        "customer ownership",
+        "build vs buy"
+      ],
+      "recommended": true,
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c702",
+      "title": "Project: write a discovery doc and success metrics for a real small business process",
+      "platform": "Build",
+      "url": "",
+      "cost": "Free",
+      "duration": "4 hours",
+      "order": 2,
+      "why": "Pick one real process (a friend's shop, a club, your own invoicing) and do discovery as an FDE would. Interview the owner, map the workflow, write the problem in one paragraph and measure a baseline. No code needed.",
+      "kind": "project",
+      "price": "free",
+      "hours": 4,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "discovery",
+        "problem statement",
+        "workflow mapping",
+        "success metrics",
+        "baseline"
+      ],
+      "prereqs": [
+        "c701"
+      ],
+      "keep": [
+        "The discovery doc: stated problem versus actual problem, workflow map, non-goals",
+        "Success metrics with a measured baseline (time, error rate or cost per task)",
+        "Your interview notes and the five questions that changed the scope",
+        "A one-paragraph verdict: LLM, plain automation or no build, and why"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c703",
+      "title": "Architectural Decision Records and MADR templates",
+      "platform": "adr.github.io",
+      "url": "https://adr.github.io/",
+      "cost": "Free",
+      "duration": "1 hour",
+      "order": 3,
+      "why": "An ADR is how you leave a client a reason for every big choice. Read the overview, then copy the MADR template for the decision records in your projects and in the SOW.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "beginner",
+      "skills": [
+        "ADR",
+        "decision records",
+        "trade-off table",
+        "MADR"
+      ],
+      "prereqs": [
+        "c701"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c704",
+      "title": "Webhooks and REST integration (Stripe webhooks guide)",
+      "platform": "Stripe",
+      "url": "https://docs.stripe.com/webhooks",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 4,
+      "why": "A clear primary source on receiving events: signature checks, retries, idempotency and returning 2xx fast. These are the same rules for any client system that pushes events to your agent.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "beginner",
+      "skills": [
+        "webhooks",
+        "signature verification",
+        "idempotency",
+        "REST"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c705",
+      "title": "Okta: OAuth 2.0 and OpenID Connect overview",
+      "platform": "Okta Developer",
+      "url": "https://developer.okta.com/docs/concepts/oauth-openid/",
+      "cost": "Free",
+      "duration": "2 hours",
+      "order": 5,
+      "why": "Enterprise clients log in through their own identity provider. Read how OAuth 2.0 and OIDC split sign-in from access, and what tokens and scopes mean, using Okta's docs.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "OIDC",
+        "OAuth 2.0",
+        "SSO",
+        "tokens and scopes"
+      ],
+      "pickGroup": "identity-provider",
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c706",
+      "title": "Auth0: OpenID Connect protocol",
+      "platform": "Auth0",
+      "url": "https://auth0.com/docs/authenticate/protocols/openid-connect-protocol",
+      "cost": "Free",
+      "duration": "2 hours",
+      "order": 6,
+      "why": "The same sign-in standard explained through Auth0, with the ID token, claims and the flows you will wire up. Pick it if your client or side project already uses Auth0.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "OIDC",
+        "ID token",
+        "claims",
+        "SSO"
+      ],
+      "pickGroup": "identity-provider",
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c707",
+      "title": "Microsoft Entra: OpenID Connect on the Microsoft identity platform",
+      "platform": "Microsoft Learn",
+      "url": "https://learn.microsoft.com/en-us/entra/identity-platform/v2-protocols-oidc",
+      "cost": "Free",
+      "duration": "2 hours",
+      "order": 7,
+      "why": "Many large clients run Entra ID (Azure AD). This page covers OIDC sign-in against it, which is what you will meet most often in a bank or a big enterprise.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "OIDC",
+        "Entra ID",
+        "SSO",
+        "enterprise identity"
+      ],
+      "pickGroup": "identity-provider",
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c708",
+      "title": "Authorization cheat sheet: least privilege and RBAC",
+      "platform": "OWASP",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html",
+      "cost": "Free",
+      "duration": "1 hour",
+      "order": 8,
+      "why": "Sign-in says who the user is; authorization says what they may do. Covers least privilege, deny by default and checking permissions on every request, which your agent's tool calls must also obey.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "RBAC",
+        "least privilege",
+        "deny by default",
+        "authorization checks"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c709",
+      "title": "SaaS Lens: tenant isolation and silo, pool and bridge models",
+      "platform": "AWS Well-Architected",
+      "url": "https://docs.aws.amazon.com/wellarchitected/latest/saas-lens/tenant-isolation.html",
+      "cost": "Free",
+      "duration": "2 hours",
+      "order": 9,
+      "why": "Shows how to keep one client's data and prompts away from another's in shared or dedicated setups. Read it with the silo, pool and bridge page when you decide how to deploy for several clients.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "multi-tenant isolation",
+        "silo and pool",
+        "tenant context",
+        "blast radius"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c710",
+      "title": "Logging cheat sheet: what an audit log must record",
+      "platform": "OWASP",
+      "url": "https://cheatsheetseries.owasp.org/cheatsheets/Logging_Cheat_Sheet.html",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 10,
+      "why": "An audit log answers who did what, when and with which data. Use this list of events, fields and things never to log (secrets, raw personal data) when you add audit logs to the agent.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "audit logs",
+        "PII in logs",
+        "log integrity",
+        "security events"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c711",
+      "title": "Project: deploy the agent into a mock client environment with SSO, RBAC and audit logs",
+      "platform": "Build",
+      "url": "",
+      "cost": "Free",
+      "duration": "8 hours",
+      "order": 11,
+      "why": "Pretend a client gave you a locked-down environment. Run your agent in containers on a private network, put sign-in through an identity provider you picked, add roles that limit tools and data, and log every action.",
+      "kind": "project",
+      "price": "free",
+      "hours": 8,
+      "track": "core",
+      "stage": "intermediate",
+      "skills": [
+        "client-environment deploy",
+        "SSO",
+        "RBAC",
+        "audit logs",
+        "private network"
+      ],
+      "prereqs": [
+        "c315",
+        "c515",
+        "c705",
+        "c708",
+        "c710"
+      ],
+      "keep": [
+        "Commit or PR: the deploy files, SSO login and role checks",
+        "A diagram of the mock client environment and what can reach what",
+        "Audit log excerpt showing a user, a role, a tool call and a denied action",
+        "A test showing that tenant A cannot read tenant B data"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c712",
+      "title": "NIST SP 800-66 Rev. 2: implementing the HIPAA Security Rule",
+      "platform": "NIST CSRC",
+      "url": "https://csrc.nist.gov/pubs/sp/800/66/r2/final",
+      "cost": "Free",
+      "duration": "3 hours",
+      "order": 12,
+      "why": "Skim it to see how a regulated client thinks about safeguards, risk analysis and access control. You are not a compliance officer; the goal is to design in a HIPAA-aware way and know what to ask.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 3,
+      "track": "optional",
+      "stage": "advanced",
+      "skills": [
+        "HIPAA-aware design",
+        "risk analysis",
+        "safeguards",
+        "PII and PHI"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c713",
+      "title": "Token economics: pricing and prompt caching (Anthropic docs)",
+      "platform": "Anthropic",
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 13,
+      "why": "ROI in a readout starts with cost per task. Read today's prices, cache read and write rates and batch discounts, then write the cost per task and break-even against the baseline you measured.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "token economics",
+        "cost per task",
+        "ROI",
+        "build vs buy"
+      ],
+      "prereqs": [
+        "c602",
+        "c614"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c714",
+      "title": "Being on-call: runbooks, handover and escalation (Google SRE book)",
+      "platform": "Google SRE",
+      "url": "https://sre.google/sre-book/being-on-call/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 14,
+      "why": "A runbook is what lets the client's team run your system when you leave. Learn what a good page-to-fix path holds: symptoms, checks, safe actions and who to call.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "runbook",
+        "handover",
+        "escalation",
+        "on-call"
+      ],
+      "prereqs": [
+        "c603"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
+      "id": "c715",
+      "title": "Project: three timed FDE case-interview drills (1.5 hours)",
+      "platform": "Self-run drill",
+      "url": "",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 15,
+      "why": "FDE interviews hand you a vague client problem and watch you scope it live. Run three timed 45-minute drills with a friend or a model playing the client: ask questions, state assumptions, set a success metric, sketch a first build and name the risks.",
+      "kind": "project",
+      "price": "free",
+      "hours": 1.5,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "case interview",
+        "decomposition",
+        "scoping live",
+        "communication"
+      ],
+      "prereqs": [
+        "c701",
+        "c702"
+      ],
+      "keep": [
+        "Three drill write-ups: questions asked, assumptions, metric, first build, risks",
+        "One paragraph on what you would ask earlier next time"
+      ]
+    },
+    {
+      "id": "c716",
+      "title": "Project: run an end-to-end client engagement and hand it over",
+      "platform": "Build",
+      "url": "",
+      "cost": "Free",
+      "duration": "20 hours",
+      "order": 16,
+      "why": "The capstone. Take one real or realistic client problem from discovery to a one-week prototype, an ROI readout and a handover pack. It ties together discovery, SOW, ADRs, deploy, cost and runbook.",
+      "kind": "project",
+      "price": "free",
+      "hours": 20,
+      "track": "core",
+      "stage": "advanced",
+      "skills": [
+        "end-to-end delivery",
+        "ROI readout",
+        "handover",
+        "runbook",
+        "stakeholder demo"
+      ],
+      "prereqs": [
+        "c702",
+        "c711",
+        "c713",
+        "c714",
+        "c614"
+      ],
+      "keep": [
+        "Written case study: problem, approach, result and what you would do differently",
+        "Demo video (5 to 8 minutes) with one deliberate failure case shown",
+        "The SOW and the ADRs, including build versus buy",
+        "Runbook and handover doc a stranger could follow",
+        "ROI readout: baseline, measured result, cost per task and break-even"
+      ],
+      "lastChecked": "2026-11-25"
+    }
+  ]
+}

@@ -7,7 +7,8 @@
         "c601",
         "c602",
         "c603",
-        "c613"
+        "c613",
+        "c619"
       ],
       "dailyMinutes": 95,
       "buildTask": "Project c613: add streaming, retries with backoff and a cost log to the NuraKnect reply endpoint.",
@@ -19,7 +20,10 @@
       "courses": [
         "c604",
         "c605",
-        "c614"
+        "c614",
+        "c617",
+        "c620",
+        "c621"
       ],
       "dailyMinutes": 100,
       "buildTask": "Project c614: add prompt and semantic caching and a cheap/expensive router; measure cost and p95 latency before and after.",
@@ -33,7 +37,8 @@
         "c607",
         "c608",
         "c615",
-        "c610"
+        "c610",
+        "c618"
       ],
       "dailyMinutes": 90,
       "buildTask": "Optional project c615: serve an open model behind the same API, load-test it, write the one-page scorecard. Read only the one serving tool you picked in depth.",

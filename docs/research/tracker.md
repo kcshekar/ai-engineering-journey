@@ -1,7 +1,7 @@
 ---
 type: tracker
 title: UX and course improvement tracker
-updated: 2026-11-23
+updated: 2026-11-25
 ---
 
 # Improvement tracker
@@ -77,7 +77,7 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | LM-02 | Retrieval first: show the term, ask for recall, then reveal the one-liner and misconception | 04 C | P6 | todo |
 | LM-03 | Hint ladder and per-test result list in the code runner; save the pass state and badge it | 04 #9, 06 #19 | P6 | todo |
 | LM-04 | Streak forgiveness (weekly goal or freeze), plus an honest heatmap with focusable cells and a table fallback | 04 #5 | P6 | todo |
-| LM-05 | Stage checkpoint question ("clear it to earn <rank>"): one per stage, answered in notes | 03 #5 | P2 (content) + P6 (UI) | todo |
+| LM-05 | Stage checkpoint question ("clear it to earn <rank>"): one per stage, answered in notes | 03 #5 | P2 (content) + P6 (UI) | content done (2026-11-25): a checkpoint per stage; UI in P6 |
 | LM-06 | Completion vs excellence: done = core items; excellence = all quizzes ≥90% plus portfolio proof | 01 | P6 | todo |
 | LM-07 | Ranks and XP tied to retrieval and projects, not to clicks | 03, 04 | P6 | todo |
 | LM-08 | Hint-first AI tutor side panel (Socratic, like Boot.dev Boots, roadmap.sh, Brilliant Koji); needs a provider and API-key decision | 04 | Later | parked |
@@ -87,30 +87,30 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 
 | ID | Change | Rank | Source | Phase | Status |
 |---|---|---|---|---|---|
-| CT-01 | New Layer 7 "Forward Deployed Engineering": discovery and scoping, SOW and ADRs, enterprise data access, client-env deploy (VPC, SSO, RBAC, multi-tenant), compliance and audit, demos, handover and runbooks, build vs buy and token economics, case-interview practice | 1 | 02, 05 | P2 | todo |
-| CT-02 | OpenTelemetry GenAI tracing taught in L3 (not only L5); new OTel project exporting to two backends | 2 | 05 | P2 | todo |
-| CT-03 | Refresh MCP items to spec 2026-07-28: stateless, `server/discover`, MRTR, tasks extension, deprecated Roots/Sampling/Logging, Client ID Metadata Documents auth; flag stale items as optional | 3 | 05 §0.1 | P2 | todo |
-| CT-04 | Agent security: OWASP LLM 2025 IDs in mustKnow, OWASP Agentic Top 10 (2026), lethal trifecta, excessive agency, MCP tool poisoning; injection primer moves to L3 | 4 | 05 | P2 | todo |
-| CT-05 | A2A v1.0 item in L3, plus mustKnow "A2A vs MCP" | 5 | 05 | P2 | todo |
-| CT-06 | Long-term memory and durable or long-running agents (checkpoints, background agents) | 6 | 05 | P2 | todo |
-| CT-07 | Voice/realtime as its own item and project, with a latency-budget mustKnow | 7 | 05 | P2 | todo |
-| CT-08 | Deployment: Docker, a queue for long jobs, eval-gated release and canary | 8 | 02, 05 | P2 | todo |
-| CT-09 | Document parsing and ingestion (OCR, tables) and ACL-aware retrieval | 9 | 05 | P2 | todo |
-| CT-10 | AI product and agent UX patterns (streaming, citations, approvals, feedback) | 9 | 05 | P2 | todo |
-| CT-11 | DSPy / prompt optimisation; Google ADK 2.x in the framework pick group; coding-agent skills, hooks, subagents and AGENTS.md moved earlier | 10 | 05 | P2 | todo |
-| CT-12 | RAG evaluation and fallback strategies as an explicit topic | — | 01 | P2 | todo |
-| CT-13 | One outcome-titled project per layer with a time tag ("6 HOURS"); "bake-off" projects that compare options on cost and quality | — | 02, 01 | P2 | todo |
-| CT-14 | Repeat evals and guardrails across layers (a golden-set primer in L2/L3), not only L5 | — | 02, 05 | P2 | todo |
-| CT-15 | Python/TS engineering baseline checklist (async, typing, testing, APIs) as a "start here" gate | — | 01, 05 | P2 | todo |
-| CT-16 | Capstones: deep-research agent, secure agent red-team report, FDE end-to-end client engagement | — | 02, 03, 05 | P2/P7 | todo |
-| CT-17 | Pin versions and "last checked" per item (openai-agents 0.25.0, claude-agent-sdk 0.2.187, google-adk 2.15.0, langgraph 1.2.24 on 2026-11-23) | — | 03 #8, 05 | P2 | todo |
+| CT-01 | New Layer 7 "Forward Deployed Engineering": discovery and scoping, SOW and ADRs, enterprise data access, client-env deploy (VPC, SSO, RBAC, multi-tenant), compliance and audit, demos, handover and runbooks, build vs buy and token economics, case-interview practice | 1 | 02, 05 | P2 | done (2026-11-25): Layer 7, c701–c716 |
+| CT-02 | OpenTelemetry GenAI tracing taught in L3 (not only L5); new OTel project exporting to two backends | 2 | 05 | P2 | done (2026-11-25): c316 core, c322 OTel project |
+| CT-03 | Refresh MCP items to spec 2026-07-28: stateless, `server/discover`, MRTR, tasks extension, deprecated Roots/Sampling/Logging, Client ID Metadata Documents auth; flag stale items as optional | 3 | 05 §0.1 | P2 | done (2026-11-25): c317 changelog, 5 mustKnow terms, c305/c306 optional, c314 asks for the stateless model |
+| CT-04 | Agent security: OWASP LLM 2025 IDs in mustKnow, OWASP Agentic Top 10 (2026), lethal trifecta, excessive agency, MCP tool poisoning; injection primer moves to L3 | 4 | 05 | P2 | done (2026-11-25): primer c318 (L3); L5 c516, OWASP 2025 IDs, excessive agency, tool poisoning |
+| CT-05 | A2A v1.0 item in L3, plus mustKnow "A2A vs MCP" | 5 | 05 | P2 | done (2026-11-25): c319, mustKnow A2A vs MCP |
+| CT-06 | Long-term memory and durable or long-running agents (checkpoints, background agents) | 6 | 05 | P2 | done (2026-11-25): c320, 2 mustKnow terms |
+| CT-07 | Voice/realtime as its own item and project, with a latency-budget mustKnow | 7 | 05 | P2 | done (2026-11-25): c617, project c618, latency-budget term |
+| CT-08 | Deployment: Docker, a queue for long jobs, eval-gated release and canary | 8 | 02, 05 | P2 | done (2026-11-25): c619 core; queue, eval-gated and canary terms |
+| CT-09 | Document parsing and ingestion (OCR, tables) and ACL-aware retrieval | 9 | 05 | P2 | done (2026-11-25): c620 Docling, ACL-aware retrieval term |
+| CT-10 | AI product and agent UX patterns (streaming, citations, approvals, feedback) | 9 | 05 | P2 | done (2026-11-25): c621 HAX guidelines |
+| CT-11 | DSPy / prompt optimisation; Google ADK 2.x in the framework pick group; coding-agent skills, hooks, subagents and AGENTS.md moved earlier | 10 | 05 | P2 | done (2026-11-25): DSPy c215, ADK c321 in the pick group, coding-agent tooling c115 in L1 |
+| CT-12 | RAG evaluation and fallback strategies as an explicit topic | — | 01 | P2 | done (2026-11-25): c216, fallback and rewriting terms |
+| CT-13 | One outcome-titled project per layer with a time tag ("6 HOURS"); "bake-off" projects that compare options on cost and quality | — | 02, 01 | P2 | done (2026-11-25): outcome titles with hours on every stage project; bake-offs c113, c414, c615 |
+| CT-14 | Repeat evals and guardrails across layers (a golden-set primer in L2/L3), not only L5 | — | 02, 05 | P2 | done (2026-11-25): L2 golden-set project c217, L3 agent golden set term |
+| CT-15 | Python/TS engineering baseline checklist (async, typing, testing, APIs) as a "start here" gate | — | 01, 05 | P2 | done (2026-11-25): c114 baseline checklist in L1 startHere |
+| CT-16 | Capstones: deep-research agent, secure agent red-team report, FDE end-to-end client engagement | — | 02, 03, 05 | P2/P7 | done for content (2026-11-25): deep research c323, red-team report c515, FDE engagement c716 |
+| CT-17 | Pin versions and "last checked" per item (openai-agents 0.25.0, claude-agent-sdk 0.2.187, google-adk 2.15.0, langgraph 1.2.24 on 2026-11-23) | — | 03 #8, 05 | P2 | done (2026-11-25): 13 versions pins with lastChecked, checked against PyPI; the checker requires a date with versions |
 
 ## TR: tracks and structure
 
 | ID | Change | Source | Phase | Status |
 |---|---|---|---|---|
 | TR-01 | Tracks as views over the same layers: Applied AI, Agentic AI, FDE (and an optional Model/Inference) set required vs optional per layer | 05 §4 | P7 | todo |
-| TR-02 | Stage metadata per layer: kicker, rank title, colour, checkpoint, project (Krish Naik pattern) | 03 #5 | P2 | todo |
+| TR-02 | Stage metadata per layer: kicker, rank title, colour, checkpoint, project (Krish Naik pattern) | 03 #5 | P2 | done (2026-11-25): `stages[]` type, checker and data in all 7 layers |
 | TR-03 | Job-skill matrix: each item maps to role skills; a "skills I can prove" view | 02 | P7 | todo |
 | TR-04 | Build / Deploy / Solve pillar view next to layers | 02 | P7 | parked |
 | TR-05 | A real topic tree (decision 0001 option 3), only if the flat list starts to hurt | 0001 | — | parked |

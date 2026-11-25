@@ -2,7 +2,7 @@
   "id": 4,
   "title": "Fine-tuning & Training",
   "weeks": "11-14",
-  "description": "When to fine-tune, building datasets, LoRA/QLoRA, quantization and preference tuning, then a tuned model you can compare and serve",
+  "description": "Fine-tuning specialist content: when to fine-tune, building datasets, LoRA/QLoRA, quantization and preference tuning, then a tuned model you can compare and serve. Required for the Model/Inference track; optional for the Applied, Agentic and FDE tracks.",
   "appliesTo": [
     "nuraknect"
   ],
@@ -48,13 +48,39 @@
     "intermediate": "Run a QLoRA fine-tune of a small open model in free Colab and show how it compares with a well-prompted baseline on a held-out set.",
     "advanced": "Merge, quantize and serve the tuned model locally, and measure the quality, speed and memory cost of each quantization level."
   },
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "Data before training",
+      "rank": "Data Smith",
+      "color": "accent",
+      "checkpoint": "A teammate wants to fine-tune because replies sound off-brand. What would you try first, what data would you need, and what would make you say no to fine-tuning?",
+      "project": "c413"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Tune and compare",
+      "rank": "Adapter Builder",
+      "color": "cyan",
+      "checkpoint": "Your tuned model scores 4 points higher than the prompted baseline but costs more to host. How do you decide whether to ship it, and what extra number do you need?",
+      "project": "c414"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Shrink and serve",
+      "rank": "Model Packer",
+      "color": "purple",
+      "checkpoint": "4-bit cuts memory by 70% and quality drops 2 points on your eval set. Which numbers tell you whether that trade is acceptable for this task?",
+      "project": "c415"
+    }
+  ],
   "pickGroups": [
     {
       "id": "training-stack",
       "label": "Training stack: pick one"
     }
   ],
-  "startHere": "If you already fine-tuned a model with PEFT, skim c401 to c404 and start at c405; if you only prompt today, start at c401 and do the dataset project early.",
+  "startHere": "This layer is required if you take the Model/Inference track and optional for the Applied, Agentic and FDE tracks (a track picker arrives later). If you are not on the Model/Inference track, read c401 and c402 to learn when to fine-tune, then move on. If you already fine-tuned a model with PEFT, skim c401 to c404 and start at c405; if you only prompt today, start at c401 and do the dataset project early.",
   "outcomes": [
     "Decide between prompting, RAG and fine-tuning for a given NuraKnect task and explain the trade-off",
     "Build, clean, validate and split a chat-format instruction dataset",
@@ -373,7 +399,11 @@
       ],
       "prereqs": [
         "c405"
-      ]
+      ],
+      "lastChecked": "2026-11-25",
+      "versions": {
+        "peft": "0.22.0"
+      }
     },
     {
       "id": "c407",
@@ -397,7 +427,11 @@
       "pickGroup": "training-stack",
       "prereqs": [
         "c406"
-      ]
+      ],
+      "lastChecked": "2026-11-25",
+      "versions": {
+        "trl": "1.18.2"
+      }
     },
     {
       "id": "c408",
@@ -422,7 +456,11 @@
       "recommended": true,
       "prereqs": [
         "c406"
-      ]
+      ],
+      "lastChecked": "2026-11-25",
+      "versions": {
+        "unsloth": "2026.11.12"
+      }
     },
     {
       "id": "c409",
@@ -446,7 +484,11 @@
       "pickGroup": "training-stack",
       "prereqs": [
         "c406"
-      ]
+      ],
+      "lastChecked": "2026-11-25",
+      "versions": {
+        "axolotl": "0.21.1"
+      }
     },
     {
       "id": "c410",
@@ -534,7 +576,7 @@
     },
     {
       "id": "c413",
-      "title": "Project: build a 200-example NuraKnect instruction dataset",
+      "title": "Project: build a clean 200-example NuraKnect dataset with a train/eval split (5 hours)",
       "platform": "Build",
       "url": "https://huggingface.co/docs/datasets/index",
       "cost": "Free",
@@ -563,13 +605,13 @@
     },
     {
       "id": "c414",
-      "title": "Project: LoRA fine-tune a small open model and compare to prompting",
+      "title": "Bake-off: LoRA-tuned small model vs a well-prompted baseline on cost and quality (7 hours)",
       "platform": "Build",
       "url": "https://docs.unsloth.ai/get-started/unsloth-notebooks",
       "cost": "Free",
       "duration": "7 hours",
       "order": 14,
-      "why": "Fine-tune a small open model on your dataset in free Colab, then compare it against a well-prompted base model on your eval split. The comparison is the point.",
+      "why": "Fine-tune a small open model on your dataset in free Colab, then run a bake-off against a well-prompted base model on your eval split. Compare quality and cost per 1k replies (tokens, prompt length, hosting). Sometimes the prompted baseline wins, and knowing that is the point.",
       "kind": "project",
       "price": "free",
       "hours": 7,
@@ -584,7 +626,9 @@
         "The Colab notebook with outputs",
         "Training loss curve and key settings (r, lr, epochs)",
         "A table of eval results: tuned vs prompted baseline",
-        "Three example replies each, side by side"
+        "A cost table: cost per 1k replies for the tuned model vs the prompted baseline",
+        "Three example replies each, side by side",
+        "A one-paragraph verdict: tune or keep prompting, and why"
       ],
       "prereqs": [
         "c413",
@@ -593,7 +637,7 @@
     },
     {
       "id": "c415",
-      "title": "Project: quantize and serve the tuned model locally with an eval comparison",
+      "title": "Project: quantize and serve the tuned model locally and measure what each level costs (6 hours)",
       "platform": "Build",
       "url": "https://github.com/ggml-org/llama.cpp",
       "cost": "Free",

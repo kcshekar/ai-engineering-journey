@@ -264,13 +264,34 @@
       ]
     },
     {
+      "id": "c216",
+      "title": "RAG evaluation and fallbacks: score retrieval, then decide what to do when it fails",
+      "platform": "Ragas docs",
+      "url": "https://docs.ragas.io/en/stable/getstarted/rag_eval/",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 10,
+      "why": "Score a small RAG app with context and answer metrics, then read the failures. Decide the fallback: say you do not know, rewrite the query, or hand off to a person.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "intermediate",
+      "skills": [
+        "rag evaluation",
+        "fallback",
+        "retrieval quality"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
       "id": "c207",
       "title": "Qdrant quickstart",
       "platform": "Qdrant",
       "url": "https://qdrant.tech/documentation/quickstart/",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 10,
+      "order": 11,
       "why": "Purpose-built vector database with payload filtering and hybrid queries. The layer's build tasks use it.",
       "kind": "docs",
       "price": "free",
@@ -294,7 +315,7 @@
       "url": "https://github.com/pgvector/pgvector#getting-started",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 11,
+      "order": 12,
       "why": "Vectors inside Postgres: one database for users, DMs and embeddings. Good fit if NuraKnect already runs on Postgres.",
       "kind": "repo",
       "price": "free",
@@ -318,7 +339,7 @@
       "url": "https://docs.trychroma.com/docs/overview/getting-started",
       "cost": "Free",
       "duration": "1.5 hours",
-      "order": 12,
+      "order": 13,
       "why": "Smallest setup for local prototypes: pip install and go. Good for the first PDF Q&A.",
       "kind": "docs",
       "price": "free",
@@ -337,12 +358,12 @@
     },
     {
       "id": "c212",
-      "title": "Project: PDF Q&A with sources",
+      "title": "Project: Ship a PDF Q&A app that cites its source passages (3 hours)",
       "platform": "Build",
       "url": "https://github.com/rohitg00/ai-engineering-from-scratch/tree/main/phases/11-llm-engineering/06-rag",
       "cost": "Free",
       "duration": "3 hours",
-      "order": 13,
+      "order": 14,
       "why": "Chunk one PDF (for example NuraKnect's FAQ), embed it, and answer questions with the source passage shown.",
       "kind": "project",
       "price": "free",
@@ -365,13 +386,42 @@
       ]
     },
     {
+      "id": "c217",
+      "title": "Project: a 20-question golden set for your PDF Q&A (2 hours)",
+      "platform": "Build",
+      "url": "",
+      "cost": "Free",
+      "duration": "2 hours",
+      "order": 15,
+      "why": "Write 20 questions with expected answers and source pages for your PDF Q&A app, include 3 that the PDF cannot answer, then run them and record the pass rate.",
+      "kind": "project",
+      "price": "free",
+      "hours": 2,
+      "track": "optional",
+      "stage": "beginner",
+      "prereqs": [
+        "c212"
+      ],
+      "keep": [
+        "golden_set.json with 20 questions, expected answers and source pages",
+        "A results table: pass or fail per question",
+        "One paragraph on the failures and what you would fix first"
+      ],
+      "skills": [
+        "golden set",
+        "evaluation",
+        "rag"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
       "id": "c213",
-      "title": "Project: Hybrid search over NuraKnect DMs",
+      "title": "Project: Hybrid search over NuraKnect DMs, scored on 20 queries (3 hours)",
       "platform": "Build",
       "url": "https://qdrant.tech/documentation/concepts/hybrid-queries/",
       "cost": "Free",
       "duration": "3 hours",
-      "order": 14,
+      "order": 16,
       "why": "Combine keyword and vector search over 50+ DMs and compare it with vectors alone on exact-term queries.",
       "kind": "project",
       "price": "free",
@@ -394,13 +444,37 @@
       ]
     },
     {
+      "id": "c215",
+      "title": "DSPy: program and optimise prompts instead of hand-writing them",
+      "platform": "DSPy docs",
+      "url": "https://dspy.ai",
+      "cost": "Free",
+      "duration": "1.5 hours",
+      "order": 17,
+      "why": "Try prompt optimisation: define a signature and a metric, then let DSPy tune the prompt on a few examples. Compare the result with your hand-written prompt.",
+      "kind": "docs",
+      "price": "free",
+      "hours": 1.5,
+      "track": "optional",
+      "stage": "intermediate",
+      "versions": {
+        "dspy": "3.5.0"
+      },
+      "skills": [
+        "dspy",
+        "prompt optimisation",
+        "evaluation"
+      ],
+      "lastChecked": "2026-11-25"
+    },
+    {
       "id": "c214",
-      "title": "Project: Add a reranker and measure before and after",
+      "title": "Project: Add a reranker and prove the gain with before and after numbers (4 hours)",
       "platform": "Build",
       "url": "https://www.sbert.net/examples/applications/retrieve_rerank/README.html",
       "cost": "Free",
       "duration": "4 hours",
-      "order": 15,
+      "order": 18,
       "why": "Add a cross-encoder reranker to your hybrid search, score both versions with RAGAS or recall@k on 20 queries, and publish the numbers.",
       "kind": "project",
       "price": "free",
@@ -430,7 +504,7 @@
       "url": "https://microsoft.github.io/graphrag/",
       "cost": "Free",
       "duration": "2 hours",
-      "order": 16,
+      "order": 19,
       "why": "Builds a knowledge graph and community summaries to answer questions about a whole corpus. Read to know when plain RAG is not enough.",
       "kind": "docs",
       "price": "free",
@@ -453,7 +527,7 @@
       "url": "https://www.deeplearning.ai/short-courses/building-agentic-rag-with-llamaindex/",
       "cost": "Free",
       "duration": "1 hour",
-      "order": 17,
+      "order": 20,
       "why": "Lets an agent decide when and what to retrieve, and break a question into steps. Bridges into Layer 3 agents.",
       "kind": "course",
       "price": "free",
@@ -633,6 +707,16 @@
       "term": "RAG vs fine-tuning",
       "oneLiner": "RAG supplies facts at request time; fine-tuning changes the model's behaviour or style.",
       "misconception": "Fine-tuning is not a good way to add fresh facts."
+    },
+    {
+      "term": "Retrieval fallback",
+      "oneLiner": "What the app does when retrieval finds nothing useful: say it does not know, retry with a rewritten query, or hand off.",
+      "misconception": "The model will just say it does not know; without a check it usually makes something up."
+    },
+    {
+      "term": "Query rewriting and decomposition",
+      "oneLiner": "Rewrite a vague question, or split a multi-part one into smaller searches, before retrieval.",
+      "misconception": "Embedding the user's raw question is always the best query."
     }
   ],
   "stageGoals": {
@@ -640,6 +724,32 @@
     "intermediate": "Combine keyword and vector search, and measure retrieval quality with a test set and RAGAS.",
     "advanced": "Add a reranker or graph or agent step and prove with before and after numbers that it helped."
   },
+  "stages": [
+    {
+      "stage": "beginner",
+      "kicker": "First grounded answers",
+      "rank": "Source Citer",
+      "color": "accent",
+      "checkpoint": "Your PDF app answers a question the PDF does not cover, with a confident wrong answer. What do you check first, and what do you change?",
+      "project": "c212"
+    },
+    {
+      "stage": "intermediate",
+      "kicker": "Measured retrieval",
+      "rank": "Retrieval Tester",
+      "color": "cyan",
+      "checkpoint": "Hybrid search beats vectors on 15 of 20 queries but loses on the rest. How do you find out why, and what would you ship?",
+      "project": "c213"
+    },
+    {
+      "stage": "advanced",
+      "kicker": "Proving the upgrade",
+      "rank": "Retrieval Engineer",
+      "color": "purple",
+      "checkpoint": "A reranker lifts recall@5 by 6 points and adds 400 ms. What traffic or quality bar decides if it stays?",
+      "project": "c214"
+    }
+  ],
   "startHere": "Already built a basic RAG app? Skim c5 to c8, check the pre questions, then start at c201 (hybrid search) and c211 (RAGAS).",
   "outcomes": [
     "Build a RAG pipeline that answers from your documents and cites sources",

@@ -19,7 +19,8 @@
       "courses": [
         "c6",
         "c7",
-        "c212"
+        "c212",
+        "c217"
       ],
       "dailyMinutes": 90,
       "buildTask": "Add conversation memory to NuraKnect. Store past DMs as embeddings. Retrieve relevant context when new DM arrives. RAG applied to conversation history.",
@@ -38,7 +39,9 @@
         "c213",
         "c214",
         "c205",
-        "c206"
+        "c206",
+        "c215",
+        "c216"
       ],
       "dailyMinutes": 90,
       "buildTask": "Set up Qdrant locally via Docker. Index 20 real NuraKnect DM examples. Query by semantic similarity. Measure retrieval accuracy on 5 test queries. Document results.",
