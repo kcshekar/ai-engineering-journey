@@ -2,7 +2,7 @@
 
 ## Now
 - Focus: nothing in progress on `main` (2026-11-25). Next 16, API input checks and clean lint are done; verify, build and browser checks are green.
-- Next step: review the draft plan `docs/plans/ux-course-upgrade.md` on local branch `feat/ux-course-research` (UX redesign, 2026 curriculum, Layer 7; decision 0002 proposed). Its P1 needed Next 16, now on `main`, so rebase the branch onto `main` first.
+- Next step: review the draft plan `docs/plans/ux-course-upgrade.md` (UX redesign, 2026 curriculum, Layer 7; decision 0002 proposed). Research is in `docs/research/`. Its P1 needed Next 16, which is done.
 - Yours: remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from `.env` if they are still there (Vercel never had them; it uses the same Turso DB, so it already has the `users` table).
 - Optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history. The retired password in old commits must never be reused.
 
