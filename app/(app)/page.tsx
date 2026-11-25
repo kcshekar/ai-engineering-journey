@@ -9,6 +9,8 @@ import { getEffectiveCurrentLayer, getCurrentWeekNum } from "@/lib/loader"
 import metaData from "@/data/roadmaps/ai-engineering/meta.json"
 import type { LayerProgressEntry, ActivityDay, RoadmapData, RoadmapMeta } from "@/types"
 
+export const metadata = { title: "Dashboard" }
+
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.id) {

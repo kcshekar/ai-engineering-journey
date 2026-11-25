@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth"
 import { FileText, ArrowRight } from "lucide-react"
 import { getLayerNotes } from "@/lib/notes-data"
 
+export const metadata = { title: "Notes" }
+
 export default async function NotesPage() {
   const session = await auth()
   if (!session?.user?.id) {

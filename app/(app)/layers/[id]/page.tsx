@@ -10,6 +10,12 @@ import type { LayerProgressEntry, RoadmapProgress } from "@/types"
 
 interface Props { params: Promise<{ id: string }> }
 
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params
+  const layer = getRoadmapLayers("ai-engineering").find((l) => l.id === parseInt(id))
+  return { title: layer ? `Layer ${layer.id}: ${layer.title}` : "Layer not found" }
+}
+
 export default async function LayerDetailPage({ params }: Props) {
   const { id } = await params
   const layerId = parseInt(id)

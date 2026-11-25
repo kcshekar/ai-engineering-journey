@@ -1,8 +1,8 @@
 ---
 type: decision
 title: Curriculum structure, FDE layer and tracks
-status: proposed
-updated: 2026-11-23
+status: accepted
+updated: 2026-11-25
 ---
 
 # 0002: Curriculum structure, FDE layer and tracks
@@ -29,7 +29,7 @@ Krish Naik's roadmap uses a different shape: 10 short stages with ranks, checkpo
 | Gets the research ideas | few | all: FDE, tracks, ranks, checkpoints, quest map | all, with closer visual parity to Krish Naik |
 
 ## Decision
-Proposed: **Extend (2)**. It closes the top gaps (FDE, stale MCP, security, OTel) and enables tracks and the quest map, with no DB change, and it keeps decision 0001's id rule. Waiting for your approval.
+Chosen: **Extend (2)**. It closes the top gaps (FDE, stale MCP, security, OTel) and enables tracks and the quest map, with no DB change, and it keeps decision 0001's id rule. Approved with the plan on 2026-11-25.
 
 ## Consequences
 - Good: existing progress and completed layers stay valid; the quest map works from stage metadata.

@@ -2,12 +2,14 @@
 
 import { useMemo } from "react"
 import { Flame } from "lucide-react"
+import { localDateKey, parseDateKey } from "@/lib/loader"
 import type { ActivityDay } from "@/types"
 
 const WEEKS = 26
 const DAYS  = 7
 
-function dateStr(d: Date) { return d.toISOString().split("T")[0] }
+// Local day keys: toISOString() would key each cell by its UTC date, one day early east of UTC.
+const dateStr = localDateKey
 
 function buildGrid(activityMap: Record<string, ActivityDay>) {
   const today = new Date(); today.setHours(0,0,0,0)
@@ -58,8 +60,8 @@ export default function StreakGraph({ activityMap }: Props) {
     const labels: { col: number; label: string }[] = []
     let last: number | null = null
     columns.forEach((col, i) => {
-      const m = new Date(col[0].date).getMonth()
-      if (m !== last) { labels.push({ col: i, label: new Date(col[0].date).toLocaleString("default", { month: "short" }) }); last = m }
+      const m = parseDateKey(col[0].date).getMonth()
+      if (m !== last) { labels.push({ col: i, label: parseDateKey(col[0].date).toLocaleString("default", { month: "short" }) }); last = m }
     })
     return labels
   }, [columns])

@@ -4,7 +4,7 @@ import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/ThemeProvider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "AI Engineering Journey",
+  title: { default: "AI Engineering Journey", template: "%s · AI Engineering Journey" },
   description: "Track your path from Full-Stack Engineer to Applied AI Engineer",
 }
 

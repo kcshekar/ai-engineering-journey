@@ -8,6 +8,7 @@ import StreakGraph from "./StreakGraph"
 import {
   getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, getLayerHours,
   calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
+  getHoursDone, countActiveDays, localDateKey,
 } from "@/lib/loader"
 import type { RoadmapData, ActivityDay, LayerProgressEntry } from "@/types"
 
@@ -35,6 +36,9 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
   const currentLayerProgress = roadmap.progress.layerProgress[String(currentLayer.id)] as LayerProgressEntry | undefined
   const currentDeadline  = getLayerDeadline(currentLayer, currentLayerProgress)
   const deadlineStatus   = getDeadlineStatus(currentDeadline)
+
+  const hoursDone  = getHoursDone(roadmap.layers, roadmap.progress)
+  const activeDays = countActiveDays(activityMap, localDateKey(), 30)
 
   const circumference = 2 * Math.PI * 64
   const strokeOffset  = circumference - (overallPercent / 100) * circumference
@@ -107,9 +111,9 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
 
       <div className="stats-row">
         {[
-          { icon: Clock,  color: "green",  value: roadmap.progress.totalHoursSpent,       label: "Hours spent" },
+          { icon: Clock,  color: "green",  value: `${hoursDone}h`, label: "Est. hours done" },
           { icon: Layers, color: "cyan",   value: Object.values(roadmap.progress.layerProgress).filter((l) => (l as LayerProgressEntry).completed).length, label: "Layers done" },
-          { icon: Flame,  color: "amber",  value: roadmap.progress.weeklyCheckins.length,  label: "Check-ins" },
+          { icon: Flame,  color: "amber",  value: activeDays, label: "Active days (30d)" },
           { icon: Target, color: "purple", value: roadmap.meta.targetRole.split("/")[0].trim(), label: "Target role" },
         ].map(({ icon: Icon, color, value, label }, i) => (
           <motion.div key={label} className="stat-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>

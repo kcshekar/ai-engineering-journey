@@ -17,18 +17,18 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 
 | ID | Change | Sev | Source | Phase | Status |
 |---|---|---|---|---|---|
-| FX-01 | Notes/code load errors become empty content and Save overwrites real notes (`lib/api-client.ts:23,28`). Separate load error, disable edit and retry, autosave, guard close and `beforeunload` | High | 06 #1 | P1 | todo |
-| FX-02 | API calls inside `setProgress` updaters double-fire, and failures show as done (`LayerDetailClient.tsx:23-35, 70-77`). Call once, roll back and toast on failure | High | 06 #7 | P1 | todo |
-| FX-03 | Icon-only mobile nav has no accessible name; add `aria-current` | High | 06 #6, #26 | P1 | todo |
-| FX-04 | AA contrast failures (dark muted 3.45:1, light accent/cyan/amber text about 3.2–3.7:1) | High | 06 #4 | P1 | todo |
-| FX-05 | Framer Motion ignores reduced-motion; long entrance on every visit | Med | 06 #13 | P1 | todo |
-| FX-06 | Dashboard "Hours spent" and "Check-ins" are always 0; stale `meta.currentLayer` | Med | 06 #8 | P1 | todo |
-| FX-07 | No `loading.tsx` / `error.tsx` / `not-found`; one global `<title>` | Med | 06 #15 | P1 | todo |
-| FX-08 | Quiz copy contradicts the MCQs; "Unlocked" while the final check is locked | Med | 06 #17 | P1 | todo |
-| FX-09 | `outline:none` focus cues; `role="button"` div wraps controls; checkbox has no state | Med | 06 #16, #18 | P1 | todo |
-| FX-10 | Streak day keys use UTC (`toISOString`); evening activity lands on the wrong day | Low | 06 #25 | P1 | todo |
+| FX-01 | Notes/code load errors become empty content and Save overwrites real notes (`lib/api-client.ts:23,28`). Separate load error, disable edit and retry, ~~autosave~~, guard close and `beforeunload` | High | 06 #1 | P1 | done (2026-11-25). No autosave: you removed it on purpose in `ad28a5d`. Close now saves first, and a failed save keeps the panel open. Save also reports failures instead of always showing "Saved" |
+| FX-02 | API calls inside `setProgress` updaters double-fire, and failures show as done (`LayerDetailClient.tsx:23-35, 70-77`). Call once, roll back and toast on failure | High | 06 #7 | P1 | done (2026-11-25). Also fixed `api-client` turning network errors into `{ ok: true }` |
+| FX-03 | Icon-only mobile nav has no accessible name; add `aria-current` | High | 06 #6, #26 | P1 | done (2026-11-25) |
+| FX-04 | AA contrast failures (dark muted 3.45:1, light accent/cyan/amber text about 3.2–3.7:1) | High | 06 #4 | P1 | done (2026-11-25). Dark muted 4.7–5.5:1; light accent/cyan/amber/rose/muted ≥5:1 on white |
+| FX-05 | Framer Motion ignores reduced-motion; long entrance on every visit | Med | 06 #13 | P1 | done for reduced motion (`MotionConfig`); trimming entrance animations moves to DS-05 in P3 |
+| FX-06 | Dashboard "Hours spent" and "Check-ins" are always 0; stale `meta.currentLayer` | Med | 06 #8 | P1 | done (2026-11-25): "Est. hours done" from item hours, "Active days (30d)". Current layer was already computed from progress |
+| FX-07 | No `loading.tsx` / `error.tsx` / `not-found`; one global `<title>` | Med | 06 #15 | P1 | done (2026-11-25). Next 16 `retry()` error boundary, title template |
+| FX-08 | Quiz copy contradicts the MCQs; "Unlocked" while the final check is locked | Med | 06 #17 | P1 | done (2026-11-25) |
+| FX-09 | `outline:none` focus cues; `role="button"` div wraps controls; checkbox has no state | Med | 06 #16, #18 | P1 | done (2026-11-25). Title is a real button; checkbox has `role=checkbox aria-checked` |
+| FX-10 | Streak day keys use UTC (`toISOString`); evening activity lands on the wrong day | Low → **High** | 06 #25 | P1 | done (2026-11-25). Worse than the audit said: east of UTC (for example India) every heatmap cell was keyed a day early. Local date keys everywhere; the activity API stores the client's local day |
 | FX-11 | `/projects` NuraKnect card links to a deleted `projects/nuraknect` folder; cards are hardcoded | Low | 06 #29 (verified) | P4 | todo |
-| FX-12 | Opening any item silently starts the layer clock | Low | 06 #27 | P1 | todo |
+| FX-12 | Opening any item silently starts the layer clock | Low | 06 #27 | P1 | done (2026-11-25): starts on the first tick or a start date you set |
 | FX-13 | `transition: all` (17 uses); render-blocking font `@import` → `next/font` | Low | 06 #21, #23 | P3 | todo |
 
 ## DS: design system v2 (04 §2, 03 §8)

@@ -7,6 +7,11 @@ import MarkdownView from "@/components/MarkdownView"
 
 interface Props { params: Promise<{ layerId: string }> }
 
+export async function generateMetadata({ params }: Props) {
+  const { layerId } = await params
+  return { title: `Notes: layer ${parseInt(layerId) || "?"}` }
+}
+
 export default async function NoteDetailPage({ params }: Props) {
   const session = await auth()
   if (!session?.user?.id) {

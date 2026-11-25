@@ -10,6 +10,8 @@ import { getRoadmapLayers } from "@/lib/roadmap-data"
 import { getLayerStatus, getEffectiveCurrentLayer, countDoneUnits, getRequiredCount, getLayerHours } from "@/lib/loader"
 import type { LayerProgressEntry } from "@/types"
 
+export const metadata = { title: "Layers" }
+
 export default async function LayersPage() {
   const session = await auth()
   if (!session?.user?.id) {
