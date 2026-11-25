@@ -32,11 +32,13 @@ function buildGrid(activityMap: Record<string, ActivityDay>, today: string | nul
   )
 }
 
+// Heatmap ramp tokens (DS-03), per theme in app/globals.css.
 function cellColor(total: number) {
-  if (total === 0) return "var(--bg-elevated)"
-  if (total <= 2)  return "rgba(34,197,94,0.3)"
-  if (total <= 5)  return "rgba(34,197,94,0.55)"
-  return "var(--accent)"
+  if (total === 0) return "var(--heat-0)"
+  if (total <= 2)  return "var(--heat-1)"
+  if (total <= 5)  return "var(--heat-2)"
+  if (total <= 9)  return "var(--heat-3)"
+  return "var(--heat-4)"
 }
 
 function tooltip(cell: ReturnType<typeof buildGrid>[0][0]) {
@@ -60,7 +62,12 @@ export default function StreakGraph({ activityMap }: Props) {
     let last: number | null = null
     columns.forEach((col, i) => {
       const m = parseDateKey(col[0].date).getMonth()
-      if (m !== last) { labels.push({ col: i, label: parseDateKey(col[0].date).toLocaleString("default", { month: "short" }) }); last = m }
+      if (m === last) return
+      last = m
+      // A label is wider than one 16px column, so skip one that would touch the previous label.
+      const prev = labels[labels.length - 1]
+      if (prev && i - prev.col < 2) return
+      labels.push({ col: i, label: parseDateKey(col[0].date).toLocaleString("default", { month: "short" }) })
     })
     return labels
   }, [columns])
@@ -104,7 +111,7 @@ export default function StreakGraph({ activityMap }: Props) {
                     className={`streak-cell${cell.isToday ? " today" : ""}`}
                     style={{
                       background: cell.isFuture ? "transparent" : cellColor(cell.total),
-                      border: cell.isToday ? "1px solid var(--accent)" : "1px solid transparent",
+                      border: cell.isToday ? "1px solid var(--text-primary)" : "1px solid transparent",
                     }}
                     title={tooltip(cell)}
                   />
@@ -116,7 +123,7 @@ export default function StreakGraph({ activityMap }: Props) {
       </div>
       <div className="streak-legend">
         <span>Less</span>
-        {[0,2,4,6].map((n) => (
+        {[0,2,4,7,10].map((n) => (
           <div key={n} className="streak-cell" style={{ background: cellColor(n), border: "1px solid transparent" }} />
         ))}
         <span>More</span>

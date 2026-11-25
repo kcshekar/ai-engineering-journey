@@ -29,17 +29,17 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | FX-10 | Streak day keys use UTC (`toISOString`); evening activity lands on the wrong day | Low → **High** | 06 #25 | P1 | done (2026-11-25). Worse than the audit said: east of UTC (for example India) every heatmap cell was keyed a day early. Local date keys everywhere; the activity API stores the client's local day |
 | FX-11 | `/projects` NuraKnect card links to a deleted `projects/nuraknect` folder; cards are hardcoded | Low | 06 #29 (verified) | P4 | todo |
 | FX-12 | Opening any item silently starts the layer clock | Low | 06 #27 | P1 | done (2026-11-25): starts on the first tick or a start date you set |
-| FX-13 | `transition: all` (17 uses); render-blocking font `@import` → `next/font` | Low | 06 #21, #23 | P3 | todo |
+| FX-13 | `transition: all` (17 uses); render-blocking font `@import` → `next/font` | Low | 06 #21, #23 | P3 | done (2026-11-25): `next/font` in `lib/fonts.ts`; no `transition: all` left |
 | FX-14 | Server-rendered "today" is UTC: deadline "days left" (`getDeadlineStatus`) and current week (`getCurrentWeekNum` in the dashboard and layer pages) can differ from your local day between local midnight and UTC midnight, causing a hydration warning. Streak and active days already use `useLocalToday` | Low | P1 review #5 | P4 | todo |
 
 ## DS: design system v2 (04 §2, 03 §8)
 
 | ID | Change | Source | Phase | Status |
 |---|---|---|---|---|
-| DS-01 | Type scale tokens `--fs-*` (1.25 ratio, fluid xl/2xl, 12px floor) to replace 19 ad-hoc sizes | 04, 06 #14 | P3 | todo |
-| DS-02 | Spacing tokens (4px base), radius set, elevation by surface step plus one accent glow | 04 | P3 | todo |
-| DS-03 | Colour tokens v2: surfaces 1–3, `*-text` tokens per theme that pass AA, heatmap ramp, 5 stage hues always with icon and label | 04, 03 | P3 | todo |
-| DS-04 | Focus ring via `box-shadow` on `:focus-visible`; 24px minimum targets (WCAG 2.2 2.5.8) | 04 F | P3 | todo |
+| DS-01 | Type scale tokens `--fs-*` (1.25 ratio, fluid xl/2xl, 12px floor) to replace 19 ad-hoc sizes | 04, 06 #14 | P3 | done (2026-11-25): 9 steps (12, 13, 14, 16, 18, 20 px, then 3 fluid), not a strict 1.25 ratio, to keep today's density; `--fs-sm` (13px) may merge later |
+| DS-02 | Spacing tokens (4px base), radius set, elevation by surface step plus one accent glow | 04 | P3 | done (2026-11-25): tokens defined; adoption across existing rules happens as T2 components replace them |
+| DS-03 | Colour tokens v2: surfaces 1–3, `*-text` tokens per theme that pass AA, heatmap ramp, 5 stage hues always with icon and label | 04, 03 | P3 | done (2026-11-25) except stage hues (T2, with StageChip): surfaces, `--<hue>-text`, heat ramp |
+| DS-04 | Focus ring via `box-shadow` on `:focus-visible`; 24px minimum targets (WCAG 2.2 2.5.8) | 04 F | P3 | done (2026-11-25): kept an outline, not a box-shadow ring, because box-shadow disappears in forced-colours mode; 24px targets; `scroll-padding-top` |
 | DS-05 | Motion rules: 120/200/320ms, transform and opacity only, `<MotionConfig reducedMotion="user">`, confetti only at layer completion | 04 | P3 | todo |
 | DS-06 | Components: ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState | 04 | P3 | todo |
 | DS-07 | Bold identity: ambient green glow and a faint dot grid on the dashboard, Fira Code tabular numerals for stats, glass only on palette, drawer and header | 04 | P3 | todo |

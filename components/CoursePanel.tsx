@@ -9,6 +9,7 @@ import {
   Play, Trash2, Save, ListChecks, Lightbulb,
 } from "lucide-react"
 import { api } from "@/lib/api-client"
+import { firaCode } from "@/lib/fonts"
 import type { Course } from "@/types"
 
 // ── Pyodide singleton ──────────────────────────────────────────────────────
@@ -461,7 +462,8 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
                   onChange={handleCodeChange}
                   options={{
                     fontSize: 13,
-                    fontFamily: "'Fira Code', 'JetBrains Mono', monospace",
+                    // next/font gives the font a generated family name, so use its own string.
+                    fontFamily: firaCode.style.fontFamily,
                     fontLigatures: true,
                     minimap: { enabled: false },
                     scrollBeyondLastLine: false,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Providers from "@/components/Providers"
 import { ThemeProvider, THEME_INIT_SCRIPT } from "@/components/ThemeProvider"
+import { firaSans, firaCode } from "@/lib/fonts"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -10,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+    <html lang="en" className={`${firaSans.variable} ${firaCode.variable}`} suppressHydrationWarning data-scroll-behavior="smooth">
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>

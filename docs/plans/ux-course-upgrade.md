@@ -103,9 +103,9 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 - Rollback: revert the `data/` and `types/` commits.
 
 ### P3: Design system v2 (M)
-- Entry: P1 done.
-- [ ] T1 DS-01–DS-04 tokens (type, space, colour, focus) in `globals.css`; FX-13 `next/font` and no `transition: all`
-- [ ] T2 DS-05 motion config; DS-06 components (ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState)
+- Entry: P1 done. Met: branch `feat/ux-course-p3` from `feat/ux-course-p2` at `c4cf856` (stacked so the plan and roadmap don't conflict; rebase on main after P2 merges).
+- [x] T1 DS-01–DS-04 tokens (type, space, colour, focus) in `globals.css`; FX-13 `next/font` and no `transition: all`. Done 2026-11-25: 9-step type scale replaces 19 raw sizes (0 left, 12px floor); spacing, radius, surface, active-shadow and heat tokens; per-theme `--<hue>-text` tokens (all ≥4.5:1 on every surface and tint, both themes) on every hue `color`, and the light-theme status colours that failed AA (deadline badges, login error, wrong MCQ) moved onto them; `:focus-visible` outline token, `scroll-padding-top`, 24px targets (not inside Monaco); Fira Sans/Code via `next/font` (`lib/fonts.ts`) with a monospace fallback for Monaco; heatmap on `--heat-0…4`, month labels no longer overlap. Reviewer (Opus): 1 high, 5 medium, 5 low, all fixed except stage-hue tokens, which move to T2 with StageChip. Screens checked: login in both themes (app pages need your login).
+- [ ] T2 DS-05 motion config; `--stage-*` tokens for StageChip (from the T1 review); DS-06 components (ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState)
 - [ ] T3 DS-07 identity touches; DS-08 Monaco theme and Pyodide spinner
 - Exit: `npm run verify` green · `design:accessibility-review` passes AA in both themes · screenshots of every page in both themes attached to the PR · no hardcoded font sizes left (grep check).
 - Rollback: revert the commits (CSS and components only).

@@ -3,8 +3,9 @@
 ## Now
 - Active plan: `docs/plans/ux-course-upgrade.md` (approved 2026-11-25; decision 0002 accepted), P0 and P1 merged (PR #1); P2 on branch `feat/ux-course-p2`. Tracker: `docs/research/tracker.md`.
 - Done: P1 safety and accessibility fixes (verify and build green). Yours: the offline check for notes in your browser (steps in the plan's P1 exit).
-- Done: P2 (content): stage metadata types and checks, curriculum refresh, Layer 7 FDE, stages with checkpoints in all 7 layers, URLs and versions checked 2026-11-25. Yours: commit and push `feat/ux-course-p2`, open the PR.
-- Next task: P3 T1, design system v2 tokens (DS-01–DS-04, FX-13).
+- Done: P2 (content) on `feat/ux-course-p2`. Yours: push it and open the PR.
+- Done: P3 T1 design tokens, `next/font`, AA text tokens, on `feat/ux-course-p3` (stacked on P2). Yours: log in and glance at the dashboard and a layer page in both themes.
+- Next task: P3 T2, motion config, stage tokens and the DS-06 components.
 - Yours: remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from `.env` if they are still there (Vercel never had them; it uses the same Turso DB, so it already has the `users` table).
 - Optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history. The retired password in old commits must never be reused.
 
