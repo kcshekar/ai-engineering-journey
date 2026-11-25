@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion"
 import { Clock, Layers, Flame, Target, Hammer, Terminal } from "lucide-react"
+import ProgressRing from "./ui/ProgressRing"
+import StatTile from "./ui/StatTile"
+import { DURATION, EASE_OUT, staggerDelay } from "@/lib/motion"
 import RoadmapSelector from "./RoadmapSelector"
 import ProgressBar from "./ProgressBar"
 import StreakGraph from "./StreakGraph"
@@ -14,8 +17,8 @@ import { useLocalToday } from "./useLocalToday"
 import type { RoadmapData, ActivityDay, LayerProgressEntry } from "@/types"
 
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  initial: { opacity: 0, y: 8 },
+  in: { opacity: 1, y: 0, transition: { duration: DURATION.slow, ease: EASE_OUT } },
 }
 
 interface Props {
@@ -42,37 +45,12 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
   const today      = useLocalToday() // null while server-rendering, so server and browser days can't disagree
   const activeDays = today ? countActiveDays(activityMap, today, 30) : "–"
 
-  const circumference = 2 * Math.PI * 64
-  const strokeOffset  = circumference - (overallPercent / 100) * circumference
-
   return (
     <motion.div className="dashboard" variants={pageVariants} initial="initial" animate="in">
       <div className="dashboard-top">
         <div className="progress-ring-card">
           <RoadmapSelector meta={roadmap.meta} />
-          <div className="progress-ring-wrapper">
-            <svg className="progress-ring-svg" viewBox="0 0 144 144">
-              <defs>
-                <linearGradient id="progressGradient" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" style={{ stopColor: "var(--accent)" }} />
-                  <stop offset="100%" style={{ stopColor: "var(--cyan)" }} />
-                </linearGradient>
-              </defs>
-              <circle className="progress-ring-bg" cx="72" cy="72" r="64" />
-              <motion.circle
-                className="progress-ring-fill"
-                cx="72" cy="72" r="64"
-                strokeDasharray={circumference}
-                initial={{ strokeDashoffset: circumference }}
-                animate={{ strokeDashoffset: strokeOffset }}
-                transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
-              />
-            </svg>
-            <div className="progress-ring-text">
-              <div className="progress-ring-value">{overallPercent}%</div>
-              <div className="progress-ring-label">complete</div>
-            </div>
-          </div>
+          <ProgressRing value={overallPercent} />
           <div className="progress-ring-title">Layer {currentLayer.id} of {roadmap.meta.totalLayers}</div>
         </div>
 
@@ -112,33 +90,27 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
       </div>
 
       <div className="stats-row">
-        {[
-          { icon: Clock,  color: "green",  value: `${hoursDone}h`, label: "Est. hours done" },
-          { icon: Layers, color: "cyan",   value: Object.values(roadmap.progress.layerProgress).filter((l) => (l as LayerProgressEntry).completed).length, label: "Layers done" },
-          { icon: Flame,  color: "amber",  value: activeDays, label: "Active days (30d)" },
-          { icon: Target, color: "purple", value: roadmap.meta.targetRole.split("/")[0].trim(), label: "Target role" },
-        ].map(({ icon: Icon, color, value, label }, i) => (
-          <motion.div key={label} className="stat-card" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
-            <div className={`stat-icon ${color}`}><Icon /></div>
-            <div>
-              <div className="stat-value">{String(value)}</div>
-              <div className="stat-label">{label}</div>
-            </div>
-          </motion.div>
+        {([
+          { icon: Clock,  tone: "green",  value: `${hoursDone}h`, label: "Est. hours done" },
+          { icon: Layers, tone: "cyan",   value: Object.values(roadmap.progress.layerProgress).filter((l) => (l as LayerProgressEntry).completed).length, label: "Layers done" },
+          { icon: Flame,  tone: "amber",  value: activeDays, label: "Active days (30d)" },
+          { icon: Target, tone: "purple", value: roadmap.meta.targetRole.split("/")[0].trim(), label: "Target role" },
+        ] satisfies Omit<React.ComponentProps<typeof StatTile>, "index">[]).map((stat, i) => (
+          <StatTile key={stat.label} {...stat} index={i} />
         ))}
       </div>
 
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: DURATION.base, ease: EASE_OUT, delay: staggerDelay(4) }}>
         <StreakGraph activityMap={activityMap} />
       </motion.div>
 
       {currentWeekPlan && (
         <div className="today-section">
-          <motion.div className="today-card build" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+          <motion.div className="today-card build" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: DURATION.base, ease: EASE_OUT, delay: staggerDelay(5) }}>
             <div className="today-card-label"><Hammer /> Build Task &mdash; Week {currentWeekPlan.week}</div>
             <div className="today-card-text">{currentWeekPlan.buildTask}</div>
           </motion.div>
-          <motion.div className="today-card python" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
+          <motion.div className="today-card python" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: DURATION.base, ease: EASE_OUT, delay: staggerDelay(6) }}>
             <div className="today-card-label"><Terminal /> Python Practice</div>
             <div className="today-card-text">{currentWeekPlan.pythonTask}</div>
           </motion.div>

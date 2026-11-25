@@ -105,7 +105,7 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 ### P3: Design system v2 (M)
 - Entry: P1 done. Met: branch `feat/ux-course-p3` from `feat/ux-course-p2` at `c4cf856` (stacked so the plan and roadmap don't conflict; rebase on main after P2 merges).
 - [x] T1 DS-01–DS-04 tokens (type, space, colour, focus) in `globals.css`; FX-13 `next/font` and no `transition: all`. Done 2026-11-25: 9-step type scale replaces 19 raw sizes (0 left, 12px floor); spacing, radius, surface, active-shadow and heat tokens; per-theme `--<hue>-text` tokens (all ≥4.5:1 on every surface and tint, both themes) on every hue `color`, and the light-theme status colours that failed AA (deadline badges, login error, wrong MCQ) moved onto them; `:focus-visible` outline token, `scroll-padding-top`, 24px targets (not inside Monaco); Fira Sans/Code via `next/font` (`lib/fonts.ts`) with a monospace fallback for Monaco; heatmap on `--heat-0…4`, month labels no longer overlap. Reviewer (Opus): 1 high, 5 medium, 5 low, all fixed except stage-hue tokens, which move to T2 with StageChip. Screens checked: login in both themes (app pages need your login).
-- [ ] T2 DS-05 motion config; `--stage-*` tokens for StageChip (from the T1 review); DS-06 components (ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState)
+- [x] T2 DS-05 motion config; `--stage-*` tokens; DS-06 components. Done 2026-11-25: `lib/motion.ts` (120/200/320 ms, ease-out, spring 300/30, 30 ms stagger capped at 240 ms) used by every animation, bars animate `scaleX` not width, entrance offsets cut to 8px; `--dur-*` and `--stage-*` tokens; `components/ui/` ProgressRing (no draw under reduced motion), SegmentedBar (layers page, per-stage via `getStageProgress`), StatTile, StageChip, KindIcon, Skeleton, EmptyState, each replacing existing markup; check-content now requires a stage on core items. Drawer, Tabs and Toast moved to P4 T2 and Tooltip to P6 T4, where they are first used. Reviewer (Opus): 0 high, 2 medium, 6 low, all fixed. Screens checked on a temporary preview route in both themes (deleted).
 - [ ] T3 DS-07 identity touches; DS-08 Monaco theme and Pyodide spinner
 - Exit: `npm run verify` green · `design:accessibility-review` passes AA in both themes · screenshots of every page in both themes attached to the PR · no hardcoded font sizes left (grep check).
 - Rollback: revert the commits (CSS and components only).
@@ -113,7 +113,7 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 ### P4: Daily loop and pages (M)
 - Entry: P3 done.
 - [ ] T1 UX-01 resume hero and deep link; UX-02 bento dashboard; UX-17 stats strip
-- [ ] T2 UX-04 accessible drawer; UX-06 "About this item"; UX-07 prereq chips; UX-08 hidden fields
+- [ ] T2 UX-04 accessible drawer; UX-06 "About this item"; UX-07 prereq chips; UX-08 hidden fields; DS-06 Drawer and Tabs (CoursePanel tabs need `role=tab` and `aria-selected`) and Toast (save failures, 5 s undo)
 - [ ] T3 UX-05 layer sub-nav and next-item button
 - [ ] T4 UX-03 "My notes" page; UX-09 and FX-11 generated projects page
 - Exit: `npm run verify` green · manual: from login, reach the next unticked item in 1 click · notes typed in the drawer appear on My notes · screenshots.
@@ -134,7 +134,7 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 - [ ] T1 `reviews` table in `lib/db/schema.ts` → `npm run migrate` on dev → check query
 - [ ] T2 LM-01 and LM-02 review queue page and a due badge on the dashboard
 - [ ] T3 LM-03 hint ladder, test result list and saved pass state
-- [ ] T4 LM-04 streak forgiveness and accessible heatmap; UX-16 weekly review card
+- [ ] T4 LM-04 streak forgiveness and accessible heatmap; UX-16 weekly review card; DS-06 Tooltip for heatmap cells (keyboard and touch, replacing `title`)
 - [ ] T5 LM-06 completion vs excellence; LM-07 ranks and XP tied to retrieval and projects
 - Exit: `npm run verify` green · tests for scheduling and XP rules · migration check query output · manual review session.
 - Rollback: revert the commits and drop the `reviews` table (`DROP TABLE reviews;` on dev, after you confirm).

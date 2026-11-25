@@ -3,9 +3,8 @@
 import { motion } from "framer-motion"
 import { CalendarDays, Hammer, Terminal } from "lucide-react"
 import type { WeekPlan } from "@/types"
+import { fadeUp, staggerList } from "@/lib/motion"
 
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } }
-const fadeUp  = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } }
 
 interface Props {
   weeklyPlan: WeekPlan[]
@@ -18,7 +17,7 @@ export default function WeeklyPlan({ weeklyPlan, currentWeek }: Props) {
       <div className="weekly-plan-title">
         <CalendarDays /> Weekly Plan
       </div>
-      <motion.div variants={stagger} initial="hidden" animate="show">
+      <motion.div variants={staggerList(weeklyPlan.length)} initial="hidden" animate="show">
         {weeklyPlan.map((week) => (
           <motion.div
             key={week.week}

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
+import { DURATION, EASE_OUT } from "@/lib/motion"
 import { motion } from "framer-motion"
 import { LayoutDashboard, Layers, FileText, FolderGit2, LogOut } from "lucide-react"
 import ThemeToggle from "./ThemeToggle"
@@ -27,7 +28,7 @@ export default function Header() {
       className="header"
       initial={{ y: -64 }}
       animate={{ y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      transition={{ duration: DURATION.slow, ease: EASE_OUT }}
     >
       <div className="header-inner">
         <div className="header-brand">

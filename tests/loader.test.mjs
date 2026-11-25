@@ -5,7 +5,7 @@ import { randomBytes, scryptSync } from "node:crypto"
 import fs from "node:fs"
 import path from "node:path"
 import {
-  getRequiredCount, countDoneUnits, isLayerWorkDone, isQuizUnlocked, applyItemToggle, getLayerHours,
+  getRequiredCount, countDoneUnits, isLayerWorkDone, isQuizUnlocked, applyItemToggle, getLayerHours, getStageProgress,
 } from "../lib/loader.ts"
 import { verifyPassword, hashPassword } from "../lib/password.ts"
 
@@ -104,4 +104,19 @@ test("real content: every layer has core work and its ids are unique across the 
     }
   }
   for (const id of ["c1", "c2", "c3", "c4", "c5", "c6", "c7", "c8"]) assert.ok(seen.has(id), `progress id ${id} is gone`)
+})
+
+test("stage progress: required units per stage in order, a pick group once in its stage, optional never", () => {
+  const S = layer([
+    item("x", { stage: "advanced" }),
+    item("a", { stage: "beginner" }),
+    item("b", { stage: "beginner", track: "optional" }),
+    item("d", { stage: "intermediate", pickGroup: "g" }),
+    item("e", { stage: "intermediate", pickGroup: "g" }),
+  ])
+  assert.deepEqual(getStageProgress(S, ["e", "b"]), [
+    { stage: "beginner", done: 0, required: 1 },
+    { stage: "intermediate", done: 1, required: 1 },
+    { stage: "advanced", done: 0, required: 1 },
+  ])
 })

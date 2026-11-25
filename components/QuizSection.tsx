@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { DURATION, EASE_OUT } from "@/lib/motion"
 import { motion, AnimatePresence } from "framer-motion"
 import { Lock, Unlock, CircleCheck, CircleX, RotateCcw, ArrowRight, FastForward, ListChecks, MessageSquare } from "lucide-react"
 import type { Quiz, QuizQuestion } from "@/types"
@@ -79,7 +80,7 @@ function McqRunner({
         </span>
       </div>
       <AnimatePresence mode="wait">
-        <motion.div key={q.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.2 }}>
+        <motion.div key={q.id} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: DURATION.base, ease: EASE_OUT }}>
           <p className="mcq-question">{q.question}</p>
           <div className="mcq-options" role="group" aria-label="Answers">
             {q.options!.map((opt, i) => {
@@ -130,9 +131,9 @@ export default function QuizSection({
   return (
     <motion.div
       className={`quiz-section ${isUnlocked ? "quiz-unlocked" : "quiz-locked"}`}
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay: 0.3 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: DURATION.slow, ease: EASE_OUT }}
     >
       <div className="quiz-icon">
         {isUnlocked ? <Unlock /> : <Lock />}

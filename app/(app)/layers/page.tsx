@@ -5,12 +5,14 @@ import { db } from "@/lib/db"
 import { progress } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { Layers } from "lucide-react"
-import ProgressBar from "@/components/ProgressBar"
+import SegmentedBar from "@/components/ui/SegmentedBar"
 import { getRoadmapLayers } from "@/lib/roadmap-data"
-import { getLayerStatus, getEffectiveCurrentLayer, countDoneUnits, getRequiredCount, getLayerHours } from "@/lib/loader"
+import { getLayerStatus, getEffectiveCurrentLayer, getStageProgress, getLayerHours } from "@/lib/loader"
 import type { LayerProgressEntry } from "@/types"
 
 export const metadata = { title: "Layers" }
+
+const STAGE_LABEL = { beginner: "Beginner", intermediate: "Intermediate", advanced: "Advanced" } as const
 
 export default async function LayersPage() {
   const session = await auth()
@@ -47,7 +49,7 @@ export default async function LayersPage() {
       <div className="layers-grid">
         {layers.map((layer) => {
           const lp = layerProgressMap[String(layer.id)]
-          const completed = countDoneUnits(layer, lp?.coursesCompleted ?? [])
+          const stages = getStageProgress(layer, lp?.coursesCompleted ?? [])
           const isCurrent = layer.id === currentLayerId
           const status = getLayerStatus(layer, layerProgressMap)
           return (
@@ -60,8 +62,11 @@ export default async function LayersPage() {
               <div className="layer-row-info">
                 <div className="layer-row-title">{layer.title}</div>
                 <div className="layer-row-desc">{layer.description}</div>
-                <div style={{ marginTop: 10, maxWidth: 240 }}>
-                  <ProgressBar label="Core items" value={completed} max={getRequiredCount(layer)} />
+                <div className="layer-row-progress">
+                  <SegmentedBar
+                    label="Core items by stage"
+                    segments={stages.map((st) => ({ key: st.stage, label: STAGE_LABEL[st.stage], done: st.done, total: st.required, tone: st.stage }))}
+                  />
                 </div>
                 {getLayerHours(layer).required > 0 && (
                   <div className="layer-row-hours">

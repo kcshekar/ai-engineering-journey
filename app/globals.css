@@ -25,10 +25,19 @@
   /* Fonts come from next/font (lib/fonts.ts), which sets --font-fira-sans and --font-fira-code on <html>. */
   --font-sans: var(--font-fira-sans, "Fira Sans"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: var(--font-fira-code, "Fira Code"), "Cascadia Code", "JetBrains Mono", monospace;
-  /* Transitions name their properties (FX-13: no transition: all). */
+  /* Motion (DS-05): same values as lib/motion.ts. Transitions name their properties (FX-13). */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --transition-ui: color 200ms var(--ease-out), background-color 200ms var(--ease-out), border-color 200ms var(--ease-out),
-    box-shadow 200ms var(--ease-out), opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  --transition-ui: color var(--dur-base) var(--ease-out), background-color var(--dur-base) var(--ease-out),
+    border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+  /* Stage hues (DS-03): item stages and projects, matching the content's stages[].color. Always shown with a label. */
+  --stage-beginner: var(--accent);       --stage-beginner-text: var(--accent-text);       --stage-beginner-dim: var(--accent-dim);
+  --stage-intermediate: var(--cyan);     --stage-intermediate-text: var(--cyan-text);     --stage-intermediate-dim: var(--cyan-dim);
+  --stage-advanced: var(--purple);       --stage-advanced-text: var(--purple-text);       --stage-advanced-dim: var(--purple-dim);
+  --stage-project: var(--amber);         --stage-project-text: var(--amber-text);         --stage-project-dim: var(--amber-dim);
   /* Focus (DS-04): a 2px outline, which also shows in forced-colours mode (a box-shadow ring would not). */
   --focus-width: 2px;
   --focus-offset: 2px;
@@ -247,8 +256,8 @@ body::before {
 .progress-ring-svg { transform: rotate(-90deg); width: 160px; height: 160px; }
 .progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 8; }
 .progress-ring-fill {
-  fill: none; stroke: url(#progressGradient); stroke-width: 8;
-  stroke-linecap: round; transition: stroke-dashoffset 1s ease;
+  fill: none; stroke-width: 8;
+  stroke-linecap: round;
 }
 .progress-ring-text {
   position: absolute; inset: 0;
@@ -561,7 +570,8 @@ body::before {
 .progress-bar-label { font-size: var(--fs-xs); color: var(--text-muted); }
 .progress-bar-value { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--accent-text); }
 .progress-bar-track { height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
-.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--cyan)); border-radius: 3px; }
+/* No radius on the fill: scaleX would squash it; the track's radius and overflow clip the ends instead. */
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--cyan)); transform-origin: left; }
 
 /* ── NOTES & PROJECTS ── */
 .section-title { font-family: var(--font-mono); font-size: var(--fs-xl); font-weight: 700; color: var(--text-primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
@@ -716,7 +726,7 @@ body::before {
 .panel-readonly-code pre { font-family: var(--font-mono); font-size: var(--fs-sm); line-height: 1.7; color: #e2e8f0; padding: 20px 24px; margin: 0; white-space: pre; tab-size: 4; overflow-x: auto; }
 .panel-empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 40px; text-align: center; }
 .panel-empty-icon  { font-size: var(--fs-3xl); margin-bottom: 4px; }
-.panel-empty-title { font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 600; color: var(--text-primary); }
+.panel-empty-title { margin: 0; font-family: var(--font-mono); font-size: var(--fs-md); font-weight: 600; color: var(--text-primary); }
 .panel-empty-desc  { font-size: var(--fs-sm); color: var(--text-secondary); line-height: 1.6; }
 .panel-empty-desc code { font-family: var(--font-mono); font-size: var(--fs-xs); background: var(--bg-elevated); border: 1px solid var(--border); padding: 2px 6px; border-radius: 4px; color: var(--accent-text); }
 
@@ -907,10 +917,10 @@ body::before {
   font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
   color: var(--text-secondary); background: var(--bg-card-hover); border: 1px solid var(--border);
 }
-.stage-pill-beginner     { color: var(--accent-text); background: var(--accent-dim); border-color: transparent; }
-.stage-pill-intermediate { color: var(--cyan-text);   background: var(--cyan-dim);   border-color: transparent; }
-.stage-pill-advanced     { color: var(--purple-text); background: var(--purple-dim); border-color: transparent; }
-.stage-pill-project      { color: var(--amber-text);  background: var(--amber-dim);  border-color: transparent; }
+.stage-pill-beginner     { color: var(--stage-beginner-text);     background: var(--stage-beginner-dim);     border-color: transparent; }
+.stage-pill-intermediate { color: var(--stage-intermediate-text); background: var(--stage-intermediate-dim); border-color: transparent; }
+.stage-pill-advanced     { color: var(--stage-advanced-text);     background: var(--stage-advanced-dim);     border-color: transparent; }
+.stage-pill-project      { color: var(--stage-project-text);      background: var(--stage-project-dim);      border-color: transparent; }
 .stage-hours { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); }
 .stage-goal { margin: -2px 0 2px; font-size: var(--fs-md); line-height: 1.55; color: var(--text-secondary); max-width: 72ch; }
 
@@ -1103,3 +1113,21 @@ body::before {
 }
 .dashboard { grid-template-columns: minmax(0, 1fr); }
 @media (max-width: 600px) { .stat-value { font-size: var(--fs-lg); word-break: normal; overflow-wrap: break-word; } }
+
+/* SegmentedBar (DS-06): one bar split by stage; the legend names each part, so colour is never the only cue. */
+.segbar { width: 100%; }
+.segbar-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.segbar-label { font-size: var(--fs-xs); color: var(--text-muted); }
+.segbar-value { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.segbar-track { display: flex; gap: 3px; height: 8px; }
+.segbar-seg { position: relative; flex-basis: 0; min-width: 8px; border-radius: var(--radius-pill); background: var(--bg-elevated); overflow: hidden; }
+.segbar-fill { position: absolute; inset: 0; transform-origin: left; transition: transform var(--dur-slow) var(--ease-out); }
+.segbar-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.segbar-key { display: inline-flex; align-items: center; gap: 6px; }
+.segbar-key::before { content: ""; width: 8px; height: 8px; border-radius: 2px; background: var(--seg); }
+.tone-beginner { --seg: var(--stage-beginner); }
+.tone-intermediate { --seg: var(--stage-intermediate); }
+.tone-advanced { --seg: var(--stage-advanced); }
+.tone-project { --seg: var(--stage-project); }
+.segbar-seg .segbar-fill { background: var(--seg); }
+.layer-row-progress { margin-top: 10px; max-width: 320px; }

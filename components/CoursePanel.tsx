@@ -10,6 +10,8 @@ import {
 } from "lucide-react"
 import { api } from "@/lib/api-client"
 import { firaCode } from "@/lib/fonts"
+import { SPRING } from "@/lib/motion"
+import EmptyState from "./ui/EmptyState"
 import type { Course } from "@/types"
 
 // ── Pyodide singleton ──────────────────────────────────────────────────────
@@ -105,12 +107,7 @@ function buildSummaryPrompt(course: Course, notes: string, code: string) {
 function PythonChallenge({ challenge }: { challenge: Course["pythonChallenge"] }) {
   const [copied, setCopied] = useState(false)
   const [hintsShown, setHintsShown] = useState(0)
-  if (!challenge) return (
-    <div className="panel-empty-state">
-      <span className="panel-empty-icon">🐍</span>
-      <span className="panel-empty-title">No challenge for this course yet</span>
-    </div>
-  )
+  if (!challenge) return <EmptyState icon="🐍" title="No challenge for this item yet" />
   const handleCopy = async () => {
     await navigator.clipboard.writeText(challenge.starterCode)
     setCopied(true); setTimeout(() => setCopied(false), 2000)
@@ -391,7 +388,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
       <motion.div key="backdrop" className="panel-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={requestClose} />
       <motion.div key="panel" className="course-panel"
         initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
-        transition={{ type: "spring", stiffness: 320, damping: 32 }}
+        transition={SPRING}
       >
         <div className="panel-header">
           <div className="panel-header-info">

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { ArrowLeft, FileText } from "lucide-react"
 import { getLayerNote } from "@/lib/notes-data"
 import MarkdownView from "@/components/MarkdownView"
+import EmptyState from "@/components/ui/EmptyState"
 
 interface Props { params: Promise<{ layerId: string }> }
 
@@ -37,11 +38,7 @@ export default async function NoteDetailPage({ params }: Props) {
       {note.content ? (
         <MarkdownView content={note.content} />
       ) : (
-        <div className="panel-empty-state">
-          <div className="panel-empty-icon">📝</div>
-          <div className="panel-empty-title">No notes yet</div>
-          <div className="panel-empty-desc">This layer doesn&apos;t have any notes written yet.</div>
-        </div>
+        <EmptyState icon="📝" title="No notes yet">This layer doesn&apos;t have any notes written yet.</EmptyState>
       )}
     </div>
   )

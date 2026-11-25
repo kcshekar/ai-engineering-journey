@@ -52,8 +52,15 @@ test("stages: bad enum, duplicate, unused stage, missing fields and wrong projec
   assert.match(q.out, /project "zz" is not in this layer/)
 })
 
+test("items: a core item needs a stage; an optional one may skip it", () => {
+  const r = check({}, [item("a"), item("b", { track: "optional" })])
+  assert.equal(r.code, 1)
+  assert.match(r.out, /item a: a core item needs a stage/)
+  assert.doesNotMatch(r.out, /item b:/)
+})
+
 test("items: lastChecked must be a real date and versions need one", () => {
-  assert.equal(check({}, [item("a", { lastChecked: "2026-11-25", versions: { langgraph: "1.2.24" } })]).code, 0)
+  assert.equal(check({}, [item("a", { stage: "beginner", lastChecked: "2026-11-25", versions: { langgraph: "1.2.24" } })]).code, 0)
   const r = check({}, [
     item("a", { lastChecked: "2026-02-30" }),
     item("b", { versions: { langgraph: "1.2.24" } }),

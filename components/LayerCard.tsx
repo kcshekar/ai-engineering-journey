@@ -4,16 +4,17 @@ import React, { useState, useEffect, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import {
   Check, ExternalLink, Clock, Monitor, BookOpen, FileText, Play, Pencil, X, AlertTriangle, AlertCircle, Lightbulb,
-  GraduationCap, CirclePlay, Newspaper, BookMarked, Book, FolderGit2, Hammer, Star, ChevronDown, Compass, Trophy, Target, Layers as LayersIcon,
+  Hammer, Star, ChevronDown, Compass, Trophy, Target, Layers as LayersIcon,
 } from "lucide-react"
 import ProgressBar from "./ProgressBar"
+import KindIcon from "./ui/KindIcon"
+import StageChip from "./ui/StageChip"
+import { fadeUp, staggerList } from "@/lib/motion"
 import CoursePanel from "./CoursePanel"
 import { api } from "@/lib/api-client"
 import { getLayerDeadline, getDeadlineStatus, getCourseTimeline, getCourseWeekNum, countDoneUnits, getRequiredCount, getLayerHours, isLayerWorkDone } from "@/lib/loader"
-import type { Layer, RoadmapProgress, LayerProgressEntry, CourseMetaEntry, Course, ItemKind, Stage } from "@/types"
+import type { Layer, RoadmapProgress, LayerProgressEntry, CourseMetaEntry, Course, Stage } from "@/types"
 
-const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } }
-const fadeUp   = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } }
 
 function engagementLevel(meta: CourseMetaEntry | undefined) {
   if (!meta) return 0
@@ -137,10 +138,6 @@ function MustKnowCard({ layer }: { layer: Layer }) {
   )
 }
 
-const KIND_ICON: Record<ItemKind, typeof Book> = {
-  course: GraduationCap, video: CirclePlay, article: Newspaper, docs: BookMarked,
-  book: Book, repo: FolderGit2, project: Hammer,
-}
 const STAGES: { id: Stage; label: string }[] = [
   { id: "beginner", label: "Beginner" },
   { id: "intermediate", label: "Intermediate" },
@@ -171,7 +168,6 @@ function ItemCard({ course, layer, layerProgress, meta, titleById, doneEverywher
   const level = done ? 5 : engagementLevel(meta)
   const borderColor = done ? undefined : LEVEL_BORDER[level]
   const optional = course.track === "optional"
-  const KindIcon = KIND_ICON[course.kind ?? "course"] ?? GraduationCap
   // Soft prerequisite hint: only prereqs that are not done yet (any layer; ids are unique per roadmap).
   const missing = (course.prereqs ?? []).filter((id) => !doneEverywhere.has(id) && titleById.has(id))
 
@@ -195,7 +191,7 @@ function ItemCard({ course, layer, layerProgress, meta, titleById, doneEverywher
           A role="button" wrapper is avoided because the card also holds the date controls. */}
       <div className="course-info course-info-clickable" onClick={() => onOpen(course)}>
         <div className="course-title-row">
-          {course.kind && <span className={`kind-icon kind-${course.kind}`} title={course.kind}><KindIcon size={14} /></span>}
+          {course.kind && <KindIcon kind={course.kind} />}
           <button type="button" className="course-title course-title-btn" onClick={(e) => { e.stopPropagation(); onOpen(course) }}>
             {course.title}
           </button>
@@ -442,11 +438,11 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
           }
           return (
             <>
-              <motion.div className="courses-grid" variants={stagger} initial="hidden" animate="show">{out}</motion.div>
+              <motion.div className="courses-grid" variants={staggerList(out.length)} initial="hidden" animate="show">{out}</motion.div>
               {optional.length > 0 && (
                 <details className="optional-extras">
                   <summary><ChevronDown size={14} /> Optional extras ({optional.length})</summary>
-                  <motion.div className="courses-grid" variants={stagger} initial="hidden" animate="show">
+                  <motion.div className="courses-grid" variants={staggerList(optional.length)} initial="hidden" animate="show">
                     {optional.map((c) => renderCard(c))}
                   </motion.div>
                 </details>
@@ -469,7 +465,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
                   return (
                     <section key={id} id={`stage-${layer.id}-${id}`} className={`stage-section stage-${id}`}>
                       <div className="stage-head">
-                        <span className={`stage-pill stage-pill-${id}`}>{label}</span>
+                        <StageChip tone={id}>{label}</StageChip>
                         {h > 0 && <span className="stage-hours">~{fmtHours(h)}</span>}
                       </div>
                       {layer.stageGoals?.[id] && <p className="stage-goal">{layer.stageGoals[id]}</p>}
@@ -479,7 +475,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
                 })}
                 {learning.some((c) => !c.stage) && (
                   <section className="stage-section">
-                    <div className="stage-head"><span className="stage-pill">More</span></div>
+                    <div className="stage-head"><StageChip>More</StageChip></div>
                     {renderList(learning.filter((c) => !c.stage))}
                   </section>
                 )}
@@ -490,13 +486,13 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
             {projects.length > 0 && (
               <section className="stage-section projects-section" aria-label="Projects">
                 <div className="stage-head">
-                  <span className="stage-pill stage-pill-project"><Hammer size={12} /> Projects</span>
+                  <StageChip tone="project"><Hammer size={12} aria-hidden="true" /> Projects</StageChip>
                   <span className="stage-hours">Build it, keep the evidence</span>
                 </div>
-                <motion.div className="projects-grid" variants={stagger} initial="hidden" animate="show">
+                <motion.div className="projects-grid" variants={staggerList(projects.length)} initial="hidden" animate="show">
                   {projects.map((p) => (
                     <div key={p.id} className="project-wrap">
-                      {p.stage && <span className={`stage-pill stage-pill-${p.stage} project-level`}>{STAGES.find((s) => s.id === p.stage)?.label}</span>}
+                      {p.stage && <StageChip tone={p.stage} className="project-level">{STAGES.find((s) => s.id === p.stage)?.label}</StageChip>}
                       {renderCard(p)}
                     </div>
                   ))}

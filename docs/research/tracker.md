@@ -40,8 +40,8 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | DS-02 | Spacing tokens (4px base), radius set, elevation by surface step plus one accent glow | 04 | P3 | done (2026-11-25): tokens defined; adoption across existing rules happens as T2 components replace them |
 | DS-03 | Colour tokens v2: surfaces 1–3, `*-text` tokens per theme that pass AA, heatmap ramp, 5 stage hues always with icon and label | 04, 03 | P3 | done (2026-11-25) except stage hues (T2, with StageChip): surfaces, `--<hue>-text`, heat ramp |
 | DS-04 | Focus ring via `box-shadow` on `:focus-visible`; 24px minimum targets (WCAG 2.2 2.5.8) | 04 F | P3 | done (2026-11-25): kept an outline, not a box-shadow ring, because box-shadow disappears in forced-colours mode; 24px targets; `scroll-padding-top` |
-| DS-05 | Motion rules: 120/200/320ms, transform and opacity only, `<MotionConfig reducedMotion="user">`, confetti only at layer completion | 04 | P3 | todo |
-| DS-06 | Components: ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState | 04 | P3 | todo |
+| DS-05 | Motion rules: 120/200/320ms, transform and opacity only, `<MotionConfig reducedMotion="user">`, confetti only at layer completion | 04 | P3 | done (2026-11-25): `lib/motion.ts` and `--dur-*`; stagger capped at 240 ms; ring skips its draw under reduced motion. Confetti: none exists yet |
+| DS-06 | Components: ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState | 04 | P3 | partly done (2026-11-25): ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Skeleton, EmptyState; Drawer, Tabs, Toast in P4 T2; Tooltip in P6 T4 |
 | DS-07 | Bold identity: ambient green glow and a faint dot grid on the dashboard, Fira Code tabular numerals for stats, glass only on palette, drawer and header | 04 | P3 | todo |
 | DS-08 | Monaco theme follows the app theme; spinner while Pyodide loads | 06 #19 | P3 | todo |
 

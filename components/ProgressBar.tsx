@@ -1,6 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
+import { DURATION, EASE_OUT } from "@/lib/motion"
 
 interface Props {
   label: string
@@ -19,9 +20,9 @@ export default function ProgressBar({ label, value, max }: Props) {
       <div className="progress-bar-track">
         <motion.div
           className="progress-bar-fill"
-          initial={{ width: 0 }}
-          animate={{ width: `${percent}%` }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: percent / 100 }}
+          transition={{ duration: DURATION.slow, ease: EASE_OUT }}
         />
       </div>
     </div>

@@ -247,6 +247,10 @@ for (const roadmap of fs.readdirSync(root, { withFileTypes: true }).filter((e) =
       if (new Set(members.map((c) => c.kind === "project")).size > 1) errors.push(`${where}: pickGroup "${g}" cannot mix projects with other items`)
     }
     checkStages(layer.stages, courses, where)
+    // getStageProgress (the stage bar on the layers page) counts only staged items, so a core item needs a stage.
+    for (const c of courses) {
+      if (isObj(c) && (c.track ?? "core") === "core" && c.stage === undefined) errors.push(`${where} item ${c.id}: a core item needs a stage`)
+    }
     // lib/loader.ts never completes a layer with no core item, so its quiz would never unlock.
     if (!courses.some((c) => isObj(c) && (c.track ?? "core") === "core")) {
       errors.push(`${where}: layer needs at least one core item, or it can never be completed`)

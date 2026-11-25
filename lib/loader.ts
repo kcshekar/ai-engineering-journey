@@ -1,4 +1,4 @@
-import type { Layer, LayerProgressEntry, WeekPlan, RoadmapProgress, ActivityDay } from "@/types"
+import type { Layer, LayerProgressEntry, WeekPlan, RoadmapProgress, ActivityDay, Stage } from "@/types"
 
 // Dates are "YYYY-MM-DD" keys in the learner's local time. Never use toISOString() for a day:
 // it is UTC, so east of UTC local midnight becomes the previous day.
@@ -117,6 +117,26 @@ function getRequiredUnits(layer: Layer): string[][] {
 export function countDoneUnits(layer: Layer, completedIds: string[]): number {
   const done = new Set(completedIds)
   return getRequiredUnits(layer).filter((ids) => ids.some((id) => done.has(id))).length
+}
+
+const STAGE_ORDER: Stage[] = ["beginner", "intermediate", "advanced"]
+
+export interface StageProgress { stage: Stage; done: number; required: number }
+
+/** Required units per item stage, in stage order; a pick group counts in the stage of its items. */
+export function getStageProgress(layer: Layer, completedIds: string[]): StageProgress[] {
+  const done = new Set(completedIds)
+  const byId = new Map(layer.courses.map((c) => [c.id, c]))
+  const rows = new Map<Stage, StageProgress>()
+  for (const ids of getRequiredUnits(layer)) {
+    const stage = byId.get(ids[0])?.stage
+    if (!stage) continue
+    const row = rows.get(stage) ?? { stage, done: 0, required: 0 }
+    row.required++
+    if (ids.some((id) => done.has(id))) row.done++
+    rows.set(stage, row)
+  }
+  return STAGE_ORDER.filter((s) => rows.has(s)).map((s) => rows.get(s)!)
 }
 
 export function getRequiredCount(layer: Layer): number {
