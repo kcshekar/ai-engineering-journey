@@ -65,9 +65,9 @@ function CourseTimeline({
   if (editing) {
     return (
       <div className="course-timeline editing" onClick={(e) => e.stopPropagation()}>
-        <input ref={startRef} type="date" className="deadline-input" defaultValue={startDate || ""} autoFocus />
+        <input ref={startRef} type="date" className="deadline-input" aria-label="Start date" defaultValue={startDate || ""} autoFocus />
         <span className="deadline-sep">→</span>
-        <input type="date" className="deadline-input" defaultValue={endDate || ""} />
+        <input type="date" className="deadline-input" aria-label="End date" defaultValue={endDate || ""} />
         <button className="course-tl-save" onClick={(e) => {
           e.stopPropagation()
           const inputs = (e.currentTarget.closest(".course-timeline") as HTMLElement).querySelectorAll("input")
@@ -334,6 +334,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
             <input
               ref={startInputRef}
               type="date"
+              aria-label="Layer start date"
               className="deadline-input"
               defaultValue={layerProgress?.startedDate || ""}
               onBlur={(e) => { setEditingStart(false); if (e.target.value) onSaveDates(layer.id, { started: true, startedDate: e.target.value }) }}
@@ -355,6 +356,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
             <input
               ref={deadlineInputRef}
               type="date"
+              aria-label="Layer deadline"
               className="deadline-input"
               defaultValue={deadline || ""}
               onBlur={(e) => { setEditingDeadline(false); if (e.target.value) onSaveDates(layer.id, { deadline: e.target.value }) }}

@@ -6,7 +6,8 @@
 - Done: P2 (content) on `feat/ux-course-p2`. Yours: push it and open the PR.
 - Done: P3 T1 design tokens, `next/font`, AA text tokens, on `feat/ux-course-p3` (stacked on P2). Yours: log in and glance at the dashboard and a layer page in both themes.
 - Done: P3 T2 motion rules, stage tokens and 7 components (`components/ui/`).
-- Next task: P3 T3, DS-07 identity touches and DS-08 Monaco theme and Pyodide spinner.
+- Done: P3 (design system v2) on `feat/ux-course-p3`: tokens, `next/font`, motion, components, identity, Monaco theme; exit checks run (FX-15 fixed). Yours: screenshots of the logged-in pages in both themes for the PR.
+- Next task: P4 T1, the resume hero and deep link (UX-01), bento dashboard (UX-02) and stats strip (UX-17).
 - Yours: remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from `.env` if they are still there (Vercel never had them; it uses the same Turso DB, so it already has the `users` table).
 - Optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history. The retired password in old commits must never be reused.
 

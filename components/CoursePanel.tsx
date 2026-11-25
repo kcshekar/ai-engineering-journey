@@ -2,17 +2,32 @@
 
 import { useState, useEffect, useEffectEvent, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import Editor from "@monaco-editor/react"
+import Editor, { type BeforeMount } from "@monaco-editor/react"
 import {
   X, FileText, Terminal, Copy, Check,
   ExternalLink, Clock, Monitor, BookOpen, Sparkles,
-  Play, Trash2, Save, ListChecks, Lightbulb,
+  Play, Trash2, Save, ListChecks, Lightbulb, Loader2,
 } from "lucide-react"
 import { api } from "@/lib/api-client"
 import { firaCode } from "@/lib/fonts"
 import { SPRING } from "@/lib/motion"
 import EmptyState from "./ui/EmptyState"
+import { useTheme } from "./ThemeProvider"
 import type { Course } from "@/types"
+
+// ── Editor themes (DS-08) ───────────────────────────────────────────────────
+// Monaco takes hex colours, not CSS variables: dark uses --bg-secondary, light uses --bg-card (white),
+// with --text-primary and --accent from app/globals.css. The output console stays dark in both themes, like a terminal.
+const defineEditorThemes: BeforeMount = (monaco) => {
+  monaco.editor.defineTheme("journey-dark", {
+    base: "vs-dark", inherit: true, rules: [],
+    colors: { "editor.background": "#111827", "editor.foreground": "#F1F5F9", "editorCursor.foreground": "#22C55E", "editor.lineHighlightBackground": "#1A1F2E" },
+  })
+  monaco.editor.defineTheme("journey-light", {
+    base: "vs", inherit: true, rules: [],
+    colors: { "editor.background": "#FFFFFF", "editor.foreground": "#0F172A", "editorCursor.foreground": "#15803D", "editor.lineHighlightBackground": "#F5F7FA" },
+  })
+}
 
 // ── Pyodide singleton ──────────────────────────────────────────────────────
 let _pyodide: unknown = null
@@ -177,6 +192,8 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const [copied, setCopied]             = useState(false)
   const [output, setOutput]             = useState<{type:string;text:string}[]>([])
   const [isRunning, setIsRunning]       = useState(false)
+  const [runMode, setRunMode]           = useState<"run" | "check">("run")
+  const { resolved: resolvedTheme }     = useTheme()
   const outputRef                       = useRef<HTMLDivElement>(null)
   const activityTimer                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   // Latest text and edit counters for saving: a save writes what was typed up to its start and
@@ -298,7 +315,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
 
   const handleRun = useCallback(async () => {
     if (isRunning || !code.trim()) return
-    setIsRunning(true)
+    setIsRunning(true); setRunMode("run")
     const firstRun = !_pyodide
     setOutput([{ type: "info", text: firstRun ? "⏳ Loading Python runtime…" : "▶ Running…" }])
     const start = Date.now()
@@ -328,7 +345,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const tests = course.pythonChallenge?.tests
   const handleCheck = useCallback(async () => {
     if (isRunning || !code.trim() || !tests) return
-    setIsRunning(true)
+    setIsRunning(true); setRunMode("check")
     setOutput([{ type: "info", text: _pyodide ? "▶ Checking…" : "⏳ Loading Python runtime…" }])
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -442,6 +459,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
             <div className="panel-notes-area">
               <textarea
                 className="panel-notes-input"
+                aria-label="Your notes"
                 value={notes}
                 onChange={(e) => handleNotesChange(e.target.value)}
                 placeholder={`What did you learn in "${course.title}"?\n\nWrite in plain text or markdown:\n- Key concepts\n- Things that surprised you\n- Questions to follow up`}
@@ -454,7 +472,8 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
                 <Editor
                   height="100%"
                   language="python"
-                  theme="vs-dark"
+                  beforeMount={defineEditorThemes}
+                  theme={resolvedTheme === "light" ? "journey-light" : "journey-dark"}
                   value={code}
                   onChange={handleCodeChange}
                   options={{
@@ -480,17 +499,17 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
                     </button>
                     {tests && (
                       <button className="output-check-btn" onClick={handleCheck} disabled={isRunning || !code.trim()} title="Run your code, then the challenge checks">
-                        <ListChecks size={13} /> Check
+                        {isRunning && runMode === "check" ? <Loader2 size={13} className="spin" aria-hidden="true" /> : <ListChecks size={13} />} Check
                       </button>
                     )}
                     <button className={`output-run-btn ${isRunning ? "running" : ""}`} onClick={handleRun} disabled={isRunning || !code.trim()} title="Run (Ctrl+Enter)">
-                      <Play size={13} /> {isRunning ? "Running…" : "Run"}
+                      {isRunning && runMode === "run" ? <Loader2 size={13} className="spin" aria-hidden="true" /> : <Play size={13} />} {isRunning ? "Running…" : "Run"}
                     </button>
                   </div>
                 </div>
-                <div className="output-panel-body" ref={outputRef}>
+                <div className="output-panel-body" ref={outputRef} role="log" aria-live="polite" aria-label="Output" aria-busy={isRunning}>
                   {output.length === 0 ? (
-                    <span className="output-empty">Press Run or Ctrl+Enter to execute</span>
+                    <span className="output-empty" aria-hidden="true">Press Run or Ctrl+Enter to execute</span>
                   ) : output.map((line, i) => (
                     <div key={i} className={`output-line output-line-${line.type}`}>{line.text}</div>
                   ))}

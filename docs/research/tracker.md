@@ -31,6 +31,7 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | FX-12 | Opening any item silently starts the layer clock | Low | 06 #27 | P1 | done (2026-11-25): starts on the first tick or a start date you set |
 | FX-13 | `transition: all` (17 uses); render-blocking font `@import` → `next/font` | Low | 06 #21, #23 | P3 | done (2026-11-25): `next/font` in `lib/fonts.ts`; no `transition: all` left |
 | FX-14 | Server-rendered "today" is UTC: deadline "days left" (`getDeadlineStatus`) and current week (`getCurrentWeekNum` in the dashboard and layer pages) can differ from your local day between local midnight and UTC midnight, causing a hydration warning. Streak and active days already use `useLocalToday` | Low | P1 review #5 | P4 | todo |
+| FX-15 | Unlabelled inputs (login email and password, notes textarea, four date inputs) and control edges under 3:1 (checkbox, inputs, select) | Med | P3 exit a11y audit | P3 | done (2026-11-25): `aria-label` on each, `--control-border` ≥3:1 on every surface in both themes |
 
 ## DS: design system v2 (04 §2, 03 §8)
 
@@ -42,8 +43,8 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | DS-04 | Focus ring via `box-shadow` on `:focus-visible`; 24px minimum targets (WCAG 2.2 2.5.8) | 04 F | P3 | done (2026-11-25): kept an outline, not a box-shadow ring, because box-shadow disappears in forced-colours mode; 24px targets; `scroll-padding-top` |
 | DS-05 | Motion rules: 120/200/320ms, transform and opacity only, `<MotionConfig reducedMotion="user">`, confetti only at layer completion | 04 | P3 | done (2026-11-25): `lib/motion.ts` and `--dur-*`; stagger capped at 240 ms; ring skips its draw under reduced motion. Confetti: none exists yet |
 | DS-06 | Components: ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Drawer, Tabs, Toast, Tooltip, Skeleton, EmptyState | 04 | P3 | partly done (2026-11-25): ProgressRing, SegmentedBar, StatTile, StageChip, KindIcon, Skeleton, EmptyState; Drawer, Tabs, Toast in P4 T2; Tooltip in P6 T4 |
-| DS-07 | Bold identity: ambient green glow and a faint dot grid on the dashboard, Fira Code tabular numerals for stats, glass only on palette, drawer and header | 04 | P3 | todo |
-| DS-08 | Monaco theme follows the app theme; spinner while Pyodide loads | 06 #19 | P3 | todo |
+| DS-07 | Bold identity: ambient green glow and a faint dot grid on the dashboard, Fira Code tabular numerals for stats, glass only on palette, drawer and header | 04 | P3 | done (2026-11-25): dot grid on every page (not only the dashboard; dot alpha 10%/6%), dashboard glow, tabular numerals, glass on header and drawer only |
+| DS-08 | Monaco theme follows the app theme; spinner while Pyodide loads | 06 #19 | P3 | done (2026-11-25): Monaco themes follow the app; spinner and live status while Pyodide loads; console AA in both themes |
 
 ## UX: daily flow and pages
 

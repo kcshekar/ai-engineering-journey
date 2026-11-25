@@ -34,6 +34,7 @@ export default function LoginPage() {
           {error && <div className="login-error">{error}</div>}
           <input
             type="email"
+            aria-label="Email"
             className="login-input"
             placeholder="Email"
             value={email}
@@ -43,6 +44,7 @@ export default function LoginPage() {
           />
           <input
             type="password"
+            aria-label="Password"
             className="login-input"
             placeholder="Password"
             value={password}

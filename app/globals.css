@@ -41,6 +41,8 @@
   /* Focus (DS-04): a 2px outline, which also shows in forced-colours mode (a box-shadow ring would not). */
   --focus-width: 2px;
   --focus-offset: 2px;
+  /* Glass blur (DS-07), with each surface's own translucent background. */
+  --glass-blur: blur(14px) saturate(1.2);
   /* Smallest pointer target (WCAG 2.2, 2.5.8). */
   --target-min: 24px;
 }
@@ -69,6 +71,8 @@
   --purple-dim: rgba(167,139,250,0.15);
   /* Text-safe hues (DS-03): use for `color`; the plain hues stay for fills, borders and icons.
      Each passes 4.5:1 on every surface and on its own -dim tint. */
+  /* Edge of inputs, selects and checkboxes: ≥3:1 on every surface (WCAG 1.4.11). */
+  --control-border: #6E7A91;
   --accent-text: #22C55E;
   --cyan-text: #22D3EE;
   --amber-text: #F59E0B;
@@ -90,7 +94,8 @@
   --shadow-card: 0 4px 24px rgba(0,0,0,0.3);
   --shadow-glow: 0 0 30px rgba(34,197,94,0.08);
   --header-bg: rgba(11,15,26,0.7);
-  --grid-line: rgba(34,197,94,0.03);
+  --grid-dot: rgba(148,163,184,0.10);
+  --drawer-alpha: 92%;
   color-scheme: dark;
 }
 
@@ -117,6 +122,7 @@
   --rose-dim: rgba(225,29,72,0.12);
   --purple: #7C3AED;
   --purple-dim: rgba(124,58,237,0.12);
+  --control-border: #7C8799;
   --accent-text: #166534;
   --cyan-text: #155E75;
   --amber-text: #92400E;
@@ -136,7 +142,9 @@
   --shadow-card: 0 2px 16px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
   --shadow-glow: 0 0 24px rgba(22,163,74,0.1);
   --header-bg: rgba(255,255,255,0.75);
-  --grid-line: rgba(22,163,74,0.04);
+  --grid-dot: rgba(15,23,42,0.06);
+  /* Light text has less contrast headroom, so the glass drawer is nearly opaque here. */
+  --drawer-alpha: 96%;
   color-scheme: light;
 }
 
@@ -158,13 +166,11 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image:
-    linear-gradient(var(--grid-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-  background-size: 60px 60px;
+  /* DS-07: a faint 24px dot grid behind every page. */
+  background-image: radial-gradient(circle, var(--grid-dot) 1px, transparent 1.5px);
+  background-size: 24px 24px;
   pointer-events: none;
   z-index: 0;
-  transition: background-image 0.25s ease;
 }
 
 #__next, main { position: relative; z-index: 1; }
@@ -173,8 +179,8 @@ body::before {
 .header {
   position: sticky; top: 0; z-index: 100;
   background: var(--header-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: 1px solid var(--border);
   padding: 0 24px;
   transition: background-color 0.25s ease, border-color 0.25s ease;
@@ -238,7 +244,14 @@ body::before {
 @media (max-width: 768px) { .main { padding: 20px 16px 60px; } }
 
 /* ── DASHBOARD ── */
-.dashboard { display: grid; gap: 24px; }
+.dashboard { display: grid; gap: 24px; position: relative; }
+/* DS-07: an ambient green glow behind the top of the dashboard; decorative only. */
+.dashboard::before {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
+  top: -96px; left: 50%; width: min(1100px, 100%); height: 420px; transform: translateX(-50%);
+  background: radial-gradient(ellipse at 50% 0%, var(--accent-glow), transparent 70%);
+  opacity: 0.55;
+}
 
 .dashboard-top {
   display: grid; grid-template-columns: 300px 1fr; gap: 24px;
@@ -264,7 +277,7 @@ body::before {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
 }
 .progress-ring-value {
-  font-family: var(--font-mono); font-size: var(--fs-3xl); font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-3xl); font-weight: 700; font-variant-numeric: tabular-nums;
   color: var(--text-primary); line-height: 1;
 }
 .progress-ring-label { font-size: var(--fs-sm); color: var(--text-muted); margin-top: 4px; }
@@ -304,7 +317,7 @@ body::before {
   border-radius: var(--radius-md); text-align: center; transition: var(--transition-ui);
 }
 .week-chip.active { border-color: var(--accent); background: var(--accent-dim); box-shadow: var(--shadow-glow); }
-.week-chip-num { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); display: block; }
+.week-chip-num { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); display: block; font-variant-numeric: tabular-nums; }
 .week-chip-focus {
   font-size: var(--fs-sm); font-weight: 500; color: var(--text-primary); margin-top: 4px; display: block;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; /* overflow fix */
@@ -329,7 +342,7 @@ body::before {
 .stat-icon.amber { background: var(--amber-dim);  color: var(--amber-text);  }
 .stat-icon.purple{ background: var(--purple-dim); color: var(--purple-text); }
 .stat-value {
-  font-family: var(--font-mono); font-size: var(--fs-2xl); font-weight: 700;
+  font-family: var(--font-mono); font-size: var(--fs-2xl); font-weight: 700; font-variant-numeric: tabular-nums;
   color: var(--text-primary); line-height: 1.2;
   overflow: hidden; text-overflow: ellipsis; word-break: break-word; white-space: normal;
 }
@@ -428,7 +441,7 @@ body::before {
 }
 .deadline-clear:hover { color: var(--rose-text); background: var(--rose-dim); }
 .deadline-input {
-  background: var(--bg-card); border: 1px solid var(--border);
+  background: var(--bg-card); border: 1px solid var(--control-border);
   color: var(--text-primary); font-size: var(--fs-xs); padding: 3px 8px;
   border-radius: 4px; font-family: inherit;
 }
@@ -473,7 +486,7 @@ body::before {
 .course-card.completed { border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); }
 
 .course-checkbox {
-  width: 24px; height: 24px; border: 2px solid var(--border-bright);
+  width: 24px; height: 24px; border: 2px solid var(--control-border);
   border-radius: 6px; display: flex; align-items: center; justify-content: center;
   transition: var(--transition-ui); flex-shrink: 0; background: transparent; cursor: pointer;
 }
@@ -568,7 +581,7 @@ body::before {
 .progress-bar-container { width: 100%; }
 .progress-bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .progress-bar-label { font-size: var(--fs-xs); color: var(--text-muted); }
-.progress-bar-value { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--accent-text); }
+.progress-bar-value { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--accent-text); }
 .progress-bar-track { height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
 /* No radius on the fill: scaleX would squash it; the track's radius and overflow clip the ends instead. */
 .progress-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--cyan)); transform-origin: left; }
@@ -653,7 +666,11 @@ body::before {
 .course-panel {
   position: fixed; top: 64px; right: 0; bottom: 0;
   width: min(640px, 100vw);
-  background: var(--bg-secondary); border-left: 1px solid var(--border);
+  /* Glass (DS-07): only the header, this drawer and, later, the command palette. Near-opaque so text stays AA. */
+  background: var(--bg-secondary);
+  background: color-mix(in oklab, var(--bg-secondary) var(--drawer-alpha), transparent);
+  backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+  border-left: 1px solid var(--border);
   z-index: 201; display: flex; flex-direction: column;
   box-shadow: -8px 0 40px rgba(0,0,0,0.4);
 }
@@ -703,7 +720,13 @@ body::before {
 .panel-loading { flex: 1; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: var(--fs-sm); color: var(--text-muted); }
 
 .code-tab-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.output-panel { flex-shrink: 0; height: 210px; border-top: 1px solid var(--border); display: flex; flex-direction: column; background: #0d1117; }
+/* The console is dark in both themes (a terminal), so it sets its own dark-theme tokens and every text in it stays AA. */
+.output-panel {
+  color-scheme: dark;
+  --text-primary: #F1F5F9; --text-muted: #8A96AB; --border: #2A3041; --border-bright: #374151;
+  --accent: #22C55E; --amber: #F59E0B; --bg-primary: #0B0F1A;
+  flex-shrink: 0; height: 210px; border-top: 1px solid var(--border); display: flex; flex-direction: column; background: #0d1117;
+}
 .output-panel-header { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .output-panel-title { font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
 .output-panel-actions { display: flex; gap: 6px; align-items: center; }
@@ -719,7 +742,7 @@ body::before {
 .output-line { white-space: pre-wrap; word-break: break-all; }
 .output-line-stdout { color: #e2e8f0; }
 .output-line-stderr { color: #f87171; }
-.output-line-info   { color: #64748b; }
+.output-line-info   { color: #8A96AB; }
 
 .panel-readonly-notes { flex: 1; overflow-y: auto; padding: 24px; font-size: var(--fs-md); line-height: 1.75; color: var(--text-primary); white-space: pre-wrap; font-family: var(--font-sans); }
 .panel-readonly-code  { flex: 1; overflow-y: auto; background: #0d1117; }
@@ -750,7 +773,7 @@ body::before {
 
 /* ── ROADMAP SELECTOR ── */
 .roadmap-selector { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); }
-.roadmap-selector select { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-primary); background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px 8px; cursor: pointer; }
+.roadmap-selector select { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-primary); background: var(--bg-card); border: 1px solid var(--control-border); border-radius: var(--radius-sm); padding: 4px 8px; cursor: pointer; }
 .roadmap-selector select:focus { border-color: var(--accent); }
 
 /* ── STREAK GRAPH ── */
@@ -765,7 +788,7 @@ body::before {
 .streak-stats { display: flex; align-items: center; gap: 12px; }
 .streak-badge { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: var(--fs-xs); font-weight: 600; color: var(--amber-text); background: var(--amber-dim); padding: 3px 8px; border-radius: 20px; }
 .streak-badge svg { color: var(--amber-text); }
-.streak-total { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); }
+.streak-total { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--text-muted); font-variant-numeric: tabular-nums; }
 .streak-graph-wrapper { display: flex; gap: 8px; align-items: flex-start; }
 .streak-graph-scroll { flex: 1; overflow-x: auto; padding-bottom: 6px; } /* overflow fix */
 .streak-days-labels { display: flex; flex-direction: column; gap: 3px; padding-top: 18px; flex-shrink: 0; }
@@ -828,7 +851,7 @@ body::before {
 .login-subtitle { font-size: var(--fs-sm); color: var(--text-muted); text-align: center; margin-bottom: 28px; }
 .login-form { display: flex; flex-direction: column; gap: 14px; }
 .login-input {
-  width: 100%; background: var(--bg-secondary); border: 1px solid var(--border);
+  width: 100%; background: var(--bg-secondary); border: 1px solid var(--control-border);
   border-radius: var(--radius-sm); color: var(--text-primary);
   font-family: var(--font-sans); font-size: var(--fs-md);
   padding: 10px 14px; transition: border-color 0.2s;
@@ -1087,7 +1110,7 @@ body::before {
 .mcq-btn.ghost { background: transparent; color: var(--text-secondary); border-color: var(--border-bright); }
 .mcq-btn.skip { background: var(--cyan); border-color: var(--cyan); margin: 0 auto; }
 .mcq-result { display: grid; gap: 12px; justify-items: center; text-align: center; }
-.mcq-score { font-family: var(--font-mono); font-size: var(--fs-4xl); font-weight: 700; line-height: 1; }
+.mcq-score { font-family: var(--font-mono); font-size: var(--fs-4xl); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
 .mcq-score.pass { color: var(--accent-text); }
 .mcq-score.fail { color: var(--amber-text); }
 .mcq-result-text { font-size: var(--fs-md); color: var(--text-secondary); }
@@ -1131,3 +1154,7 @@ body::before {
 .tone-project { --seg: var(--stage-project); }
 .segbar-seg .segbar-fill { background: var(--seg); }
 .layer-row-progress { margin-top: 10px; max-width: 320px; }
+
+/* Busy icon (Run / Check while Python loads or runs). It only spins when motion is allowed; otherwise it stays still. */
+@media (prefers-reduced-motion: no-preference) { .spin { animation: spin 0.9s linear infinite; } }
+@keyframes spin { to { transform: rotate(360deg); } }
