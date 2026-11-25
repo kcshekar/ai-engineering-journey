@@ -11,6 +11,7 @@ const PRICES = ["free", "freemium", "paid"]
 const TRACKS = ["core", "optional"]
 const STAGES = ["beginner", "intermediate", "advanced"]
 const QUIZ_STAGES = ["pre", "check", "post"]
+const STAGE_COLORS = ["accent", "cyan", "amber", "rose", "purple"]
 // Same idea as AI Engineering from Scratch's check_quiz_bias.py: a question is
 // guessable when the correct option is strictly longest and this much longer.
 const LENGTH_RATIO = 1.25
@@ -27,6 +28,13 @@ let mcqCount = 0
 const isStr = (v) => typeof v === "string" && v.trim() !== ""
 const isStrArray = (v) => Array.isArray(v) && v.every(isStr)
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v)
+// A real calendar day in "YYYY-MM-DD" form.
+const isDateKey = (v) => {
+  if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(v)) return false
+  const [y, m, d] = v.split("-").map(Number)
+  const date = new Date(Date.UTC(y, m - 1, d))
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d
+}
 
 // Returns the list, or [] with an error when the field is present but not a list.
 function list(value, where, field) {
@@ -72,10 +80,50 @@ function checkItem(item, where, pickGroupIds) {
       errors.push(`${where}: ${field} must be a list of strings`)
     }
   }
+  if (item.lastChecked !== undefined && !isDateKey(item.lastChecked)) {
+    errors.push(`${where}: lastChecked must be a date like 2026-11-25`)
+  }
+  if (item.versions !== undefined) {
+    if (!isObj(item.versions) || !Object.keys(item.versions).length || !Object.entries(item.versions).every(([k, v]) => isStr(k) && isStr(v))) {
+      errors.push(`${where}: versions must map package names to version strings`)
+    } else if (item.lastChecked === undefined) {
+      errors.push(`${where}: versions need a lastChecked date`)
+    }
+  }
   const pc = item.pythonChallenge
   if (pc) {
     if (pc.tests !== undefined && !isStr(pc.tests)) errors.push(`${where}: pythonChallenge.tests must be Python code`)
     if (pc.hints !== undefined && !isStrArray(pc.hints)) errors.push(`${where}: pythonChallenge.hints must be a list of strings`)
+  }
+}
+
+// Stage metadata (TR-02): one entry per item stage the layer uses; the project must prove that stage.
+function checkStages(value, courses, where) {
+  const seen = new Set()
+  const used = new Set(courses.filter(isObj).map((c) => c.stage).filter(Boolean))
+  for (const s of list(value, where, "stages")) {
+    if (!isObj(s)) {
+      errors.push(`${where}: each stage must be an object`)
+      continue
+    }
+    const sw = `${where} stage ${s.stage ?? "(no stage)"}`
+    if (!STAGES.includes(s.stage)) {
+      errors.push(`${sw}: stage must be one of ${STAGES.join(", ")}`)
+      continue
+    }
+    if (seen.has(s.stage)) errors.push(`${sw}: listed twice`)
+    seen.add(s.stage)
+    if (!used.has(s.stage)) errors.push(`${sw}: no item in this layer has this stage`)
+    for (const field of ["kicker", "rank", "checkpoint"]) {
+      if (!isStr(s[field])) errors.push(`${sw}: needs a ${field}`)
+    }
+    if (!STAGE_COLORS.includes(s.color)) errors.push(`${sw}: color must be one of ${STAGE_COLORS.join(", ")}`)
+    if (s.project !== undefined) {
+      const p = courses.find((c) => isObj(c) && c.id === s.project)
+      if (!p) errors.push(`${sw}: project "${s.project}" is not in this layer`)
+      else if (p.kind !== "project") errors.push(`${sw}: project "${s.project}" is not a project item`)
+      else if (p.stage !== s.stage) errors.push(`${sw}: project "${s.project}" belongs to stage ${p.stage ?? "(none)"}`)
+    }
   }
 }
 
@@ -198,6 +246,7 @@ for (const roadmap of fs.readdirSync(root, { withFileTypes: true }).filter((e) =
       if (members.some((c) => (c.track ?? "core") !== "core")) errors.push(`${where}: pickGroup "${g}" members must all be core (optional items are not grouped on the page)`)
       if (new Set(members.map((c) => c.kind === "project")).size > 1) errors.push(`${where}: pickGroup "${g}" cannot mix projects with other items`)
     }
+    checkStages(layer.stages, courses, where)
     // lib/loader.ts never completes a layer with no core item, so its quiz would never unlock.
     if (!courses.some((c) => isObj(c) && (c.track ?? "core") === "core")) {
       errors.push(`${where}: layer needs at least one core item, or it can never be completed`)

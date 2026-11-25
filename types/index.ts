@@ -3,6 +3,8 @@ export type ItemPrice = "free" | "freemium" | "paid"
 export type ItemTrack = "core" | "optional"
 export type Stage = "beginner" | "intermediate" | "advanced"
 export type QuizStage = "pre" | "check" | "post"
+// Colour tokens in app/globals.css that a stage may use (the quest map, P5).
+export type StageColor = "accent" | "cyan" | "amber" | "rose" | "purple"
 
 export interface PythonChallenge {
   level: number
@@ -42,6 +44,10 @@ export interface Course {
   skills?: string[]
   // For kind "project": the evidence to keep when it is done.
   keep?: string[]
+  // "YYYY-MM-DD" when the url and any versions below were last checked live.
+  lastChecked?: string
+  // Pinned versions this item was written against, for example { "langgraph": "1.2.24" }. Needs lastChecked.
+  versions?: Record<string, string>
 }
 
 export interface MustKnowTerm {
@@ -53,6 +59,20 @@ export interface MustKnowTerm {
 export interface PickGroup {
   id: string
   label: string
+}
+
+// Stage metadata (TR-02, Krish Naik pattern): one entry per item stage used in the layer.
+export interface LayerStage {
+  stage: Stage
+  // Short line above the stage name, for example "Before the agent".
+  kicker: string
+  // Rank title earned when the stage is cleared, for example "Retriever".
+  rank: string
+  color: StageColor
+  // Question you answer in your notes to clear the stage (LM-05).
+  checkpoint: string
+  // Id of the project item, in this layer and this stage, that proves the stage.
+  project?: string
 }
 
 export interface PortfolioProof {
@@ -98,6 +118,7 @@ export interface Layer {
   quiz: Quiz
   mustKnow?: MustKnowTerm[]
   stageGoals?: Partial<Record<Stage, string>>
+  stages?: LayerStage[]
   pickGroups?: PickGroup[]
   outcomes?: string[]
   startHere?: string
