@@ -44,6 +44,24 @@ export function updateLayerEntry(
   return next
 }
 
+/**
+ * After a save of change `next` (made from `prev`) failed, what to show now (`cur` is the latest state).
+ * - Nothing changed since: show `prev` again.
+ * - A later change was made: keep it and apply `undo` to that layer only. `resync` is that layer's corrected
+ *   entry, which must be written again, because the later change's write may have carried the failed one.
+ */
+export function resolveFailedSave(
+  cur: RoadmapProgress,
+  next: RoadmapProgress,
+  prev: RoadmapProgress,
+  layerId: number,
+  undo: (lp: LayerProgressEntry) => void,
+): { progress: RoadmapProgress; resync: LayerProgressEntry | null } {
+  if (cur === next) return { progress: prev, resync: null }
+  const progress = updateLayerEntry(cur, layerId, undo)
+  return { progress, resync: progress.layerProgress[String(layerId)] }
+}
+
 /** Estimated hours of finished work: the hours of every completed item. */
 export function getHoursDone(layers: Layer[], progress: RoadmapProgress): number {
   let hours = 0
@@ -133,7 +151,8 @@ export function applyItemToggle(layer: Layer | undefined, lp: LayerProgressEntry
     lp.coursesCompleted.splice(idx, 1)
   } else {
     lp.coursesCompleted.push(courseId)
-    if (!lp.started) { lp.started = true; lp.startedDate = today }
+    // Keep a start date the learner set before the first tick.
+    if (!lp.started) { lp.started = true; lp.startedDate ??= today }
   }
   if (!layer) return
   if (isLayerWorkDone(layer, lp.coursesCompleted)) {

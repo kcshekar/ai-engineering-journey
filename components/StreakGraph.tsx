@@ -2,33 +2,31 @@
 
 import { useMemo } from "react"
 import { Flame } from "lucide-react"
-import { localDateKey, parseDateKey } from "@/lib/loader"
+import { addDays, parseDateKey } from "@/lib/loader"
+import { useLocalToday } from "./useLocalToday"
 import type { ActivityDay } from "@/types"
 
 const WEEKS = 26
 const DAYS  = 7
 
-// Local day keys: toISOString() would key each cell by its UTC date, one day early east of UTC.
-const dateStr = localDateKey
-
-function buildGrid(activityMap: Record<string, ActivityDay>) {
-  const today = new Date(); today.setHours(0,0,0,0)
-  const start = new Date(today)
-  start.setDate(today.getDate() - WEEKS * DAYS + 1)
-  start.setDate(start.getDate() - start.getDay()) // align Sunday
+// Cells use local day keys (toISOString() would key them by UTC, a day early east of UTC), and the
+// grid is built only in the browser, where "today" is the learner's day (null while server-rendering).
+function buildGrid(activityMap: Record<string, ActivityDay>, today: string | null) {
+  if (!today) return []
+  const back = WEEKS * DAYS - 1
+  const first = addDays(today, -back)
+  const start = addDays(first, -parseDateKey(first).getDay()) // align Sunday
 
   return Array.from({ length: WEEKS }, (_, w) =>
     Array.from({ length: DAYS }, (_, d) => {
-      const date = new Date(start)
-      date.setDate(start.getDate() + w * 7 + d)
-      const key = dateStr(date)
+      const key = addDays(start, w * 7 + d)
       const e = activityMap[key] || {}
       return {
         date: key,
         total: e.total || 0,
         types: { view: e.view || 0, notes: e.notes || 0, code: e.code || 0, complete: e.complete || 0 },
-        isFuture: date > today,
-        isToday: key === dateStr(today),
+        isFuture: key > today,
+        isToday: key === today,
       }
     })
   )
@@ -55,7 +53,8 @@ function tooltip(cell: ReturnType<typeof buildGrid>[0][0]) {
 interface Props { activityMap: Record<string, ActivityDay> }
 
 export default function StreakGraph({ activityMap }: Props) {
-  const columns     = useMemo(() => buildGrid(activityMap), [activityMap])
+  const today       = useLocalToday()
+  const columns     = useMemo(() => buildGrid(activityMap, today), [activityMap, today])
   const monthLabels = useMemo(() => {
     const labels: { col: number; label: string }[] = []
     let last: number | null = null
@@ -69,18 +68,18 @@ export default function StreakGraph({ activityMap }: Props) {
   const totalDays = useMemo(() => Object.values(activityMap).filter((v) => v.total > 0).length, [activityMap])
 
   const streak = useMemo(() => {
-    const today = new Date(); today.setHours(0,0,0,0)
-    let count = 0; const d = new Date(today)
-    while (activityMap[dateStr(d)]?.total) { count++; d.setDate(d.getDate() - 1) }
+    if (!today) return null
+    let count = 0
+    while (activityMap[addDays(today, -count)]?.total) count++
     return count
-  }, [activityMap])
+  }, [activityMap, today])
 
   return (
     <div className="streak-card">
       <div className="streak-header">
         <div className="streak-title"><Flame size={16} /> Study Activity</div>
         <div className="streak-stats">
-          <span className="streak-badge"><Flame size={12} /> {streak} day streak</span>
+          <span className="streak-badge"><Flame size={12} /> {streak ?? "–"} day streak</span>
           <span className="streak-total">{totalDays} active days</span>
         </div>
       </div>

@@ -30,6 +30,7 @@ Every change we want to adopt, so nothing from the research gets lost. Plan: `do
 | FX-11 | `/projects` NuraKnect card links to a deleted `projects/nuraknect` folder; cards are hardcoded | Low | 06 #29 (verified) | P4 | todo |
 | FX-12 | Opening any item silently starts the layer clock | Low | 06 #27 | P1 | done (2026-11-25): starts on the first tick or a start date you set |
 | FX-13 | `transition: all` (17 uses); render-blocking font `@import` → `next/font` | Low | 06 #21, #23 | P3 | todo |
+| FX-14 | Server-rendered "today" is UTC: deadline "days left" (`getDeadlineStatus`) and current week (`getCurrentWeekNum` in the dashboard and layer pages) can differ from your local day between local midnight and UTC midnight, causing a hydration warning. Streak and active days already use `useLocalToday` | Low | P1 review #5 | P4 | todo |
 
 ## DS: design system v2 (04 §2, 03 §8)
 

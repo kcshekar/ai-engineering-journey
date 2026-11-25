@@ -8,8 +8,9 @@ import StreakGraph from "./StreakGraph"
 import {
   getCurrentLayer, getCurrentWeek, getCompletedCount, getRequiredCount, getLayerHours,
   calculateOverallProgress, getLayerDeadline, getDeadlineStatus, getLayerStatus,
-  getHoursDone, countActiveDays, localDateKey,
+  getHoursDone, countActiveDays,
 } from "@/lib/loader"
+import { useLocalToday } from "./useLocalToday"
 import type { RoadmapData, ActivityDay, LayerProgressEntry } from "@/types"
 
 const pageVariants = {
@@ -38,7 +39,8 @@ export default function DashboardClient({ initialRoadmap, initialActivityMap }: 
   const deadlineStatus   = getDeadlineStatus(currentDeadline)
 
   const hoursDone  = getHoursDone(roadmap.layers, roadmap.progress)
-  const activeDays = countActiveDays(activityMap, localDateKey(), 30)
+  const today      = useLocalToday() // null while server-rendering, so server and browser days can't disagree
+  const activeDays = today ? countActiveDays(activityMap, today, 30) : "–"
 
   const circumference = 2 * Math.PI * 64
   const strokeOffset  = circumference - (overallPercent / 100) * circumference

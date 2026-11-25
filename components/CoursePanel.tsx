@@ -181,6 +181,13 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const [isRunning, setIsRunning]       = useState(false)
   const outputRef                       = useRef<HTMLDivElement>(null)
   const activityTimer                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // Latest text and edit counters for saving: a save writes what was typed up to its start and
+  // only marks the panel clean if nothing was typed while it ran.
+  const notesRef                        = useRef("")
+  const codeRef                         = useRef("")
+  const editVersion                     = useRef(0)
+  const savedVersion                    = useRef(0)
+  const saveChain                       = useRef<Promise<boolean>>(Promise.resolve(true))
 
   // Load state is derived from keys, so no state is set synchronously in the effect.
   // A failed load blocks editing and saving: saving an empty editor would overwrite the real notes.
@@ -195,8 +202,11 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
     Promise.all([api.getNotes(course.id, layerId), api.getCode(course.id, layerId)])
       .then(([n, c]) => {
         if (cancelled) return
-        setNotes(n.content ?? "")
-        setCode(c.content ?? "")
+        notesRef.current = n.content ?? ""
+        codeRef.current = c.content ?? ""
+        savedVersion.current = editVersion.current
+        setNotes(notesRef.current)
+        setCode(codeRef.current)
         setIsDirty(false); setLoadedKey(key)
       })
       .catch(() => { if (!cancelled) setFailedKey(key) })
@@ -220,48 +230,73 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight
   }, [output])
 
+  const markEdited = useCallback(() => {
+    editVersion.current += 1
+    setIsDirty(true); setCloseBlocked(false)
+    if (saveStatus === "error") setSaveStatus("idle")
+  }, [saveStatus])
+
   const handleNotesChange = useCallback((val: string) => {
-    setNotes(val); setIsDirty(true)
+    notesRef.current = val
+    setNotes(val); markEdited()
     clearTimeout(activityTimer.current)
     activityTimer.current = setTimeout(() => api.logActivity("notes").then(onActivity), 3000)
-  }, [onActivity])
+  }, [onActivity, markEdited])
 
   const handleCodeChange = useCallback((val: string | undefined) => {
-    setCode(val ?? ""); setIsDirty(true)
+    codeRef.current = val ?? ""
+    setCode(val ?? ""); markEdited()
     clearTimeout(activityTimer.current)
     activityTimer.current = setTimeout(() => api.logActivity("code").then(onActivity), 3000)
-  }, [onActivity])
+  }, [onActivity, markEdited])
 
-  // Returns true when there is nothing left unsaved.
-  const handleSave = useCallback(async (): Promise<boolean> => {
-    if (!isDirty) return true
-    if (loading || loadError) return false
-    setSaveStatus("saving")
-    const [notesOk, codeOk] = await Promise.all([
-      api.saveNotes(course.id, layerId, notes),
-      api.saveCode(course.id, layerId, code),
-    ])
-    if (!notesOk || !codeOk) {
-      setSaveStatus("error")
-      return false
+  // One save of the latest text. Edits only happen after a successful load (the editors are hidden
+  // otherwise), so with no new edits nothing is written. Edits typed while it runs stay unsaved.
+  const runSave = useCallback(async (): Promise<boolean> => {
+    const version = editVersion.current
+    if (version === savedVersion.current) {
+      setSaveStatus((s) => (s === "saving" ? "idle" : s))
+      return true
     }
+    const notesNow = notesRef.current, codeNow = codeRef.current
+    const [notesOk, codeOk] = await Promise.all([
+      api.saveNotes(course.id, layerId, notesNow),
+      api.saveCode(course.id, layerId, codeNow),
+    ])
+    if (!notesOk || !codeOk) { setSaveStatus("error"); return false }
+    savedVersion.current = Math.max(savedVersion.current, version)
     api.updateCourseMeta(course.id, {
-      hasNotes: notes.trim().length > 0, noteChars: notes.trim().length,
-      hasCode: code.trim().length > 0,  codeChars: code.trim().length,
+      hasNotes: notesNow.trim().length > 0, noteChars: notesNow.trim().length,
+      hasCode: codeNow.trim().length > 0,  codeChars: codeNow.trim().length,
     }).then(onMetaChange)
     api.logActivity("notes")
-    setIsDirty(false); setSaveStatus("saved"); setCloseBlocked(false)
     onActivity?.()
-    setTimeout(() => setSaveStatus("idle"), 2000)
-    return true
-  }, [course.id, layerId, notes, code, isDirty, loading, loadError, onActivity, onMetaChange])
+    const clean = editVersion.current === savedVersion.current
+    if (clean) {
+      setIsDirty(false); setSaveStatus("saved"); setCloseBlocked(false)
+      setTimeout(() => setSaveStatus((s) => (s === "saved" ? "idle" : s)), 2000)
+    } else {
+      setSaveStatus("idle")
+    }
+    return clean
+  }, [course.id, layerId, onActivity, onMetaChange])
 
-  // Closing saves unsaved work first. If that save fails, the panel stays open; closing again discards.
+  // Saves run one after another, so an older save can never land after a newer one.
+  // Resolves true when nothing is left unsaved.
+  const handleSave = useCallback((): Promise<boolean> => {
+    setSaveStatus("saving")
+    const job = saveChain.current.then(runSave, runSave)
+    saveChain.current = job.catch(() => false)
+    return job
+  }, [runSave])
+
+  // Closing saves unsaved work first. If that save fails, the panel stays open; closing again
+  // without new edits discards them.
   const requestClose = useCallback(async () => {
-    if (!isDirty || closeBlocked) { onClose(); return }
+    if (closeBlocked) { onClose(); return }
     if (await handleSave()) onClose()
     else setCloseBlocked(true)
-  }, [isDirty, closeBlocked, handleSave, onClose])
+  }, [closeBlocked, handleSave, onClose])
 
   const handleRun = useCallback(async () => {
     if (isRunning || !code.trim()) return

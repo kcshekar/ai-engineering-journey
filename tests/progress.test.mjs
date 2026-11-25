@@ -4,7 +4,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import {
   localDateKey, parseDateKey, addDays, daysBetween, updateLayerEntry, emptyLayerEntry,
-  getHoursDone, countActiveDays, getLayerDeadline, applyItemToggle,
+  getHoursDone, countActiveDays, getLayerDeadline, applyItemToggle, resolveFailedSave,
 } from "../lib/loader.ts"
 import { activityDayOf } from "../lib/api-input.ts"
 
@@ -72,4 +72,33 @@ test("activityDayOf: trusts the client's local day within one day of UTC, else u
   assert.equal(activityDayOf("2026-13-45", now), "2026-11-25")
   assert.equal(activityDayOf(undefined, now), "2026-11-25")
   assert.equal(activityDayOf(42, now), "2026-11-25")
+})
+
+test("resolveFailedSave: no later change, so the previous state comes back", () => {
+  const l = layer(1, [item("a"), item("b")])
+  const toggleA = (lp) => applyItemToggle(l, lp, "a")
+  const prev = progressOf({ 1: emptyLayerEntry() })
+  const next = updateLayerEntry(prev, 1, toggleA)
+  const { progress, resync } = resolveFailedSave(next, next, prev, 1, toggleA)
+  assert.equal(progress, prev)
+  assert.equal(resync, null)
+})
+
+test("resolveFailedSave: a later change survives, the failed one is undone, and the layer is re-sent", () => {
+  const l = layer(1, [item("a"), item("b"), item("c")])
+  const toggle = (id) => (lp) => applyItemToggle(l, lp, id)
+  const prev = progressOf({ 1: emptyLayerEntry() })
+  const next = updateLayerEntry(prev, 1, toggle("a"))  // A: tick a (its save fails)
+  const later = updateLayerEntry(next, 1, toggle("b")) // B: tick b (saved; its write carried a)
+  const { progress, resync } = resolveFailedSave(later, next, prev, 1, toggle("a"))
+  assert.deepEqual(progress.layerProgress[1].coursesCompleted, ["b"])
+  assert.deepEqual(resync.coursesCompleted, ["b"])
+  assert.deepEqual(later.layerProgress[1].coursesCompleted, ["a", "b"]) // inputs untouched
+})
+
+test("applyItemToggle: the first tick keeps a start date the learner set", () => {
+  const lp = { ...emptyLayerEntry(), startedDate: "2026-11-01" }
+  applyItemToggle(layer(1, [item("a"), item("b")]), lp, "a")
+  assert.equal(lp.started, true)
+  assert.equal(lp.startedDate, "2026-11-01")
 })

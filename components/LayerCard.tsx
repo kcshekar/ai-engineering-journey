@@ -340,9 +340,9 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
               type="date"
               className="deadline-input"
               defaultValue={layerProgress?.startedDate || ""}
-              onBlur={(e) => { setEditingStart(false); if (e.target.value) onSaveDates(layer.id, { startedDate: e.target.value }) }}
+              onBlur={(e) => { setEditingStart(false); if (e.target.value) onSaveDates(layer.id, { started: true, startedDate: e.target.value }) }}
               onKeyDown={(e) => {
-                if (e.key === "Enter") { setEditingStart(false); if ((e.target as HTMLInputElement).value) onSaveDates(layer.id, { startedDate: (e.target as HTMLInputElement).value }) }
+                if (e.key === "Enter") { setEditingStart(false); if ((e.target as HTMLInputElement).value) onSaveDates(layer.id, { started: true, startedDate: (e.target as HTMLInputElement).value }) }
                 if (e.key === "Escape") setEditingStart(false)
               }}
             />

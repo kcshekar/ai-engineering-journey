@@ -78,6 +78,15 @@ Every change has an ID in `docs/research/tracker.md`. Phases list IDs, not repea
 - [x] T3 FX-05 reduced motion; FX-07 loading, error and not-found plus per-page titles
 - [x] T4 FX-06 real dashboard stats; FX-08 quiz copy; FX-10 local-date keys (streak, deadlines, activity API); FX-12 explicit layer start
 - Exit: `npm run verify` green · new tests for the save rollback and the local-date key · manual: save notes offline (DevTools offline) does not wipe them · tracker rows set to done.
+  - 2026-11-25 review (reviewer subagent, Opus): 0 high, 4 medium, 3 low. Fixed:
+    - saves now queue in order, and text typed during a save stays unsaved
+    - a failed layer save is undone even after later changes, and the layer is re-sent
+    - a start date you set survives the first tick
+    - closing again after new edits tries to save again
+    - the rollback has tests
+    - streak and active days render in the browser only (no hydration mismatch)
+
+    The remaining UTC "today" cases are FX-14 (P4). Verify: 29 tests.
   - 2026-11-25: verify green (26 tests, 9 new in `tests/progress.test.mjs`, also green with TZ Asia/Kolkata, America/Los_Angeles, Pacific/Kiritimati) · `npm run build` green · tracker updated. **Manual offline check still to do in your browser** (the worktree has no `.env`): open an item → DevTools Network "Offline" → reopen it, and the panel should show "Couldn't load… Retry" with editing off; type, then close, and the panel stays open with "Not saved".
 - Rollback: `git revert` the P1 commits (no DB change).
 
