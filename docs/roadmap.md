@@ -1,11 +1,10 @@
 # Roadmap
 
 ## Now
-- Done 2026-11-23: Next.js 16 upgrade; API input checks (400 on bad input, known fields only); lint is clean with the React Compiler rules back to error. No active plan.
-- Yours to finish (outside the repo):
-  - remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your `.env` and from Vercel (nothing reads them now)
-  - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against it
-  - optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history (commands in the hand-off); the retired password in old commits must never be reused
+- Focus: nothing in progress on `main` (2026-11-25). Next 16, API input checks and clean lint are done; verify, build and browser checks are green.
+- Next step: review the draft plan `docs/plans/ux-course-upgrade.md` on local branch `feat/ux-course-research` (UX redesign, 2026 curriculum, Layer 7; decision 0002 proposed). Its P1 needed Next 16, now on `main`, so rebase the branch onto `main` first.
+- Yours, outside the repo: remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from `.env` and Vercel; if Vercel uses another Turso DB, run `npm run migrate` and `npm run set-password` against it.
+- Optional: purge `download`, `memory/project_learningtracker.md` and the deleted employer docs from git history. The retired password in old commits must never be reused.
 
 ## Next
 - `npm audit` (2026-11-23, on Next 16): 6 left (4 moderate, 2 low), no high or critical.
