@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
+import { createContext, useContext, useEffect, useCallback, useSyncExternalStore } from "react"
 
 type ThemeMode = "dark" | "light" | "system"
 
@@ -14,13 +14,6 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 const STORAGE_KEY = "theme"
 
-function resolveTheme(mode: ThemeMode): "dark" | "light" {
-  if (mode === "system") {
-    return window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
-  }
-  return mode
-}
-
 export const THEME_INIT_SCRIPT = `
 (function() {
   try {
@@ -33,32 +26,48 @@ export const THEME_INIT_SCRIPT = `
 })();
 `
 
-export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<ThemeMode>("system")
-  const [resolved, setResolved] = useState<"dark" | "light">("dark")
+// The saved mode lives in localStorage and "system" follows the OS setting; both are read as
+// external stores, so the server renders the defaults and the browser switches without an effect.
+const modeListeners = new Set<() => void>()
+let memoryMode: ThemeMode = "system" // used when localStorage is blocked
+const LIGHT_QUERY = "(prefers-color-scheme: light)"
 
-  useEffect(() => {
-    const stored = (localStorage.getItem(STORAGE_KEY) as ThemeMode | null) ?? "system"
-    setModeState(stored)
-    setResolved(resolveTheme(stored))
-  }, [])
+function subscribeMode(onChange: () => void) {
+  modeListeners.add(onChange)
+  window.addEventListener("storage", onChange)
+  return () => { modeListeners.delete(onChange); window.removeEventListener("storage", onChange) }
+}
+
+function readMode(): ThemeMode {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored === "dark" || stored === "light" ? stored : "system"
+  } catch {
+    return memoryMode
+  }
+}
+
+function subscribeSystem(onChange: () => void) {
+  const mq = window.matchMedia(LIGHT_QUERY)
+  mq.addEventListener("change", onChange)
+  return () => mq.removeEventListener("change", onChange)
+}
+
+const readSystemLight = () => window.matchMedia(LIGHT_QUERY).matches
+
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const mode = useSyncExternalStore(subscribeMode, readMode, () => "system" as ThemeMode)
+  const systemLight = useSyncExternalStore(subscribeSystem, readSystemLight, () => false)
+  const resolved: "dark" | "light" = mode === "system" ? (systemLight ? "light" : "dark") : mode
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", resolved)
   }, [resolved])
 
-  useEffect(() => {
-    if (mode !== "system") return
-    const mq = window.matchMedia("(prefers-color-scheme: light)")
-    const handler = () => setResolved(resolveTheme("system"))
-    mq.addEventListener("change", handler)
-    return () => mq.removeEventListener("change", handler)
-  }, [mode])
-
   const setMode = useCallback((next: ThemeMode) => {
-    localStorage.setItem(STORAGE_KEY, next)
-    setModeState(next)
-    setResolved(resolveTheme(next))
+    memoryMode = next
+    try { localStorage.setItem(STORAGE_KEY, next) } catch {}
+    modeListeners.forEach((notify) => notify())
   }, [])
 
   return (

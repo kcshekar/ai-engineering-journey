@@ -5,7 +5,7 @@ Personal AI-engineering learning tracker: a Next.js 16 app that reads roadmaps f
 ## Commands
 - Dev: `npm run dev` (Next.js 16, Turbopack by default) → http://localhost:3000. Dev writes to `.next/dev`, so `npm run build` can run alongside it.
 - Verify (run before saying a task is done): `npm run verify` (`tsc --noEmit`, then `npm run lint`, then `node scripts/check-content.mjs`, which checks the roadmap JSON: ids, references, enums, pick groups, quiz answers, then `npm test`). About 20 s.
-- Lint: `npm run lint` (ESLint 9 with `eslint-config-next` 16; warnings don't fail it, errors do). Three React Compiler rules are set to warn in `eslint.config.mjs` until `CoursePanel` and `ThemeProvider` are refactored.
+- Lint: `npm run lint` (ESLint 9 with `eslint-config-next` 16, including the React Compiler rules). It is clean: 0 errors, 0 warnings; keep it that way.
 - Test: `npm test` (Node's built-in runner, `tests/*.test.mjs`; needs Node 22.18+ because it loads `.ts` files directly).
 - Set or change the login: `npm run set-password` (asks for email and password, writes a scrypt hash to the `users` table; run it yourself, it needs a terminal for hidden input).
 - Build: `npm run build`
@@ -20,7 +20,7 @@ Personal AI-engineering learning tracker: a Next.js 16 app that reads roadmaps f
 
 ## Layout
 - `app/(app)/`: dashboard, layers, notes, projects pages. `app/(auth)/login`.
-- `app/api/*`: route handlers (activity, code, course-meta, layer-progress, notes, auth).
+- `app/api/*`: route handlers (activity, code, course-meta, course-metas, course-timeline, layer-progress, notes, auth). Every route checks its input with `lib/api-input.ts` and answers 400 on bad input; `course-meta` and `layer-progress` accept only their known fields.
 - `lib/db/`: Drizzle schema and client (Turso/libsql). `lib/auth.ts`: NextAuth v5 credentials.
 - `data/roadmaps/<id>/`: roadmap content (`meta.json`, `layer-N/layer.json`, `planning.json`, notes).
 - `components/`: client components.

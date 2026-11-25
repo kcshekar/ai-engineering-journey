@@ -1,7 +1,7 @@
 # Roadmap
 
 ## Now
-- Next.js 16 upgrade is done (2026-11-23; plan deleted, git keeps it). No active plan.
+- Done 2026-11-23: Next.js 16 upgrade; API input checks (400 on bad input, known fields only); lint is clean with the React Compiler rules back to error. No active plan.
 - Yours to finish (outside the repo):
   - remove `AUTH_USER_EMAIL` and `AUTH_USER_PASSWORD_HASH` from your `.env` and from Vercel (nothing reads them now)
   - if Vercel uses a different Turso DB than your `.env`, run `npm run migrate` and `npm run set-password` against it
@@ -11,8 +11,6 @@
 - `npm audit` (2026-11-23, on Next 16): 6 left (4 moderate, 2 low), no high or critical.
   - esbuild through drizzle-kit (moderate): dev tool only; affects `drizzle-kit studio` while it runs.
   - dompurify through monaco-editor (moderate): the editor loads its code from a CDN at runtime, so this copy is not what runs.
-- API input checks: the POST routes trust the body (for example `/api/course-timeline` returns 500 on a missing `layerId`). Return 400 instead. Low risk (login required, single user).
-- Lint warnings (9): 3 `react-hooks/exhaustive-deps` (`CoursePanel.tsx`, `LayerCard.tsx`) and 6 from the React Compiler rules that came with Next 16 (`set-state-in-effect`, `immutability`, `preserve-manual-memoization` in `CoursePanel.tsx` and `ThemeProvider.tsx`). Each changes when an effect re-runs, so refactor them one at a time, then set those rules back to error in `eslint.config.mjs`.
 
 ## Later
 - Multi-user support, monitoring and data export (from the old gaps list, now deleted; git history has it).

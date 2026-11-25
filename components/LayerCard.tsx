@@ -310,7 +310,7 @@ export default function LayerCard({ layer, progress, onToggleCourse, onActivity,
   }, [])
   useEffect(() => { refreshMetas() }, [refreshMetas])
 
-  const openCoursePanel = useCallback((course: typeof layer.courses[0]) => {
+  const openCoursePanel = useCallback((course: Course) => {
     setOpenCourse(course)
     if (!layerProgress?.started) {
       onSaveDates(layer.id, {

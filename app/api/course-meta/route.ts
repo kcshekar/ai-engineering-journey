@@ -4,13 +4,20 @@ import { db } from "@/lib/db"
 import { courseMeta } from "@/lib/db/schema"
 import { eq } from "drizzle-orm"
 import { sql } from "drizzle-orm"
+import { badRequest, readBody, isObject, courseIdOf, invalidFields, COURSE_META_FIELDS } from "@/lib/api-input"
+
 
 export async function POST(req: NextRequest) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const userId = session.user.id
 
-  const { courseId, patch } = await req.json() as { courseId: string; patch: Record<string, unknown> }
+  const body = await readBody(req)
+  const courseId = courseIdOf(body?.courseId)
+  const patch = body?.patch
+  if (!courseId || !isObject(patch)) return badRequest("courseId and a patch object are required")
+  const wrong = invalidFields(COURSE_META_FIELDS, patch)
+  if (wrong.length) return badRequest(`invalid patch fields: ${wrong.join(", ")}`)
   const id = `${userId}-${courseId}`
   const today = new Date().toISOString().split("T")[0]
 

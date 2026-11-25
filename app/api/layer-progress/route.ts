@@ -3,13 +3,15 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { progress } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
+import { badRequest, readBody, isObject, layerIdOf, invalidFields, LAYER_PROGRESS_FIELDS } from "@/lib/api-input"
 
 export async function GET(req: NextRequest) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const userId = session.user.id
 
-  const layerId = parseInt(new URL(req.url).searchParams.get("layerId")!)
+  const layerId = layerIdOf(new URL(req.url).searchParams.get("layerId"))
+  if (!layerId) return badRequest("layerId is required")
   const row = await db.select().from(progress).where(
     and(eq(progress.userId, userId), eq(progress.roadmapId, "ai-engineering"), eq(progress.layerId, layerId))
   ).then((r) => r[0])
@@ -33,8 +35,13 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   const userId = session.user.id
 
-  const { layerId, patch } = await req.json()
-  const lid = parseInt(String(layerId))
+  const body = await readBody(req)
+  const lid = layerIdOf(body?.layerId)
+  const patch = body?.patch
+  if (!lid || !isObject(patch)) return badRequest("layerId and a patch object are required")
+  const wrong = invalidFields(LAYER_PROGRESS_FIELDS, patch)
+  if (wrong.length) return badRequest(`invalid patch fields: ${wrong.join(", ")}`)
+  if (Object.keys(patch).length === 0) return badRequest("patch must not be empty")
   const id  = `${userId}-ai-engineering-${lid}`
 
   const existing = await db.select().from(progress).where(eq(progress.id, id)).then((r) => r[0])

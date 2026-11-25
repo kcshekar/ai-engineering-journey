@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useEffectEvent, useCallback, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Editor from "@monaco-editor/react"
 import {
@@ -170,7 +170,7 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const [activeTab, setActiveTab]       = useState("notes")
   const [notes, setNotes]               = useState("")
   const [code, setCode]                 = useState("")
-  const [loading, setLoading]           = useState(true)
+  const [loadedKey, setLoadedKey]       = useState<string | null>(null)
   const [isDirty, setIsDirty]           = useState(false)
   const [saveStatus, setSaveStatus]     = useState<"idle"|"saving"|"saved">("idle")
   const [copied, setCopied]             = useState(false)
@@ -179,9 +179,12 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
   const outputRef                       = useRef<HTMLDivElement>(null)
   const activityTimer                   = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
+  // "Loading" until this item's notes and code have arrived; derived, so no state is set during the effect.
+  const loading = loadedKey !== `${layerId}:${course.id}`
+  const onViewed = useEffectEvent(() => onMetaChange())
+
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     Promise.all([
       api.getNotes(course.id, layerId).catch(() => ({ content: "" })),
       api.getCode(course.id, layerId).catch(() => ({ content: "" })),
@@ -189,21 +192,12 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
       if (cancelled) return
       setNotes((n as {content:string}).content ?? "")
       setCode((c as {content:string}).content ?? "")
-      setIsDirty(false); setLoading(false)
+      setIsDirty(false); setLoadedKey(`${layerId}:${course.id}`)
     })
     api.logActivity("view")
-    api.updateCourseMeta(course.id, { views: "__inc__" }).then(onMetaChange)
+    api.updateCourseMeta(course.id, { views: "__inc__" }).then(() => onViewed())
     return () => { cancelled = true }
   }, [course.id, layerId])
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); handleSave() }
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && activeTab === "code") { e.preventDefault(); handleRun() }
-    }
-    window.addEventListener("keydown", handler)
-    return () => window.removeEventListener("keydown", handler)
-  }, [activeTab, notes, code, isDirty])
 
   useEffect(() => {
     if (outputRef.current) outputRef.current.scrollTop = outputRef.current.scrollHeight
@@ -308,6 +302,17 @@ export default function CoursePanel({ course, layerId, isCompleted, onToggle, on
       setIsRunning(false)
     }
   }, [code, isRunning, tests, course.id, onMetaChange])
+
+  // Ctrl/Cmd+S saves, Ctrl/Cmd+Enter runs code. The effect event always sees the latest handlers.
+  const onShortcut = useEffectEvent((e: KeyboardEvent) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "s") { e.preventDefault(); handleSave() }
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && activeTab === "code") { e.preventDefault(); handleRun() }
+  })
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => onShortcut(e)
+    window.addEventListener("keydown", handler)
+    return () => window.removeEventListener("keydown", handler)
+  }, [])
 
   const handleCopySummary = useCallback(async () => {
     await navigator.clipboard.writeText(buildSummaryPrompt(course, notes, code))
